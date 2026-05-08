@@ -77,7 +77,7 @@ export default function Home() {
 
         <label>Información de contacto</label>
 
-        <div>
+        <div className="Email">
           <h3>Email</h3>
           <p className="txt">
             soporte@ecocanje.com
@@ -92,7 +92,7 @@ export default function Home() {
         </div>
         
 
-        <div>
+        <div className="telefono">
           <h3>Teléfono</h3>
 
           <p className="txt">
@@ -104,7 +104,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div>
+        <div className="Ubicacion">
           <h3>Ubicación</h3>
 
           <p className="txt">

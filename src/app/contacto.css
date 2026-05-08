@@ -131,7 +131,22 @@ textarea {
   border-radius: 18px;
   margin-bottom: 20px;
   transition: 0.3s;
+  
 }
+.Email {
+    background-color: #f3faf7;
+;
+}
+.telefono{
+ background-color: #eef9f5;
+}
+
+.Ubicacion{
+background-color: #f3f8e8;
+
+}
+
+
 
 .infoContacto div:hover {
   transform: translateY(-4px);
@@ -256,7 +271,7 @@ span {
 .faq h3 {
   font-size: 28px;
   margin-bottom: 15px;
-  color: rgba(0, 0, 0, 0.775);
+  color: rgba(0, 0, 0, 0.689);
 }
 
 .faq p {
