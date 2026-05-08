@@ -86,7 +86,11 @@ export default function Home() {
           <p className="text">
             info@ecocanje.com
           </p>
+          
+          
+       
         </div>
+        
 
         <div>
           <h3>Teléfono</h3>
@@ -96,7 +100,19 @@ export default function Home() {
           </p>
 
           <p className="text">
-            Lima-San Juan de Lurigancho
+            Lun - Vie: 9:00 AM - 6:00 PM
+          </p>
+        </div>
+
+        <div>
+          <h3>Ubicación</h3>
+
+          <p className="txt">
+            Torre A
+          </p>
+
+          <p className="text">
+            Lima - San Juan de Lurigancho
           </p>
         </div>
 
