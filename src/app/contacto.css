@@ -1,0 +1,282 @@
+body {
+  margin: 0;
+  padding: 40px;
+  background-color: #eef5ef;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* TITULO */
+
+h1 {
+  text-align: center;
+  color: #0ea56b;
+  font-size: 58px;
+  margin-bottom: 15px;
+}
+
+.subtexto {
+  text-align: center;
+  font-size: 22px;
+  color: #5f6b66;
+  margin-bottom: 60px;
+}
+
+/* FORMULARIO */
+
+.container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.formulario {
+  width: 700px;
+  background-color: white;
+  padding: 40px;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.formulario h2 {
+  font-size: 36px;
+  margin-bottom: 35px;
+  color: #111827;
+}
+
+.formulario div {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 25px;
+}
+
+label {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #111827;
+}
+
+input,
+select,
+textarea {
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid #b8e2cf;
+  font-size: 18px;
+  outline: none;
+  transition: 0.3s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+}
+
+textarea {
+  min-height: 220px;
+  resize: none;
+}
+
+.btnVerde {
+  background: linear-gradient(
+    135deg,
+    #0ea56b,
+    #10c48b
+  );
+
+  color: white;
+  border: none;
+  padding: 20px;
+  border-radius: 16px;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btnVerde:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+}
+
+/* INFORMACION */
+
+.infoContacto {
+  background-color: white;
+  padding: 40px;
+  border-radius: 24px;
+  margin-bottom: 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.infoContacto label {
+  display: block;
+  font-size: 36px;
+  margin-bottom: 30px;
+}
+
+.infoContacto div {
+  border: 1px solid #b8e2cf;
+  padding: 25px;
+  border-radius: 18px;
+  margin-bottom: 20px;
+  transition: 0.3s;
+}
+
+.infoContacto div:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.infoContacto h3 {
+  font-size: 28px;
+  margin-bottom: 10px;
+  color: black;
+}
+
+.txt {
+  font-size: 18px;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.text {
+  font-size: 17px;
+  color: #6b7280;
+}
+
+/* CHAT */
+
+.chatBox {
+  background: linear-gradient(
+    135deg,
+    #0ea56b,
+    #10c48b
+  );
+
+  padding: 40px;
+  border-radius: 24px;
+  margin-bottom: 40px;
+  color: white;
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.25);
+}
+
+.chatBox h2 {
+  font-size: 40px;
+  margin-bottom: 20px;
+}
+
+.chatBox p {
+  font-size: 20px;
+  line-height: 1.7;
+}
+
+.chatBox button {
+  margin-top: 25px;
+  background-color: white;
+  color: #0ea56b;
+  border: none;
+  padding: 16px 28px;
+  border-radius: 14px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.chatBox button:hover {
+  transform: scale(1.05);
+}
+
+/* HORARIO */
+
+.horario {
+  background-color: white;
+  padding: 40px;
+  border-radius: 24px;
+  margin-bottom: 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.horario h3 {
+  font-size: 36px;
+  margin-bottom: 30px;
+}
+
+.horario div {
+  display: flex;
+  justify-content: space-between;
+  padding: 18px 0;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 19px;
+}
+
+.horario div:last-child {
+  border-bottom: none;
+}
+
+/* FAQ */
+
+.faq {
+  background-color: white;
+  padding: 40px;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.faq h2 {
+  font-size: 42px;
+  margin-bottom: 35px;
+}
+
+.faq div {
+  padding: 24px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.faq div:last-child {
+  border-bottom: none;
+}
+
+.faq h3 {
+  font-size: 28px;
+  margin-bottom: 15px;
+}
+
+.faq p {
+  font-size: 19px;
+  line-height: 1.8;
+  color: #4b5563;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 768px) {
+
+  body {
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 42px;
+  }
+
+  .subtexto {
+    font-size: 18px;
+  }
+
+  .formulario,
+  .infoContacto,
+  .chatBox,
+  .horario,
+  .faq {
+    padding: 25px;
+  }
+
+  .horario div {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
