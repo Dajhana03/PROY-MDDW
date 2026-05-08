@@ -1,0 +1,37 @@
+body{
+     background: #f5f5f5;
+    padding: 40px;
+    color: #222;
+      font-family: 'Inter', sans-serif;
+}
+.container {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+
+}
+.formulario {
+     margin-bottom: 25px;
+}
+h1 {
+     text-align: center;
+    margin-bottom: 10px;
+    color: #10b981;
+  
+}
+.subtexto{
+    text-align: center;
+    color: #6B7280;
+}
+
+.btnVerde {
+    color: white;
+    background-color: #059669;
+    border: none;
+    padding: 5px;
+    border-radius: 10px;
+    
+}
+.btnVerde:hover {
+     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
