@@ -75,6 +75,9 @@ h1 {
   margin-bottom: 18px;
 }
 
+select#paises{
+    color: black;
+}
 .formulario label{
   font-size: 15px;
   font-weight: 700;
