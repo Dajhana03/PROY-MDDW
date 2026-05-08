@@ -97,6 +97,7 @@ select#paises{
   background-color: white;
   outline: none;
   transition: 0.3s;
+  color: black;
 }
 
 .formulario input:focus,
