@@ -57,7 +57,7 @@ export default function Blog() {
 
           <div className={styles.postsGrid}>
             <div className={styles.card}>
-              <img src="/post1.jpg" alt="" />
+              <img src="/images/4.jpg" alt="" />
 
               <div className={styles.cardContent}>
                 <div className={styles.smallTags}>
@@ -91,7 +91,7 @@ export default function Blog() {
             </div>
 
             <div className={styles.card}>
-              <img src="/post2.jpg" alt="" />
+              <img src="/images/1.jpg" alt="" />
 
               <div className={styles.cardContent}>
                 <div className={styles.smallTags}>
@@ -125,7 +125,7 @@ export default function Blog() {
             </div>
 
             <div className={styles.card}>
-              <img src="/post3.jpg" alt="" />
+              <img src="/images/2.jpg" alt="" />
 
               <div className={styles.cardContent}>
                 <div className={styles.smallTags}>
@@ -159,7 +159,7 @@ export default function Blog() {
             </div>
 
             <div className={styles.card}>
-              <img src="/post4.jpg" alt="" />
+              <img src="/images/3.jpg" alt="" />
 
               <div className={styles.cardContent}>
                 <div className={styles.smallTags}>
