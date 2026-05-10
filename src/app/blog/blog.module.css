@@ -29,7 +29,9 @@
 
 .sidebar {
   width: 380px;
+  color: black;
 }
+
 
 .heroCard {
   position: relative;
@@ -53,6 +55,7 @@
     rgba(0,0,0,0.1)
   );
 }
+
 
 .heroContent {
   position: absolute;
@@ -152,6 +155,7 @@
   margin-top: 25px;
   padding-top: 20px;
   border-top: 1px solid #d8eee2;
+  color: rgba(8, 8, 8, 0.784);
 }
 
 .bottomRow a {
@@ -159,6 +163,8 @@
   text-decoration: none;
   font-weight: bold;
 }
+
+
 
 .sideCard {
   background-color: white;
@@ -179,7 +185,20 @@
 .category {
   display: flex;
   justify-content: space-between;
-  margin-top: 28px;
+  align-items: center;
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 14px;
+  transition: 0.3s;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.category:hover {
+  background-color: #0ea56b;
+}
+.category span:hover{
+ 
+   color: white;
 }
 
 .newsletter {
@@ -218,6 +237,9 @@
   color: #0ea56b;
   font-weight: bold;
   font-size: 16px;
+}
+.newsletter button:hover {
+  background-color: rgb(232, 237, 237);
 }
 
 .popularItem {

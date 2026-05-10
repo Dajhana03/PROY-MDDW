@@ -197,8 +197,8 @@ export default function Blog() {
           <div className={styles.sideCard}>
             <h3>Buscar Artículos</h3>
 
-            <input
-              type="text"
+            <input 
+              type="text" 
               placeholder="Buscar..."
             />
           </div>
@@ -208,8 +208,8 @@ export default function Blog() {
 
             <div className={styles.category}>
               <span>Sostenibilidad</span>
-
               <span>(45)</span>
+              
             </div>
 
             <div className={styles.category}>
