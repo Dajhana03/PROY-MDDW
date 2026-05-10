@@ -1,0 +1,19 @@
+.container {
+  padding: 40px;
+  
+  min-height: 100vh;
+}
+
+.layout {
+  display: flex;
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.leftContent {
+  flex: 1;
+}
+
+.sidebar {
+  width: 380px;
+}
