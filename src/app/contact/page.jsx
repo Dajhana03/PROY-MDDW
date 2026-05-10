@@ -1,37 +1,40 @@
-import Image from "next/image";
-import "../contact/contacto.module.css";
+import styles from "../contact/contacto.module.css";
 
 export default function Home() {
   return (
     <>
-      <h1 className="titulo">Contacto y soporte</h1>
+      <h1 className={styles.titulo}>
+        Contacto y soporte
+      </h1>
 
-      <p className="subtexto">
+      <p className={styles.subtexto}>
         Estamos aquí para ayudarte. Contáctanos por cualquiera de estos medios
       </p>
 
-      <div className="topSection">
+      <div className={styles.topSection}>
         {/* FORMULARIO */}
 
-        <div className="formulario">
+        <div className={styles.formulario}>
           <h2>Envíanos un Mensaje</h2>
 
-          <div className="filaInputs">
-            <div className="inputGrupo">
+          <div className={styles.filaInputs}>
+            <div className={styles.inputGrupo}>
               <label>Nombre</label>
 
               <input type="text" placeholder="Tu nombre" />
             </div>
 
-            <div className="inputGrupo">
+            <div className={styles.inputGrupo}>
               <label>Apellido</label>
 
               <input type="text" placeholder="Tu apellido" />
             </div>
           </div>
 
-          <div className="inputCompleto">
-            <label htmlFor="email">Correo Electrónico</label>
+          <div className={styles.inputCompleto}>
+            <label htmlFor="email">
+              Correo Electrónico
+            </label>
 
             <input
               type="email"
@@ -40,20 +43,34 @@ export default function Home() {
               placeholder="tu@email.com"
             />
           </div>
-          <div className="inputCompleto">
+
+          <div className={styles.inputCompleto}>
             <label htmlFor="paises">Asunto</label>
 
             <select name="paises" id="paises">
-              <option value="ST">Soporte Técnico</option>
-              <option value="PD">Pregunta sobre donaciones</option>
-              <option value="ar">Problemas con puntos</option>
-              <option value="Sug">Sugerencia</option>
+              <option value="ST">
+                Soporte Técnico
+              </option>
+
+              <option value="PD">
+                Pregunta sobre donaciones
+              </option>
+
+              <option value="ar">
+                Problemas con puntos
+              </option>
+
+              <option value="Sug">
+                Sugerencia
+              </option>
+
               <option value="Otro">Otro</option>
             </select>
           </div>
 
-          <div className="inputCompleto">
+          <div className={styles.inputCompleto}>
             <label htmlFor="Area">Mensaje</label>
+
             <textarea
               name="txtArea"
               id="Area"
@@ -61,49 +78,66 @@ export default function Home() {
             ></textarea>
           </div>
 
-          <button className="btnVerde">Enviar Mensaje</button>
+          <button className={styles.btnVerde}>
+            Enviar Mensaje
+          </button>
         </div>
 
         {/* COLUMNA DERECHA */}
 
-        <div className="rightSide">
+        <div className={styles.rightSide}>
           {/* INFO CONTACTO */}
 
-          <div className="infoContacto">
-            <label>Información de contacto</label>
+          <div className={styles.infoContacto}>
+            <label>
+              Información de contacto
+            </label>
 
-            <div className="Email">
+            <div className={styles.Email}>
               <h3>Email</h3>
 
-              <p className="txt">soporte@ecocanje.com</p>
+              <p className={styles.txt}>
+                soporte@ecocanje.com
+              </p>
 
-              <p className="text">info@ecocanje.com</p>
+              <p className={styles.text}>
+                info@ecocanje.com
+              </p>
             </div>
 
-            <div className="telefono">
+            <div className={styles.telefono}>
               <h3>Teléfono</h3>
 
-              <p className="txt">+51 955 123 456</p>
+              <p className={styles.txt}>
+                +51 955 123 456
+              </p>
 
-              <p className="text">Lun - Vie: 9:00 AM - 6:00 PM</p>
+              <p className={styles.text}>
+                Lun - Vie: 9:00 AM - 6:00 PM
+              </p>
             </div>
 
-            <div className="Ubicacion">
+            <div className={styles.Ubicacion}>
               <h3>Ubicación</h3>
 
-              <p className="txt">Torre A</p>
+              <p className={styles.txt}>
+                Torre A
+              </p>
 
-              <p className="text">Lima - San Juan de Lurigancho</p>
+              <p className={styles.text}>
+                Lima - San Juan de Lurigancho
+              </p>
             </div>
           </div>
 
           {/* CHAT */}
 
-          <div className="chatBox">
+          <div className={styles.chatBox}>
             <h2>Chat en vivo</h2>
 
             <p>
-              ¿Necesitas ayuda inmediata? Nuestro equipo está
+              ¿Necesitas ayuda inmediata? Nuestro equipo
+              está
               <br />
               disponible para ayudarte en tiempo real.
             </p>
@@ -115,61 +149,75 @@ export default function Home() {
 
       {/* HORARIO */}
 
-      <div className="horario">
+      <div className={styles.horario}>
         <h3>Horario de atención</h3>
 
         <div>
           <span>Lunes - Viernes</span>
+
           <span>9:00 AM - 6:00 PM</span>
         </div>
 
         <div>
           <span>Sábado</span>
+
           <span>10:00 AM - 2:00 PM</span>
         </div>
 
         <div>
           <span>Domingo</span>
 
-          <span style={{ color: "red" }}>Cerrado</span>
+          <span style={{ color: "red" }}>
+            Cerrado
+          </span>
         </div>
       </div>
 
-      <div className="faq">
+      <div className={styles.faq}>
         <h2>Preguntas Frecuentes</h2>
 
-        <div className="faqGrid">
-          <div className="faqCard">
-            <h3>¿Cómo puedo registrarme en ECO CANJE?</h3>
+        <div className={styles.faqGrid}>
+          <div className={styles.faqCard}>
+            <h3>
+              ¿Cómo puedo registrarme en ECO CANJE?
+            </h3>
 
             <p>
-              Haz clic en el botón 'Registrarse' en el menú superior y completa
-              el formulario en 2 simples pasos.
+              Haz clic en el botón 'Registrarse' en el
+              menú superior y completa el formulario en 2
+              simples pasos.
             </p>
           </div>
 
-          <div className="faqCard">
+          <div className={styles.faqCard}>
             <h3>¿Cómo funcionan los puntos?</h3>
 
             <p>
-              Cada donación te otorga puntos que puedes canjear por beneficios
-              exclusivos.
+              Cada donación te otorga puntos que puedes
+              canjear por beneficios exclusivos.
             </p>
           </div>
 
-          <div className="faqCard">
-            <h3>¿Qué tipo de artículos puedo donar?</h3>
+          <div className={styles.faqCard}>
+            <h3>
+              ¿Qué tipo de artículos puedo donar?
+            </h3>
 
             <p>
-              Aceptamos libros, ropa, muebles, tecnología y materiales
-              reciclables.
+              Aceptamos libros, ropa, muebles,
+              tecnología y materiales reciclables.
             </p>
           </div>
 
-          <div className="faqCard">
-            <h3>¿Cómo puedo solicitar una donación?</h3>
+          <div className={styles.faqCard}>
+            <h3>
+              ¿Cómo puedo solicitar una donación?
+            </h3>
 
-            <p>Navega por el feed de donaciones y haz clic en 'Solicitar'.</p>
+            <p>
+              Navega por el feed de donaciones y haz clic
+              en 'Solicitar'.
+            </p>
           </div>
         </div>
       </div>

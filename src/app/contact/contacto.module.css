@@ -1,14 +1,7 @@
 body {
-  margin: 0;
-  padding: 40px;
-  background-color: #eef5ef;
-  font-family: Arial, Helvetica, sans-serif;
-  max-width: 1200px;
-  margin: 0 auto;
+    background-color: #eef5ef;
+
 }
-
-/* TITULO */
-
 .titulo {
   text-align: center;
   color: #0ea56b;
@@ -41,7 +34,7 @@ body {
 
 /* FORMULARIO */
 
-.formulario{
+.formulario {
   flex: 1;
   background-color: white;
   padding: 32px;
@@ -50,35 +43,36 @@ body {
   min-height: 760px;
 }
 
-.formulario h2{
+.formulario h2 {
   font-size: 22px;
   color: #111827;
   margin-bottom: 28px;
   font-weight: 700;
 }
 
-.filaInputs{
+.filaInputs {
   display: flex;
   gap: 16px;
   margin-bottom: 18px;
 }
 
-.inputGrupo{
+.inputGrupo {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-.inputCompleto{
+.inputCompleto {
   display: flex;
   flex-direction: column;
   margin-bottom: 18px;
 }
 
-select#paises{
-    color: black;
+select#paises {
+  color: black;
 }
-.formulario label{
+
+.formulario label {
   font-size: 15px;
   font-weight: 700;
   color: #111827;
@@ -87,7 +81,7 @@ select#paises{
 
 .formulario input,
 .formulario select,
-.formulario textarea{
+.formulario textarea {
   width: 100%;
   box-sizing: border-box;
   padding: 15px 18px;
@@ -102,21 +96,21 @@ select#paises{
 
 .formulario input:focus,
 .formulario select:focus,
-.formulario textarea:focus{
+.formulario textarea:focus {
   border-color: #10b981;
   box-shadow: 0 0 0 4px rgba(16,185,129,0.12);
 }
 
-.formulario textarea{
+.formulario textarea {
   min-height: 170px;
   resize: none;
 }
 
-.formulario ::placeholder{
+.formulario ::placeholder {
   color: #9ca3af;
 }
 
-.btnVerde{
+.btnVerde {
   width: 100%;
   margin-top: 8px;
   background: linear-gradient(
@@ -135,7 +129,7 @@ select#paises{
   transition: 0.3s;
 }
 
-.btnVerde:hover{
+.btnVerde:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 20px rgba(16,185,129,0.25);
 }
@@ -258,7 +252,7 @@ select#paises{
   color: black;
 }
 
-span {
+.horario span {
   color: #6b7280;
 }
 
@@ -276,7 +270,7 @@ span {
 
 /* FAQ */
 
-.faq{
+.faq {
   margin-top: 20px;
   background-color: white;
   padding: 35px;
@@ -289,14 +283,14 @@ span {
   font-size: 38px;
 }
 
-.faqGrid{
+.faqGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
   margin-top: 30px;
 }
 
-.faqCard{
+.faqCard {
   background-color: #f8fffb;
   border: 1px solid #b8e2cf;
   border-radius: 18px;
@@ -304,17 +298,17 @@ span {
   transition: 0.3s;
 }
 
-.faqCard:hover{
+.faqCard:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(0,0,0,0.08);
 }
 
-.faqCard h3{
+.faqCard h3 {
   color: #0ea56b;
   font-size: 20px;
 }
 
-.faqCard p{
+.faqCard p {
   color: #181b22b3;
   line-height: 1.7;
   font-size: 15px;
@@ -323,7 +317,6 @@ span {
 /* RESPONSIVE */
 
 @media (max-width: 1100px) {
-
   .topSection {
     flex-direction: column;
   }
@@ -331,24 +324,16 @@ span {
   .rightSide {
     width: 100%;
   }
-
 }
 
-@media (max-width: 900px){
-
-  .faqGrid{
+@media (max-width: 900px) {
+  .faqGrid {
     grid-template-columns: 1fr;
   }
-
 }
 
 @media (max-width: 768px) {
-
-  body {
-    padding: 20px;
-  }
-
-  h1 {
+  .titulo {
     font-size: 42px;
   }
 
@@ -356,7 +341,7 @@ span {
     font-size: 18px;
   }
 
-  .filaInputs{
+  .filaInputs {
     flex-direction: column;
   }
 
@@ -372,5 +357,4 @@ span {
     flex-direction: column;
     gap: 8px;
   }
-
 }
