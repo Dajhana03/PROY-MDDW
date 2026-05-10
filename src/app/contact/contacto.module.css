@@ -9,7 +9,7 @@ body {
 
 /* TITULO */
 
-h1 {
+.titulo h1 {
   text-align: center;
   color: #0ea56b;
   font-size: 58px;

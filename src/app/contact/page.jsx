@@ -4,7 +4,7 @@ import "../contact/contacto.module.css";
 export default function Home() {
   return (
     <>
-      <h1>Contacto y soporte</h1>
+      <h1 className="titulo">Contacto y soporte</h1>
 
       <p className="subtexto">
         Estamos aquí para ayudarte. Contáctanos por cualquiera de estos medios
