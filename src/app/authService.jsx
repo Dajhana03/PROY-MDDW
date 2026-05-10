@@ -13,3 +13,26 @@ export const loginUser = async (email, password) => {
     throw error;
   }
 };
+
+export const registerUser = async (email, password, firstName, lastName) => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password,
+    );
+
+    const uid = userCredential.user.uid;
+
+    await setDoc(doc(db, "users", uid), {
+      userId: uid,
+      email,
+      first_name: firstName,
+      last_name: lastName,
+    });
+
+    return { success: true };
+  } catch (error) {
+    return { success: false, error };
+  }
+};

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import "./contacto.css";
+import "../contact/contacto.module.css";
 
 export default function Home() {
   return (
