@@ -1,15 +1,13 @@
-body {
-  margin: 0;
+.page {
+  margin: 0 auto;
   padding: 40px;
   background-color: #eef5ef;
   font-family: Arial, Helvetica, sans-serif;
   max-width: 1200px;
-  margin: 0 auto;
 }
 
 /* TITULO */
-
-h1 {
+.h1 {
   text-align: center;
   color: #0ea56b;
   font-size: 58px;
@@ -24,7 +22,6 @@ h1 {
 }
 
 /* LAYOUT PRINCIPAL */
-
 .topSection {
   display: flex;
   gap: 40px;
@@ -40,8 +37,7 @@ h1 {
 }
 
 /* FORMULARIO */
-
-.formulario{
+.formulario {
   flex: 1;
   background-color: white;
   padding: 32px;
@@ -50,35 +46,32 @@ h1 {
   min-height: 760px;
 }
 
-.formulario h2{
+.formulario h2 {
   font-size: 22px;
   color: #111827;
   margin-bottom: 28px;
   font-weight: 700;
 }
 
-.filaInputs{
+.filaInputs {
   display: flex;
   gap: 16px;
   margin-bottom: 18px;
 }
 
-.inputGrupo{
+.inputGrupo {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-.inputCompleto{
+.inputCompleto {
   display: flex;
   flex-direction: column;
   margin-bottom: 18px;
 }
 
-select#paises{
-    color: black;
-}
-.formulario label{
+.formulario label {
   font-size: 15px;
   font-weight: 700;
   color: #111827;
@@ -87,7 +80,7 @@ select#paises{
 
 .formulario input,
 .formulario select,
-.formulario textarea{
+.formulario textarea {
   width: 100%;
   box-sizing: border-box;
   padding: 15px 18px;
@@ -102,29 +95,25 @@ select#paises{
 
 .formulario input:focus,
 .formulario select:focus,
-.formulario textarea:focus{
+.formulario textarea:focus {
   border-color: #10b981;
   box-shadow: 0 0 0 4px rgba(16,185,129,0.12);
 }
 
-.formulario textarea{
+.formulario textarea {
   min-height: 170px;
   resize: none;
 }
 
-.formulario ::placeholder{
+.formulario input::placeholder,
+.formulario textarea::placeholder {
   color: #9ca3af;
 }
 
-.btnVerde{
+.btnVerde {
   width: 100%;
   margin-top: 8px;
-  background: linear-gradient(
-    135deg,
-    #0ea56b,
-    #10c48b
-  );
-
+  background: linear-gradient(135deg, #0ea56b, #10c48b);
   border: none;
   color: white;
   padding: 16px;
@@ -135,18 +124,17 @@ select#paises{
   transition: 0.3s;
 }
 
-.btnVerde:hover{
+.btnVerde:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 20px rgba(16,185,129,0.25);
 }
 
 /* INFORMACION */
-
 .infoContacto {
   background-color: white;
   padding: 24px;
   border-radius: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
 .infoContacto label {
@@ -179,7 +167,7 @@ select#paises{
 
 .infoContacto div:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
 }
 
 .infoContacto h3 {
@@ -200,18 +188,12 @@ select#paises{
 }
 
 /* CHAT */
-
 .chatBox {
-  background: linear-gradient(
-    135deg,
-    #0ea56b,
-    #10c48b
-  );
-
+  background: linear-gradient(135deg, #0ea56b, #10c48b);
   padding: 24px;
   border-radius: 24px;
   color: white;
-  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 10px 30px rgba(16,185,129,0.25);
 }
 
 .chatBox h2 {
@@ -243,12 +225,11 @@ select#paises{
 }
 
 /* HORARIO */
-
 .horario {
   background-color: white;
   padding: 24px;
   border-radius: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
   width: 620px;
 }
 
@@ -258,7 +239,7 @@ select#paises{
   color: black;
 }
 
-span {
+.horarioSpan {          /* ← reemplaza el selector "span" global */
   color: #6b7280;
 }
 
@@ -275,8 +256,7 @@ span {
 }
 
 /* FAQ */
-
-.faq{
+.faq {
   margin-top: 20px;
   background-color: white;
   padding: 35px;
@@ -289,14 +269,14 @@ span {
   font-size: 38px;
 }
 
-.faqGrid{
+.faqGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
   margin-top: 30px;
 }
 
-.faqCard{
+.faqCard {
   background-color: #f8fffb;
   border: 1px solid #b8e2cf;
   border-radius: 18px;
@@ -304,62 +284,51 @@ span {
   transition: 0.3s;
 }
 
-.faqCard:hover{
+.faqCard:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(0,0,0,0.08);
 }
 
-.faqCard h3{
+.faqCard h3 {
   color: #0ea56b;
   font-size: 20px;
 }
 
-.faqCard p{
+.faqCard p {
   color: #181b22b3;
   line-height: 1.7;
   font-size: 15px;
 }
 
 /* RESPONSIVE */
-
 @media (max-width: 1100px) {
-
   .topSection {
     flex-direction: column;
   }
-
   .rightSide {
     width: 100%;
   }
-
 }
 
-@media (max-width: 900px){
-
-  .faqGrid{
+@media (max-width: 900px) {
+  .faqGrid {
     grid-template-columns: 1fr;
   }
-
 }
 
 @media (max-width: 768px) {
-
-  body {
+  .page {
     padding: 20px;
   }
-
-  h1 {
+  .h1 {
     font-size: 42px;
   }
-
   .subtexto {
     font-size: 18px;
   }
-
-  .filaInputs{
+  .filaInputs {
     flex-direction: column;
   }
-
   .formulario,
   .infoContacto,
   .chatBox,
@@ -367,10 +336,8 @@ span {
   .faq {
     padding: 25px;
   }
-
   .horario div {
     flex-direction: column;
     gap: 8px;
   }
-
 }

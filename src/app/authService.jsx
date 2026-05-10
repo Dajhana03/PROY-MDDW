@@ -36,3 +36,4 @@ export const registerUser = async (email, password, firstName, lastName) => {
     return { success: false, error };
   }
 };
+
