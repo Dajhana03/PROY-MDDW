@@ -11,7 +11,6 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
     try {
       const user = await loginUser(email, password);
       console.log("Usuario: ", user);
@@ -23,7 +22,7 @@ function Login() {
 
   return (
     <main className={styles.page}>
-    
+
       <h1 className={styles.headline}>Bienvenido</h1>
       <p className={styles.subline}>
         Ingresa a tu cuenta para continuar donando y acumulando puntos
@@ -31,14 +30,15 @@ function Login() {
 
       <div className={styles.card}>
 
-        <button type="button" className={styles.socialBtn}>  
+        <button type="button" className={styles.socialBtn}>
+          <img src="/svg/google.svg" alt="Google" className={styles.socialIcon} />
           Continuar con Google
         </button>
 
         <button type="button" className={styles.socialBtn}>
+          <img src="/svg/facebook.svg" alt="Facebook" className={styles.socialIcon} />
           Continuar con Facebook
         </button>
-
 
         <div className={styles.divider}>
           <span>O con tu email</span>
@@ -48,6 +48,7 @@ function Login() {
           <div className={styles.field}>
             <label htmlFor="email">Correo Electrónico</label>
             <div className={styles.inputWrap}>
+              <img src="/svg/email.svg" alt="" className={styles.inputIcon} />
               <input
                 id="email"
                 type="email"
@@ -62,6 +63,7 @@ function Login() {
           <div className={styles.field}>
             <label htmlFor="password">Contraseña</label>
             <div className={styles.inputWrap}>
+              <img src="/svg/lock.svg" alt="" className={styles.inputIcon} />
               <input
                 id="password"
                 type="password"
@@ -103,4 +105,5 @@ function Login() {
     </main>
   );
 }
+
 export default Login;

@@ -1,8 +1,13 @@
-body {
-    background-color: #eef5ef;
-
+.page {
+  margin: 0 auto;
+  padding: 40px;
+  background-color: #eef5ef;
+  font-family: Arial, Helvetica, sans-serif;
+  max-width: 1200px;
 }
-.titulo {
+
+/* TITULO */
+.h1 {
   text-align: center;
   color: #0ea56b;
   font-size: 58px;
@@ -17,7 +22,6 @@ body {
 }
 
 /* LAYOUT PRINCIPAL */
-
 .topSection {
   display: flex;
   gap: 40px;
@@ -33,7 +37,6 @@ body {
 }
 
 /* FORMULARIO */
-
 .formulario {
   flex: 1;
   background-color: white;
@@ -66,10 +69,6 @@ body {
   display: flex;
   flex-direction: column;
   margin-bottom: 18px;
-}
-
-select#paises {
-  color: black;
 }
 
 .formulario label {
@@ -106,19 +105,15 @@ select#paises {
   resize: none;
 }
 
-.formulario ::placeholder {
+.formulario input::placeholder,
+.formulario textarea::placeholder {
   color: #9ca3af;
 }
 
 .btnVerde {
   width: 100%;
   margin-top: 8px;
-  background: linear-gradient(
-    135deg,
-    #0ea56b,
-    #10c48b
-  );
-
+  background: linear-gradient(135deg, #0ea56b, #10c48b);
   border: none;
   color: white;
   padding: 16px;
@@ -135,12 +130,11 @@ select#paises {
 }
 
 /* INFORMACION */
-
 .infoContacto {
   background-color: white;
   padding: 24px;
   border-radius: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
 .infoContacto label {
@@ -173,7 +167,7 @@ select#paises {
 
 .infoContacto div:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
 }
 
 .infoContacto h3 {
@@ -194,18 +188,12 @@ select#paises {
 }
 
 /* CHAT */
-
 .chatBox {
-  background: linear-gradient(
-    135deg,
-    #0ea56b,
-    #10c48b
-  );
-
+  background: linear-gradient(135deg, #0ea56b, #10c48b);
   padding: 24px;
   border-radius: 24px;
   color: white;
-  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 10px 30px rgba(16,185,129,0.25);
 }
 
 .chatBox h2 {
@@ -237,12 +225,11 @@ select#paises {
 }
 
 /* HORARIO */
-
 .horario {
   background-color: white;
   padding: 24px;
   border-radius: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
   width: 620px;
 }
 
@@ -252,7 +239,7 @@ select#paises {
   color: black;
 }
 
-.horario span {
+.horarioSpan {          /* ← reemplaza el selector "span" global */
   color: #6b7280;
 }
 
@@ -269,7 +256,6 @@ select#paises {
 }
 
 /* FAQ */
-
 .faq {
   margin-top: 20px;
   background-color: white;
@@ -315,12 +301,10 @@ select#paises {
 }
 
 /* RESPONSIVE */
-
 @media (max-width: 1100px) {
   .topSection {
     flex-direction: column;
   }
-
   .rightSide {
     width: 100%;
   }
@@ -333,18 +317,18 @@ select#paises {
 }
 
 @media (max-width: 768px) {
-  .titulo {
+  .page {
+    padding: 20px;
+  }
+  .h1 {
     font-size: 42px;
   }
-
   .subtexto {
     font-size: 18px;
   }
-
   .filaInputs {
     flex-direction: column;
   }
-
   .formulario,
   .infoContacto,
   .chatBox,
@@ -352,7 +336,6 @@ select#paises {
   .faq {
     padding: 25px;
   }
-
   .horario div {
     flex-direction: column;
     gap: 8px;
