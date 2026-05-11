@@ -19,7 +19,7 @@ function RegisterPage() {
   const [birthDate, setBirthDate] = useState("");
   const [city, setCity] = useState("");
   const [userType, setUserType] = useState("");
-  const [ageError, setAgeError] = useState("");  // ← nuevo
+  const [ageError, setAgeError] = useState("");  
 
   const [loading, setLoading] = useState(false);
 
@@ -186,7 +186,7 @@ function RegisterPage() {
                       value={birthDate}
                       onChange={(e) => {
                         setBirthDate(e.target.value);
-                        setAgeError(""); // limpiar error al cambiar fecha
+                        setAgeError("");
                       }}
                       type="date"
                       required
@@ -194,7 +194,6 @@ function RegisterPage() {
                         .toISOString().split("T")[0]}
                     />
                   </div>
-                  {/* ← mensaje de error de edad */}
                   {ageError && <p className={styles["age-error"]}>{ageError}</p>}
                 </div>
               </div>
