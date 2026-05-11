@@ -35,10 +35,22 @@ export default function Home() {
           <div className={styles.inputCompleto}>
             <label htmlFor="paises">Asunto</label>
             <select name="paises" id="paises">
-              <option value="ST">Soporte Técnico</option>
-              <option value="PD">Pregunta sobre donaciones</option>
-              <option value="ar">Problemas con puntos</option>
-              <option value="Sug">Sugerencia</option>
+              <option value="ST">
+                Soporte Técnico
+              </option>
+
+              <option value="PD">
+                Pregunta sobre donaciones
+              </option>
+
+              <option value="ar">
+                Problemas con puntos
+              </option>
+
+              <option value="Sug">
+                Sugerencia
+              </option>
+
               <option value="Otro">Otro</option>
             </select>
           </div>
@@ -81,7 +93,8 @@ export default function Home() {
           <div className={styles.chatBox}>
             <h2>Chat en vivo</h2>
             <p>
-              ¿Necesitas ayuda inmediata? Nuestro equipo está
+              ¿Necesitas ayuda inmediata? Nuestro equipo
+              está
               <br />
               disponible para ayudarte en tiempo real.
             </p>
