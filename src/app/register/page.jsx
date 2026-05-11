@@ -28,7 +28,7 @@ function RegisterPage() {
       const result = await registerUser(email, password, firstName, lastName);
       if (result.success) {
         alert("Cuenta creada correctamente");
-        router.push("/login");
+        router.push("");
       } else {
         if (result.error.code === "auth/email-already-in-use") {
           alert("El correo ya está registrado");
@@ -64,12 +64,12 @@ function RegisterPage() {
 
         <div className={styles["form-container"]}>
           <button className={styles["social-btn"]} type="button">
-            <img src="public\google.svg" alt="Google" className={styles["social-icon"]} />
+            <img src="/svg/google.svg" alt="Google" className={styles["social-icon"]} />
             Registrarse con Google
           </button>
 
           <button className={styles["social-btn"]} type="button">
-            <img src="public\facebook.svg" alt="Facebook" className={styles["social-icon"]} />
+            <img src="/svg/facebook.svg" alt="Facebook" className={styles["social-icon"]} />
             Registrarse con Facebook
           </button>
 
@@ -82,7 +82,7 @@ function RegisterPage() {
               <div className={styles["input-group"]}>
                 <label>Nombre</label>
                 <div className={styles["input-wrapper"]}>
-                  <img src="public\user.svg" alt="Usuario" className={styles["input-icon"]} />
+                  <img src="/svg/user.svg" alt="Usuario" className={styles["input-icon"]} />
                   <input
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
@@ -96,7 +96,7 @@ function RegisterPage() {
               <div className={styles["input-group"]}>
                 <label>Apellido</label>
                 <div className={styles["input-wrapper"]}>
-                  <img src="public\user.svg" alt="Usuario" className={styles["input-icon"]} />
+                  <img src="/svg/user.svg" alt="Usuario" className={styles["input-icon"]} />
                   <input
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
@@ -111,7 +111,7 @@ function RegisterPage() {
             <div className={styles["input-group"]}>
               <label>Correo Electrónico</label>
               <div className={styles["input-wrapper"]}>
-                <img src="public\email.svg" alt="Email" className={styles["input-icon"]} />
+                <img src="/svg/email.svg" alt="Email" className={styles["input-icon"]} />
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -125,7 +125,7 @@ function RegisterPage() {
             <div className={styles["input-group"]}>
               <label>Contraseña</label>
               <div className={styles["input-wrapper"]}>
-                <img src="public\lock.svg" alt="Contraseña" className={styles["input-icon"]} />
+                <img src="/svg/lock.svg" alt="Contraseña" className={styles["input-icon"]} />
                 <input
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
