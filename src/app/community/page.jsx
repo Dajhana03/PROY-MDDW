@@ -1,185 +1,149 @@
 "use client";
-import "./community.css";
+import { useState } from "react";
+import styles from "./community.module.css";
 import {
-  Users,
-  MessageSquare,
-  Calendar,
-  Heart,
-  Star,
-  TrendingUp,
-  Send,
-  ArrowRight,
-  MapPin,
-  Clock,
-  UserIcon,
+  Users, MessageSquare, Calendar, Heart, Star,
+  TrendingUp, Send, ArrowRight, MapPin, Clock,
+  UserIcon, Plus, X, CheckCircle,
 } from "lucide-react";
 
+const initialForums = [
+  { id: 1, title: "¿Cómo mejorar el reciclaje en el campus?", author: "Carlos M.", time: "Hace 2 horas", comments: 24, likes: 45, liked: false },
+  { id: 2, title: "Organizando evento de donación masiva", author: "Ana R.", time: "Hace 5 horas", comments: 18, likes: 67, liked: false },
+  { id: 3, title: "Tips para maximizar puntos", author: "María G.", time: "Hace 1 día", comments: 32, likes: 89, liked: false },
+];
+
+const initialEvents = [
+  { id: 1, title: "Feria de Reciclaje 2026", date: "15 Mayo 2026", hour: "10:00 AM", place: "Plaza Central", people: 145, attending: false },
+  { id: 2, title: "Taller: Compostaje Casero", date: "20 Mayo 2026", hour: "3:00 PM", place: "Aula Verde", people: 67, attending: false },
+  { id: 3, title: "Campaña de Donación Masiva", date: "25 Mayo 2026", hour: "9:00 AM", place: "Campus Norte", people: 203, attending: false },
+];
+
+const initialStories = [
+  { id: 1, title: "De estudiante a Eco Líder", author: "Juan Pérez", description: "Mi viaje desde mi primera donación hasta convertirme en embajador ECO CANJE...", likes: 156, liked: false, image: "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?q=80&w=800&auto=format&fit=crop" },
+  { id: 2, title: "Cómo alimentamos a 50 familias", author: "Comunidad Campus Norte", description: "La historia de nuestra campaña solidaria que cambió vidas...", likes: 234, liked: false, image: "https://images.unsplash.com/photo-1593113598332-cd59a93f7d2e?q=80&w=800&auto=format&fit=crop" },
+  { id: 3, title: "Reciclamos 500kg en un mes", author: "Grupo Verde UNAM", description: "Así logramos nuestro objetivo de reciclaje más ambicioso hasta la fecha...", likes: 189, liked: false, image: "https://images.unsplash.com/photo-1528323273322-d81458248d40?q=80&w=800&auto=format&fit=crop" },
+];
+
+const contributors = [
+  { rank: 1, name: "Ana Rodríguez", points: 450, badge: "👑" },
+  { rank: 2, name: "Carlos Mendoza", points: 400, badge: "🥈" },
+  { rank: 3, name: "María García", points: 350, badge: "🥉" },
+];
+
 export default function CommunityPage() {
-  const forums = [
-    {
-      title: "¿Cómo mejorar el reciclaje en el campus?",
-      author: "Carlos M.",
-      time: "Hace 2 horas",
-      comments: 24,
-      likes: 45,
-    },
-    {
-      title: "Organizando evento de donación masiva",
-      author: "Ana R.",
-      time: "Hace 5 horas",
-      comments: 18,
-      likes: 67,
-    },
-    {
-      title: "Tips para maximizar puntos",
-      author: "María G.",
-      time: "Hace 1 día",
-      comments: 32,
-      likes: 89,
-    },
-  ];
+  const [forums, setForums] = useState(initialForums);
+  const [events, setEvents] = useState(initialEvents);
+  const [stories, setStories] = useState(initialStories);
+  const [email, setEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newContent, setNewContent] = useState("");
 
-  const events = [
-    {
-      title: "Feria de Reciclaje 2026",
-      date: "15 Mayo 2026",
-      hour: "10:00 AM",
-      place: "Plaza Central",
-      people: "145 asistirán",
-    },
-    {
-      title: "Taller: Compostaje Casero",
-      date: "20 Mayo 2026",
-      hour: "3:00 PM",
-      place: "Aula Verde",
-      people: "67 asistirán",
-    },
-    {
-      title: "Campaña de Donación Masiva",
-      date: "25 Mayo 2026",
-      hour: "9:00 AM",
-      place: "Campus Norte",
-      people: "203 asistirán",
-    },
-  ];
+  const toggleForumLike = (id) => {
+    setForums((prev) =>
+      prev.map((f) => f.id === id ? { ...f, liked: !f.liked, likes: f.liked ? f.likes - 1 : f.likes + 1 } : f)
+    );
+  };
 
-  const stories = [
-    {
-      title: "De estudiante a Eco Líder",
-      author: "Juan Pérez",
-      description:
-        "Mi viaje desde mi primera donación hasta convertirme en embajador ECO CANJE...",
-      likes: 156,
-      image:
-        "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?q=80&w=800&auto=format&fit=crop",
-    },
-    {
-      title: "Cómo alimentamos a 50 familias",
-      author: "Comunidad Campus Norte",
-      description:
-        "La historia de nuestra campaña solidaria que cambió vidas...",
-      likes: 234,
-      image:
-        "https://images.unsplash.com/photo-1593113598332-cd59a93f7d2e?q=80&w=800&auto=format&fit=crop",
-    },
-    {
-      title: "Reciclamos 500kg en un mes",
-      author: "Grupo Verde UNAM",
-      description:
-        "Así logramos nuestro objetivo de reciclaje más ambicioso hasta la fecha...",
-      likes: 189,
-      image:
-        "https://images.unsplash.com/photo-1528323273322-d81458248d40?q=80&w=800&auto=format&fit=crop",
-    },
-  ];
+  const toggleStoryLike = (id) => {
+    setStories((prev) =>
+      prev.map((s) => s.id === id ? { ...s, liked: !s.liked, likes: s.liked ? s.likes - 1 : s.likes + 1 } : s)
+    );
+  };
+
+  const toggleAttend = (id) => {
+    setEvents((prev) =>
+      prev.map((e) => e.id === id ? { ...e, attending: !e.attending, people: e.attending ? e.people - 1 : e.people + 1 } : e)
+    );
+  };
+
+  const handleNewDiscussion = (e) => {
+    e.preventDefault();
+    if (!newTitle.trim()) return;
+    setForums((prev) => [
+      { id: Date.now(), title: newTitle.trim(), author: "Tú", time: "Ahora mismo", comments: 0, likes: 0, liked: false },
+      ...prev,
+    ]);
+    setNewTitle("");
+    setNewContent("");
+    setShowModal(false);
+  };
+
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setSubscribed(true);
+  };
 
   return (
-    <div className="community-page">
+    <div className={styles.page}>
 
-      {/* ══ NAVBAR ══ */}
-      <header className="community-navbar">
-        <div className="community-logo">
-          <div className="logo-icon">🌿</div>
-          <h2>ECO CANJE</h2>
+      {/* NAVBAR */}
+      <header className={styles.navbar}>
+        <div className={styles.logo}>
+          <span className={styles.logoIcon}>🌿</span>
+          <span className={styles.logoText}>ECO CANJE</span>
         </div>
-
-        <nav className="community-nav-links">
+        <nav className={styles.navLinks}>
           <a href="#">Inicio</a>
           <a href="#">Donaciones</a>
           <a href="#">Publicar</a>
           <a href="#">Beneficios</a>
-          <a href="#" className="active-link">Comunidad</a>
+          <a href="#" className={styles.activeLink}>Comunidad</a>
           <a href="#">Blog</a>
           <a href="#">Contacto</a>
         </nav>
-
-        <div className="community-auth-buttons">
-          <button className="login-btn">Iniciar sesión</button>
-          <button className="register-btn">Registrarse</button>
+        <div className={styles.authButtons}>
+          <button className={styles.loginBtn}>Iniciar sesión</button>
+          <button className={styles.registerBtn}>Registrarse</button>
         </div>
       </header>
 
-      <main className="community-container">
+      <main className={styles.container}>
 
-        {/* ══ HERO ══ */}
-        <section className="hero-section">
+        {/* HERO */}
+        <section className={styles.hero}>
           <h1>Comunidad ECO CANJE</h1>
           <p>Conecta, comparte y aprende con estudiantes comprometidos con el cambio</p>
         </section>
 
-        {/* ══ STATS ══ */}
-        <section className="stats-section">
-          <div className="stat-card">
-            <Users size={30} />
-            <h2>1,200+</h2>
-            <span>Miembros</span>
-          </div>
-          <div className="stat-card">
-            <MessageSquare size={30} />
-            <h2>450+</h2>
-            <span>Discusiones</span>
-          </div>
-          <div className="stat-card">
-            <Calendar size={30} />
-            <h2>28</h2>
-            <span>Eventos</span>
-          </div>
-          <div className="stat-card">
-            <Heart size={30} />
-            <h2>5,600+</h2>
-            <span>Impactos</span>
-          </div>
+        {/* STATS */}
+        <section className={styles.stats}>
+          <div className={styles.statCard}><Users size={28} /><h2>1,200+</h2><span>Miembros</span></div>
+          <div className={styles.statCard}><MessageSquare size={28} /><h2>450+</h2><span>Discusiones</span></div>
+          <div className={styles.statCard}><Calendar size={28} /><h2>28</h2><span>Eventos</span></div>
+          <div className={styles.statCard}><Heart size={28} /><h2>5,600+</h2><span>Impactos</span></div>
         </section>
 
-        {/* ══ MAIN GRID ══ */}
-        <section className="content-grid">
-
-          {/* LEFT */}
-          <div className="left-content">
+        {/* GRID */}
+        <section className={styles.grid}>
+          <div className={styles.leftCol}>
 
             {/* FORO */}
-            <div className="forum-container">
-              <div className="forum-header">
-                <h2>
-                  <MessageSquare size={18} />
-                  Foro de Discusión
-                </h2>
-                <button className="discussion-btn">Nueva Discusión</button>
+            <div className={styles.card}>
+              <div className={styles.cardHeader}>
+                <h2 className={styles.cardTitle}><MessageSquare size={16} />Foro de Discusión</h2>
+                <button className={styles.btnPrimary} onClick={() => setShowModal(true)}>
+                  <Plus size={14} /> Nueva Discusión
+                </button>
               </div>
-
-              <div className="forum-list">
-                {forums.map((forum, index) => (
-                  <div className="forum-card" key={index}>
-                    <h3>{forum.title}</h3>
-                    <div className="forum-info">
-                      <div className="forum-meta">
+              <div className={styles.forumList}>
+                {forums.map((forum) => (
+                  <div className={styles.forumItem} key={forum.id}>
+                    <h3 className={styles.forumTitle}>{forum.title}</h3>
+                    <div className={styles.forumMeta}>
+                      <div className={styles.metaLeft}>
                         <span>Por {forum.author}</span>
-                        <span>•</span>
+                        <span className={styles.dot}>•</span>
                         <span>{forum.time}</span>
                       </div>
-                      <div className="forum-actions">
-                        <span><MessageSquare size={12} /> {forum.comments}</span>
-                        <span><Heart size={12} /> {forum.likes}</span>
+                      <div className={styles.metaRight}>
+                        <span className={styles.metaIcon}><MessageSquare size={11} /> {forum.comments}</span>
+                        <button className={`${styles.likeBtn} ${forum.liked ? styles.liked : ""}`} onClick={() => toggleForumLike(forum.id)}>
+                          <Heart size={11} fill={forum.liked ? "currentColor" : "none"} /> {forum.likes}
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -187,30 +151,25 @@ export default function CommunityPage() {
               </div>
             </div>
 
-            {/* HISTORIAS INSPIRADORAS */}
-            <div className="stories-container">
-              <h2>
-                <Star size={18} />
-                Historias Inspiradoras
-              </h2>
-
-              <div className="stories-grid">
-                {stories.map((story, index) => (
-                  <div className="story-card" key={index}>
-                    <div
-                      className="story-image"
-                      style={{ backgroundImage: `url(${story.image})` }}
-                    >
-                      <div className="story-overlay">
+            {/* HISTORIAS */}
+            <div className={styles.card}>
+              <h2 className={styles.cardTitle} style={{ marginBottom: "14px" }}><Star size={16} />Historias Inspiradoras</h2>
+              <div className={styles.storiesGrid}>
+                {stories.map((story) => (
+                  <div className={styles.storyCard} key={story.id}>
+                    <div className={styles.storyImg} style={{ backgroundImage: `url(${story.image})` }}>
+                      <div className={styles.storyOverlay}>
                         <h3>{story.title}</h3>
                         <p>Por {story.author}</p>
                       </div>
                     </div>
-                    <div className="story-content">
+                    <div className={styles.storyBody}>
                       <p>{story.description}</p>
-                      <div className="story-footer">
-                        <span><Heart size={13} /> {story.likes}</span>
-                        <button>Leer más <ArrowRight size={13} /></button>
+                      <div className={styles.storyFooter}>
+                        <button className={`${styles.likeBtn} ${story.liked ? styles.liked : ""}`} onClick={() => toggleStoryLike(story.id)}>
+                          <Heart size={12} fill={story.liked ? "currentColor" : "none"} /> {story.likes}
+                        </button>
+                        <button className={styles.readMore}>Leer más <ArrowRight size={12} /></button>
                       </div>
                     </div>
                   </div>
@@ -220,64 +179,48 @@ export default function CommunityPage() {
 
           </div>
 
-          {/* RIGHT SIDEBAR */}
-          <aside className="right-sidebar">
+          {/* SIDEBAR */}
+          <aside className={styles.sidebar}>
 
-            {/* PRÓXIMOS EVENTOS */}
-            <div className="events-container">
-              <h2><Calendar size={18} /> Próximos Eventos</h2>
-
-              {events.map((event, index) => (
-                <div className="event-card" key={index}>
-                  <h3>{event.title}</h3>
-                  <div className="event-details">
-                    <p><Calendar size={12} /> {event.date}</p>
-                    <p><Clock size={12} /> {event.hour}</p>
-                    <p><MapPin size={12} /> {event.place}</p>
-                    <p><UserIcon size={12} /> {event.people}</p>
+            {/* EVENTOS */}
+            <div className={styles.card}>
+              <h2 className={styles.cardTitle} style={{ marginBottom: "4px" }}><Calendar size={16} /> Próximos Eventos</h2>
+              {events.map((event) => (
+                <div className={styles.eventItem} key={event.id}>
+                  <h3 className={styles.eventTitle}>{event.title}</h3>
+                  <div className={styles.eventDetails}>
+                    <p><Calendar size={11} /> {event.date}</p>
+                    <p><Clock size={11} /> {event.hour}</p>
+                    <p><MapPin size={11} /> {event.place}</p>
+                    <p><UserIcon size={11} /> {event.people} asistirán</p>
                   </div>
-                  <button>Asistir</button>
+                  <button
+                    className={event.attending ? styles.btnAttending : styles.btnPrimary}
+                    onClick={() => toggleAttend(event.id)}
+                    style={{ width: "100%" }}
+                  >
+                    {event.attending ? <><CheckCircle size={13} /> Asistiendo</> : "Asistir"}
+                  </button>
                 </div>
               ))}
             </div>
 
             {/* TOP CONTRIBUTORS */}
-            <div className="contributors-container">
-              <h2><TrendingUp size={18} /> Top Contributors</h2>
-
-              <div className="contributors-list">
-                <div className="contributor-card">
-                  <div className="contributor-left">
-                    <div className="rank">1</div>
-                    <div>
-                      <h4>Usuario 1</h4>
-                      <p>450 puntos</p>
+            <div className={styles.contributorsCard}>
+              <h2 className={styles.contributorsTitle}><TrendingUp size={16} /> Top Contributors</h2>
+              <div className={styles.contributorsList}>
+                {contributors.map((c) => (
+                  <div className={styles.contributorItem} key={c.rank}>
+                    <div className={styles.contributorLeft}>
+                      <div className={styles.rank}>{c.rank}</div>
+                      <div>
+                        <p className={styles.contributorName}>{c.name}</p>
+                        <p className={styles.contributorPoints}>{c.points} puntos</p>
+                      </div>
                     </div>
+                    <span>{c.badge}</span>
                   </div>
-                  <span className="contributor-crown">👑</span>
-                </div>
-
-                <div className="contributor-card">
-                  <div className="contributor-left">
-                    <div className="rank">2</div>
-                    <div>
-                      <h4>Usuario 2</h4>
-                      <p>400 puntos</p>
-                    </div>
-                  </div>
-                  <span>🥈</span>
-                </div>
-
-                <div className="contributor-card">
-                  <div className="contributor-left">
-                    <div className="rank">3</div>
-                    <div>
-                      <h4>Usuario 3</h4>
-                      <p>350 puntos</p>
-                    </div>
-                  </div>
-                  <span>🥉</span>
-                </div>
+                ))}
               </div>
             </div>
 
@@ -285,68 +228,70 @@ export default function CommunityPage() {
         </section>
       </main>
 
-      {/* ══ FOOTER ══ */}
-      <footer className="community-footer">
-        <div className="footer-grid">
-
+      {/* FOOTER */}
+      <footer className={styles.footer}>
+        <div className={styles.footerGrid}>
           <div>
-            <div className="community-logo footer-logo">
-              <div className="logo-icon">🌿</div>
-              <h2>ECO CANJE</h2>
+            <div className={styles.logo}>
+              <span className={styles.logoIcon}>🌿</span>
+              <span className={styles.logoText}>ECO CANJE</span>
             </div>
-            <p>
-              Red Solidaria Universitaria: Transformando donaciones en impacto
-              social y sostenibilidad.
-            </p>
-            <div className="socials">
-              <span>📘</span>
-              <span>📷</span>
-              <span>🐦</span>
-              <span>💼</span>
+            <p className={styles.footerDesc}>Red Solidaria Universitaria: Transformando donaciones en impacto social y sostenibilidad.</p>
+            <div className={styles.socials}>
+              <span>📘</span><span>📷</span><span>🐦</span><span>💼</span>
             </div>
           </div>
-
           <div>
             <h3>Enlaces Rápidos</h3>
-            <ul>
-              <li>Donaciones</li>
-              <li>Publicar Donación</li>
-              <li>Beneficios</li>
-              <li>Comunidad</li>
-            </ul>
+            <ul><li>Donaciones</li><li>Publicar Donación</li><li>Beneficios</li><li>Comunidad</li></ul>
           </div>
-
           <div>
             <h3>Recursos</h3>
-            <ul>
-              <li>Blog</li>
-              <li>Contacto</li>
-              <li>Dashboard</li>
-              <li>FAQs</li>
-            </ul>
+            <ul><li>Blog</li><li>Contacto</li><li>Dashboard</li><li>FAQs</li></ul>
           </div>
-
           <div>
             <h3>Newsletter</h3>
-            <p>Recibe noticias sobre sostenibilidad y donaciones</p>
-            <div className="newsletter-box">
-              <input type="email" placeholder="tu@email.com" />
-              <button><Send size={16} /></button>
-            </div>
+            <p className={styles.footerNewsletterDesc}>Recibe noticias sobre sostenibilidad y donaciones</p>
+            {subscribed ? (
+              <p className={styles.subscribedMsg}><CheckCircle size={14} /> ¡Suscrito correctamente!</p>
+            ) : (
+              <form className={styles.newsletterBox} onSubmit={handleSubscribe}>
+                <input type="email" placeholder="tu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                <button type="submit"><Send size={15} /></button>
+              </form>
+            )}
           </div>
-
         </div>
-
-        <div className="footer-bottom">
+        <div className={styles.footerBottom}>
           <p>© 2026 ECO CANJE. Todos los derechos reservados.</p>
-          <div className="hashtags">
-            <span>#Reciclar</span>
-            <span>#Donaciones</span>
-            <span>#EcoCanje</span>
-            <span>#Sostenibilidad</span>
+          <div className={styles.hashtags}>
+            <span>#Reciclar</span><span>#Donaciones</span><span>#EcoCanje</span><span>#Sostenibilidad</span>
           </div>
         </div>
       </footer>
+
+      {/* MODAL */}
+      {showModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>Nueva Discusión</h2>
+              <button className={styles.closeBtn} onClick={() => setShowModal(false)}><X size={18} /></button>
+            </div>
+            <form onSubmit={handleNewDiscussion}>
+              <div className={styles.field}>
+                <label>Título</label>
+                <input type="text" placeholder="¿Sobre qué quieres hablar?" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} required autoFocus />
+              </div>
+              <div className={styles.field}>
+                <label>Descripción (opcional)</label>
+                <textarea placeholder="Cuéntanos más detalles..." value={newContent} onChange={(e) => setNewContent(e.target.value)} rows={4} />
+              </div>
+              <button type="submit" className={styles.btnPrimary} style={{ width: "100%" }}>Publicar Discusión</button>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );
