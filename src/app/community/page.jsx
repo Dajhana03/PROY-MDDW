@@ -20,9 +20,39 @@ const initialEvents = [
 ];
 
 const initialStories = [
-  { id: 1, title: "De estudiante a Eco Líder", author: "Juan Pérez", description: "Mi viaje desde mi primera donación hasta convertirme en embajador ECO CANJE...", likes: 156, liked: false, image: "https://picsum.photos/seed/eco1/400/300" },
-  { id: 2, title: "Cómo alimentamos a 50 familias", author: "Comunidad Campus Norte", description: "La historia de nuestra campaña solidaria que cambió vidas...", likes: 234, liked: false, image: "https://picsum.photos/seed/eco2/400/300" },
-  { id: 3, title: "Reciclamos 500kg en un mes", author: "Grupo Verde UNAM", description: "Así logramos nuestro objetivo de reciclaje más ambicioso hasta la fecha...", likes: 189, liked: false, image: "https://picsum.photos/seed/eco3/400/300" },
+  {
+    id: 1,
+    title: "De estudiante a Eco Líder",
+    author: "Carlos Ruiz",
+    description:
+      "Mi viaje desde mi primera donación hasta convertirme en embajador ECO CANJE.",
+    likes: 156,
+    liked: false,
+    image:
+      "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop",
+  },
+  {
+    id: 2,
+    title: "Cómo alimentamos a 50 familias",
+    author: "Campus Norte",
+    description:
+      "La historia de nuestra campaña solidaria que cambió vidas.",
+    likes: 234,
+    liked: false,
+    image:
+      "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1200&auto=format&fit=crop",
+  },
+  {
+    id: 3,
+    title: "Reciclamos 500kg en un mes",
+    author: "Grupo Verde",
+    description:
+      "Así logramos nuestro objetivo ecológico más ambicioso.",
+    likes: 189,
+    liked: false,
+    image:
+      "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?q=80&w=1200&auto=format&fit=crop",
+  },
 ];
 
 const contributors = [
