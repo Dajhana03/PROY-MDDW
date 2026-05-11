@@ -20,9 +20,9 @@ const initialEvents = [
 ];
 
 const initialStories = [
-  { id: 1, title: "De estudiante a Eco Líder", author: "Juan Pérez", description: "Mi viaje desde mi primera donación hasta convertirme en embajador ECO CANJE...", likes: 156, liked: false, image: "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?q=80&w=800&auto=format&fit=crop" },
-  { id: 2, title: "Cómo alimentamos a 50 familias", author: "Comunidad Campus Norte", description: "La historia de nuestra campaña solidaria que cambió vidas...", likes: 234, liked: false, image: "https://images.unsplash.com/photo-1593113598332-cd59a93f7d2e?q=80&w=800&auto=format&fit=crop" },
-  { id: 3, title: "Reciclamos 500kg en un mes", author: "Grupo Verde UNAM", description: "Así logramos nuestro objetivo de reciclaje más ambicioso hasta la fecha...", likes: 189, liked: false, image: "https://images.unsplash.com/photo-1528323273322-d81458248d40?q=80&w=800&auto=format&fit=crop" },
+  { id: 1, title: "De estudiante a Eco Líder", author: "Juan Pérez", description: "Mi viaje desde mi primera donación hasta convertirme en embajador ECO CANJE...", likes: 156, liked: false, image: "https://picsum.photos/seed/eco1/400/300" },
+  { id: 2, title: "Cómo alimentamos a 50 familias", author: "Comunidad Campus Norte", description: "La historia de nuestra campaña solidaria que cambió vidas...", likes: 234, liked: false, image: "https://picsum.photos/seed/eco2/400/300" },
+  { id: 3, title: "Reciclamos 500kg en un mes", author: "Grupo Verde UNAM", description: "Así logramos nuestro objetivo de reciclaje más ambicioso hasta la fecha...", likes: 189, liked: false, image: "https://picsum.photos/seed/eco3/400/300" },
 ];
 
 const contributors = [
@@ -30,6 +30,16 @@ const contributors = [
   { rank: 2, name: "Carlos Mendoza", points: 400, badge: "🥈" },
   { rank: 3, name: "María García", points: 350, badge: "🥉" },
 ];
+
+/* Ícono hoja SVG igual al logo del screenshot */
+function LeafIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/>
+      <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+    </svg>
+  );
+}
 
 export default function CommunityPage() {
   const [forums, setForums] = useState(initialForums);
@@ -41,23 +51,14 @@ export default function CommunityPage() {
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
 
-  const toggleForumLike = (id) => {
-    setForums((prev) =>
-      prev.map((f) => f.id === id ? { ...f, liked: !f.liked, likes: f.liked ? f.likes - 1 : f.likes + 1 } : f)
-    );
-  };
+  const toggleForumLike = (id) =>
+    setForums((prev) => prev.map((f) => f.id === id ? { ...f, liked: !f.liked, likes: f.liked ? f.likes - 1 : f.likes + 1 } : f));
 
-  const toggleStoryLike = (id) => {
-    setStories((prev) =>
-      prev.map((s) => s.id === id ? { ...s, liked: !s.liked, likes: s.liked ? s.likes - 1 : s.likes + 1 } : s)
-    );
-  };
+  const toggleStoryLike = (id) =>
+    setStories((prev) => prev.map((s) => s.id === id ? { ...s, liked: !s.liked, likes: s.liked ? s.likes - 1 : s.likes + 1 } : s));
 
-  const toggleAttend = (id) => {
-    setEvents((prev) =>
-      prev.map((e) => e.id === id ? { ...e, attending: !e.attending, people: e.attending ? e.people - 1 : e.people + 1 } : e)
-    );
-  };
+  const toggleAttend = (id) =>
+    setEvents((prev) => prev.map((e) => e.id === id ? { ...e, attending: !e.attending, people: e.attending ? e.people - 1 : e.people + 1 } : e));
 
   const handleNewDiscussion = (e) => {
     e.preventDefault();
@@ -66,9 +67,7 @@ export default function CommunityPage() {
       { id: Date.now(), title: newTitle.trim(), author: "Tú", time: "Ahora mismo", comments: 0, likes: 0, liked: false },
       ...prev,
     ]);
-    setNewTitle("");
-    setNewContent("");
-    setShowModal(false);
+    setNewTitle(""); setNewContent(""); setShowModal(false);
   };
 
   const handleSubscribe = (e) => {
@@ -83,7 +82,7 @@ export default function CommunityPage() {
       {/* NAVBAR */}
       <header className={styles.navbar}>
         <div className={styles.logo}>
-          <span className={styles.logoIcon}>🌿</span>
+          <div className={styles.logoIcon}><LeafIcon /></div>
           <span className={styles.logoText}>ECO CANJE</span>
         </div>
         <nav className={styles.navLinks}>
@@ -111,10 +110,10 @@ export default function CommunityPage() {
 
         {/* STATS */}
         <section className={styles.stats}>
-          <div className={styles.statCard}><Users size={28} /><h2>1,200+</h2><span>Miembros</span></div>
-          <div className={styles.statCard}><MessageSquare size={28} /><h2>450+</h2><span>Discusiones</span></div>
-          <div className={styles.statCard}><Calendar size={28} /><h2>28</h2><span>Eventos</span></div>
-          <div className={styles.statCard}><Heart size={28} /><h2>5,600+</h2><span>Impactos</span></div>
+          <div className={styles.statCard}><Users size={32} /><h2>1,200+</h2><span>Miembros</span></div>
+          <div className={styles.statCard}><MessageSquare size={32} /><h2>450+</h2><span>Discusiones</span></div>
+          <div className={styles.statCard}><Calendar size={32} /><h2>28</h2><span>Eventos</span></div>
+          <div className={styles.statCard}><Heart size={32} /><h2>5,600+</h2><span>Impactos</span></div>
         </section>
 
         {/* GRID */}
@@ -124,7 +123,7 @@ export default function CommunityPage() {
             {/* FORO */}
             <div className={styles.card}>
               <div className={styles.cardHeader}>
-                <h2 className={styles.cardTitle}><MessageSquare size={16} />Foro de Discusión</h2>
+                <h2 className={styles.cardTitle}><MessageSquare size={18} />Foro de Discusión</h2>
                 <button className={styles.btnPrimary} onClick={() => setShowModal(true)}>
                   <Plus size={14} /> Nueva Discusión
                 </button>
@@ -140,9 +139,9 @@ export default function CommunityPage() {
                         <span>{forum.time}</span>
                       </div>
                       <div className={styles.metaRight}>
-                        <span className={styles.metaIcon}><MessageSquare size={11} /> {forum.comments}</span>
+                        <span className={styles.metaIcon}><MessageSquare size={12} /> {forum.comments}</span>
                         <button className={`${styles.likeBtn} ${forum.liked ? styles.liked : ""}`} onClick={() => toggleForumLike(forum.id)}>
-                          <Heart size={11} fill={forum.liked ? "currentColor" : "none"} /> {forum.likes}
+                          <Heart size={12} fill={forum.liked ? "currentColor" : "none"} /> {forum.likes}
                         </button>
                       </div>
                     </div>
@@ -153,7 +152,7 @@ export default function CommunityPage() {
 
             {/* HISTORIAS */}
             <div className={styles.card}>
-              <h2 className={styles.cardTitle} style={{ marginBottom: "14px" }}><Star size={16} />Historias Inspiradoras</h2>
+              <h2 className={styles.cardTitle} style={{ marginBottom: "16px" }}><Star size={18} />Historias Inspiradoras</h2>
               <div className={styles.storiesGrid}>
                 {stories.map((story) => (
                   <div className={styles.storyCard} key={story.id}>
@@ -184,15 +183,15 @@ export default function CommunityPage() {
 
             {/* EVENTOS */}
             <div className={styles.card}>
-              <h2 className={styles.cardTitle} style={{ marginBottom: "4px" }}><Calendar size={16} /> Próximos Eventos</h2>
+              <h2 className={styles.cardTitle}><Calendar size={18} /> Próximos Eventos</h2>
               {events.map((event) => (
                 <div className={styles.eventItem} key={event.id}>
                   <h3 className={styles.eventTitle}>{event.title}</h3>
                   <div className={styles.eventDetails}>
-                    <p><Calendar size={11} /> {event.date}</p>
-                    <p><Clock size={11} /> {event.hour}</p>
-                    <p><MapPin size={11} /> {event.place}</p>
-                    <p><UserIcon size={11} /> {event.people} asistirán</p>
+                    <p><Calendar size={12} /> {event.date}</p>
+                    <p><Clock size={12} /> {event.hour}</p>
+                    <p><MapPin size={12} /> {event.place}</p>
+                    <p><UserIcon size={12} /> {event.people} asistirán</p>
                   </div>
                   <button
                     className={event.attending ? styles.btnAttending : styles.btnPrimary}
@@ -233,7 +232,7 @@ export default function CommunityPage() {
         <div className={styles.footerGrid}>
           <div>
             <div className={styles.logo}>
-              <span className={styles.logoIcon}>🌿</span>
+              <div className={styles.logoIcon}><LeafIcon /></div>
               <span className={styles.logoText}>ECO CANJE</span>
             </div>
             <p className={styles.footerDesc}>Red Solidaria Universitaria: Transformando donaciones en impacto social y sostenibilidad.</p>
