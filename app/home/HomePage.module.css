@@ -1,0 +1,359 @@
+/* ── Hero ── */
+.heroSection {
+  background: #f5fcf7;
+  padding: 80px 0 65px;
+  overflow: hidden;
+}
+
+.heroContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 70px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid #e8f2eb;
+  padding: 7px 15px;
+  border-radius: 100px;
+  font-size: 0.76rem;
+  color: var(--text-medium);
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.badge i {
+  color: var(--primary);
+}
+
+.heroContent h1 {
+  font-family: 'Manrope', sans-serif;
+  font-size: 4rem;
+  line-height: 1.1;
+  font-weight: 800;
+  margin-bottom: 20px;
+  color: #1f352c;
+  letter-spacing: -2px;
+}
+
+.heroContent p {
+  font-size: 0.98rem;
+  line-height: 1.9;
+  color: var(--text-medium);
+  max-width: 530px;
+  margin-bottom: 34px;
+}
+
+.heroButtons {
+  display: flex;
+  gap: 16px;
+}
+
+.heroImageCard {
+  position: relative;
+}
+
+.heroImage {
+  border-radius: 30px;
+  overflow: hidden;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.10);
+  border: 10px solid rgba(255, 255, 255, 0.85);
+  transform: rotate(-1deg);
+}
+
+.heroImage img {
+  height: 360px;
+}
+
+/* ── Donation types ── */
+.donationTypes {
+  background: white;
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.infoCard {
+  background: white;
+  border: 1px solid #edf4ef;
+  border-radius: 22px;
+  padding: 34px 28px;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.infoCard:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-md);
+}
+
+.greenLight {
+  background: #fbfff4;
+}
+
+.cardIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #19c37d, #16ab6b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-bottom: 22px;
+  font-size: 1rem;
+}
+
+.infoCard h3 {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+
+.infoCard p {
+  font-size: 0.9rem;
+  color: var(--text-medium);
+  line-height: 1.8;
+}
+
+/* ── Gamification ── */
+.gamificationSection {
+  background: #edf9f2;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.gamificationContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 70px;
+}
+
+.gamificationImage img {
+  height: 620px;
+}
+
+.gamificationContent h2 {
+  font-family: 'Manrope', sans-serif;
+  font-size: 2.2rem;
+  color: var(--primary-dark);
+  margin-bottom: 18px;
+}
+
+.gamificationContent p {
+  color: var(--text-medium);
+  margin-bottom: 32px;
+  max-width: 520px;
+}
+
+.featureList {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin-bottom: 34px;
+}
+
+.featureIcon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #1ed480, #18b56f);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Testimonials ── */
+.testimonials {
+  background: white;
+}
+
+.testimonialGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.testimonialCard {
+  background: white;
+  border: 1px solid #edf4ef;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.testimonialCard:hover {
+  transform: translateY(-5px);
+}
+
+.testimonialHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1fd681, #17b76f);
+  flex-shrink: 0;
+}
+
+.testimonialHeader h4 {
+  font-size: 0.95rem;
+}
+
+.testimonialHeader span {
+  font-size: 0.8rem;
+  color: var(--text-light);
+  display: block;
+}
+
+.testimonialCard p {
+  color: var(--text-medium);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+/* ── Stats ── */
+.statsSection {
+  background: linear-gradient(135deg, #18ba74, #22d47f);
+  padding: 60px 0;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  text-align: center;
+  color: white;
+}
+
+.statsGrid :global(.stat-item) h2 {
+  font-family: 'Manrope', sans-serif;
+  font-size: 3rem;
+  margin-bottom: 8px;
+}
+
+.statsGrid :global(.stat-item) p {
+  opacity: 0.9;
+  font-size: 0.92rem;
+}
+
+/* ── Available donations ── */
+.donationsGrid {
+  margin-bottom: 40px;
+}
+
+.donationCard {
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid #edf4ef;
+  background: white;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.donationCard:hover {
+  transform: translateY(-6px);
+}
+
+.donationTop {
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: var(--primary-dark);
+  background: #e9fbf2;
+}
+
+.greenCard .donationTop {
+  background: #f6ffe3;
+}
+
+.donationBody {
+  padding: 26px;
+}
+
+.donationBody h3 {
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.donationBody p {
+  font-size: 0.88rem;
+  color: var(--text-medium);
+  margin-bottom: 14px;
+}
+
+.donationBody a {
+  color: var(--primary-dark);
+  font-weight: 700;
+  font-size: 0.84rem;
+}
+
+.centerButtons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 992px) {
+  .heroContainer,
+  .gamificationContainer {
+    grid-template-columns: 1fr;
+  }
+
+  .cardsGrid,
+  .testimonialGrid,
+  .donationsGrid,
+  .statsGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .heroContent h1 {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .heroContent h1 {
+    font-size: 2.5rem;
+  }
+
+  .cardsGrid,
+  .testimonialGrid,
+  .donationsGrid,
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .heroButtons,
+  .centerButtons {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroSection {
+    padding: 60px 0;
+  }
+
+  .heroContent h1 {
+    font-size: 2.1rem;
+  }
+}
