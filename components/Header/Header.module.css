@@ -35,7 +35,7 @@
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #24d989, #16b26d);
+  background: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -44,6 +44,12 @@
   box-shadow: 0 10px 25px rgba(25, 195, 125, 0.25);
 }
 
+.logoName {
+  background: linear-gradient(to right, #13b87c, #78c531);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 .navbar {
   display: flex;
   align-items: center;
@@ -88,7 +94,7 @@
   border-radius: 11px;
   font-size: 0.82rem;
   font-weight: 700;
-  box-shadow: 0 10px 24px rgba(25, 195, 125, 0.20);
+  box-shadow: 0 10px 24px rgba(25, 195, 125, 0.2);
   transition: var(--transition);
 }
 

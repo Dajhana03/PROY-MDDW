@@ -1,11 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Manrope:wght@500;600;700;800&display=swap');
+@import "tailwindcss";
 
 :root {
   --primary: #19c37d;
   --primary-dark: #13a868;
-  --primary-light: #eefdF5;
+  --primary-light: #eefdf5;
   --secondary-green: #daf5e7;
   --background: #f7fcf9;
+  --foreground: #171717;
   --white: #ffffff;
   --text-dark: #24332d;
   --text-medium: #6f8478;
@@ -13,11 +14,25 @@
   --border: #e7f2eb;
   --shadow-sm: 0 4px 14px rgba(16, 66, 40, 0.04);
   --shadow-md: 0 12px 30px rgba(16, 66, 40, 0.07);
-  --shadow-lg: 0 24px 60px rgba(16, 66, 40, 0.10);
+  --shadow-lg: 0 24px 60px rgba(16, 66, 40, 0.1);
   --radius-sm: 12px;
   --radius-md: 18px;
   --radius-lg: 26px;
   --transition: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
 }
 
 * {
@@ -31,7 +46,7 @@ html {
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   background: var(--white);
   color: var(--text-dark);
   overflow-x: hidden;
@@ -54,7 +69,7 @@ button {
   border: none;
   outline: none;
   cursor: pointer;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 /* ── Layout ── */
@@ -75,7 +90,7 @@ button {
 
 .section-title h1,
 .section-title h2 {
-  font-family: 'Manrope', sans-serif;
+  font-family: "Manrope", sans-serif;
   font-size: 2rem;
   font-weight: 800;
   color: var(--primary-dark);
@@ -129,7 +144,9 @@ button {
 .reveal {
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease;
 }
 
 .reveal.show-reveal {

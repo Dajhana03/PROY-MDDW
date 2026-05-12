@@ -1,59 +1,72 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import styles from './Header.module.css';
-import { useScrollShadow } from '../../hooks/useScrollShadow';
-
-const NAV_LINKS = [
-  { label: 'Inicio',     href: '/home' },
-  { label: 'Donaciones', href: null },
-  { label: 'Publicar',   href: null },
-  { label: 'Beneficios', href: '/benefits' },
-  { label: 'Comunidad',  href: null },
-  { label: 'Blog',       href: null },
-  { label: 'Contacto',   href: null },
-];
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import styles from "./Header.module.css";
+import { useScrollShadow } from "../../hooks/useScrollShadow";
 
 export default function Header() {
-  const scrolled  = useScrollShadow();
-  const pathname  = usePathname();
+  const scrolled = useScrollShadow();
+  const pathname = usePathname();
 
   return (
-    <header className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
+    <header className={`${styles.header} ${scrolled ? styles.scrolled : ""}`}>
       <div className={`container ${styles.navContainer}`}>
-
-        {/* Logo */}
-        <Link href="/home" className={styles.logo}>
+        <Link href="/" className={styles.logo}>
           <div className={styles.logoIcon}>
-            <i className="fa-solid fa-leaf" />
+            <img src="/images/logo.webp" alt="EcoCanje Logo" />
           </div>
-          <span>ECO CANJE</span>
+
+          <span className={styles.logoName}>ECO CANJE</span>
         </Link>
 
-        {/* Nav links */}
         <nav className={styles.navbar}>
-          {NAV_LINKS.map(({ label, href }) =>
-            href ? (
-              <Link
-                key={label}
-                href={href}
-                className={pathname === href ? styles.active : ''}
-              >
-                {label}
-              </Link>
-            ) : (
-              <a key={label} href="#">{label}</a>
-            )
-          )}
+          <Link href="/" className={pathname === "/" ? styles.active : ""}>
+            Inicio
+          </Link>
+
+          <Link href="#">Donaciones</Link>
+
+          <Link href="#">Publicar</Link>
+
+          <Link
+            href="/benefits"
+            className={pathname === "/benefits" ? styles.active : ""}
+          >
+            Beneficios
+          </Link>
+
+          <Link
+            href="/community"
+            className={pathname === "/community" ? styles.active : ""}
+          >
+            Comunidad
+          </Link>
+
+          <Link
+            href="/blog"
+            className={pathname === "/blog" ? styles.active : ""}
+          >
+            Blog
+          </Link>
+
+          <Link
+            href="/contact"
+            className={pathname === "/contact" ? styles.active : ""}
+          >
+            Contacto
+          </Link>
         </nav>
 
-        {/* Actions */}
         <div className={styles.navActions}>
-          <a href="#" className={styles.loginBtn}>Iniciar sesión</a>
-          <a href="#" className={styles.registerBtn}>Registrarse</a>
-        </div>
+          <Link href="/login" className={styles.loginBtn}>
+            Iniciar sesión
+          </Link>
 
+          <Link href="/register" className={styles.registerBtn}>
+            Registrarse
+          </Link>
+        </div>
       </div>
     </header>
   );

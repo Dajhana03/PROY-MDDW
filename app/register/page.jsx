@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { registerUser } from "../authService";
+import { registerUser } from "../../src/app/authService";
 import { useRouter } from "next/navigation";
 import styles from "./register.module.css";
 
@@ -19,7 +19,7 @@ function RegisterPage() {
   const [birthDate, setBirthDate] = useState("");
   const [city, setCity] = useState("");
   const [userType, setUserType] = useState("");
-  const [ageError, setAgeError] = useState("");  
+  const [ageError, setAgeError] = useState("");
 
   const [loading, setLoading] = useState(false);
 
@@ -50,7 +50,8 @@ function RegisterPage() {
     const age = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
     const dayDiff = today.getDate() - birth.getDate();
-    const realAge = monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? age - 1 : age;
+    const realAge =
+      monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? age - 1 : age;
 
     if (realAge < 18) {
       setAgeError("Solo mayores de edad pueden registrarse en ECO CANJE.");
@@ -88,7 +89,9 @@ function RegisterPage() {
 
         {/* STEPS */}
         <div className={styles.steps}>
-          <div className={step === 1 ? styles["step-active"] : styles["step-done"]}>
+          <div
+            className={step === 1 ? styles["step-active"] : styles["step-done"]}
+          >
             <span>1</span>
             <p>Datos Básicos</p>
           </div>
@@ -100,17 +103,24 @@ function RegisterPage() {
         </div>
 
         <div className={styles["form-container"]}>
-
           {/* ── PASO 1 ── */}
           {step === 1 && (
             <>
               <button className={styles["social-btn"]} type="button">
-                <img src="/svg/google.svg" alt="Google" className={styles["social-icon"]} />
+                <img
+                  src="/svg/google.svg"
+                  alt="Google"
+                  className={styles["social-icon"]}
+                />
                 Registrarse con Google
               </button>
 
               <button className={styles["social-btn"]} type="button">
-                <img src="/svg/facebook.svg" alt="Facebook" className={styles["social-icon"]} />
+                <img
+                  src="/svg/facebook.svg"
+                  alt="Facebook"
+                  className={styles["social-icon"]}
+                />
                 Registrarse con Facebook
               </button>
 
@@ -123,16 +133,36 @@ function RegisterPage() {
                   <div className={styles["input-group"]}>
                     <label>Nombre</label>
                     <div className={styles["input-wrapper"]}>
-                      <img src="/svg/user.svg" alt="" className={styles["input-icon"]} />
-                      <input value={firstName} onChange={(e) => setFirstName(e.target.value)} type="text" required placeholder="Juan" />
+                      <img
+                        src="/svg/user.svg"
+                        alt=""
+                        className={styles["input-icon"]}
+                      />
+                      <input
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        type="text"
+                        required
+                        placeholder="Juan"
+                      />
                     </div>
                   </div>
 
                   <div className={styles["input-group"]}>
                     <label>Apellido</label>
                     <div className={styles["input-wrapper"]}>
-                      <img src="/svg/user.svg" alt="" className={styles["input-icon"]} />
-                      <input value={lastName} onChange={(e) => setLastName(e.target.value)} type="text" required placeholder="Pérez" />
+                      <img
+                        src="/svg/user.svg"
+                        alt=""
+                        className={styles["input-icon"]}
+                      />
+                      <input
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        type="text"
+                        required
+                        placeholder="Pérez"
+                      />
                     </div>
                   </div>
                 </div>
@@ -140,16 +170,36 @@ function RegisterPage() {
                 <div className={styles["input-group"]}>
                   <label>Correo Electrónico</label>
                   <div className={styles["input-wrapper"]}>
-                    <img src="/svg/email.svg" alt="" className={styles["input-icon"]} />
-                    <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="tu@email.com" />
+                    <img
+                      src="/svg/email.svg"
+                      alt=""
+                      className={styles["input-icon"]}
+                    />
+                    <input
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      type="email"
+                      required
+                      placeholder="tu@email.com"
+                    />
                   </div>
                 </div>
 
                 <div className={styles["input-group"]}>
                   <label>Contraseña</label>
                   <div className={styles["input-wrapper"]}>
-                    <img src="/svg/lock.svg" alt="" className={styles["input-icon"]} />
-                    <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required placeholder="••••••••" />
+                    <img
+                      src="/svg/lock.svg"
+                      alt=""
+                      className={styles["input-icon"]}
+                    />
+                    <input
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      type="password"
+                      required
+                      placeholder="••••••••"
+                    />
                   </div>
                   <p className={styles["password-info"]}>Mínimo 8 caracteres</p>
                 </div>
@@ -173,15 +223,29 @@ function RegisterPage() {
                 <div className={styles["input-group"]}>
                   <label>Teléfono</label>
                   <div className={styles["input-wrapper"]}>
-                    <img src="/svg/phone.svg" alt="" className={styles["input-icon"]} />
-                    <input value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" required placeholder="+51 999 000 000" />
+                    <img
+                      src="/svg/phone.svg"
+                      alt=""
+                      className={styles["input-icon"]}
+                    />
+                    <input
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      type="tel"
+                      required
+                      placeholder="+51 999 000 000"
+                    />
                   </div>
                 </div>
 
                 <div className={styles["input-group"]}>
                   <label>Fecha de nacimiento</label>
                   <div className={styles["input-wrapper"]}>
-                    <img src="/svg/date.svg" alt="" className={styles["input-icon"]} />
+                    <img
+                      src="/svg/date.svg"
+                      alt=""
+                      className={styles["input-icon"]}
+                    />
                     <input
                       value={birthDate}
                       onChange={(e) => {
@@ -190,26 +254,47 @@ function RegisterPage() {
                       }}
                       type="date"
                       required
-                      max={new Date(new Date().setFullYear(new Date().getFullYear() - 18))
-                        .toISOString().split("T")[0]}
+                      max={
+                        new Date(
+                          new Date().setFullYear(new Date().getFullYear() - 18),
+                        )
+                          .toISOString()
+                          .split("T")[0]
+                      }
                     />
                   </div>
-                  {ageError && <p className={styles["age-error"]}>{ageError}</p>}
+                  {ageError && (
+                    <p className={styles["age-error"]}>{ageError}</p>
+                  )}
                 </div>
               </div>
 
               <div className={styles["input-group"]}>
                 <label>Ciudad</label>
                 <div className={styles["input-wrapper"]}>
-                  <img src="/svg/place.svg" alt="" className={styles["input-icon"]} />
-                  <input value={city} onChange={(e) => setCity(e.target.value)} type="text" required placeholder="Lima" />
+                  <img
+                    src="/svg/place.svg"
+                    alt=""
+                    className={styles["input-icon"]}
+                  />
+                  <input
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    type="text"
+                    required
+                    placeholder="Lima"
+                  />
                 </div>
               </div>
 
               <div className={styles["input-group"]}>
                 <label>Tipo de usuario</label>
                 <div className={styles["input-wrapper"]}>
-                  <img src="/svg/user.svg" alt="" className={styles["input-icon"]} />
+                  <img
+                    src="/svg/user.svg"
+                    alt=""
+                    className={styles["input-icon"]}
+                  />
                   <select
                     value={userType}
                     onChange={(e) => setUserType(e.target.value)}
@@ -225,7 +310,11 @@ function RegisterPage() {
               </div>
 
               <div className={styles["btn-group"]}>
-                <button type="button" onClick={() => setStep(1)} className={styles["back-button"]}>
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className={styles["back-button"]}
+                >
                   ← Volver
                 </button>
 
@@ -234,12 +323,15 @@ function RegisterPage() {
                   disabled={loading}
                   className={`${styles["register-button"]}${loading ? ` ${styles.loading}` : ""}`}
                 >
-                  {loading ? <div className={styles.spinner} /> : <span>Crear cuenta</span>}
+                  {loading ? (
+                    <div className={styles.spinner} />
+                  ) : (
+                    <span>Crear cuenta</span>
+                  )}
                 </button>
               </div>
             </form>
           )}
-
         </div>
       </div>
     </div>

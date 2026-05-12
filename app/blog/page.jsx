@@ -3,13 +3,11 @@ import styles from "./blog.module.css";
 export default function Blog() {
   return (
     <div className={styles.container}>
-      <h1 className={styles.titulo}>
-        Blog ECO CANJE
-      </h1>
+      <h1 className={styles.titulo}>Blog ECO CANJE</h1>
 
       <p className={styles.subtexto}>
-        Artículos, consejos e historias sobre
-        sostenibilidad y solidaridad universitaria
+        Artículos, consejos e historias sobre sostenibilidad y solidaridad
+        universitaria
       </p>
 
       <div className={styles.layout}>
@@ -20,8 +18,8 @@ export default function Blog() {
 
           <div className={styles.heroCard}>
             <img
-              src="/hero.jpg"
-              alt=""
+              src="/images/bucket.webp"
+              alt="bucket"
               className={styles.heroImage}
             />
 
@@ -34,15 +32,11 @@ export default function Blog() {
                 <span>Innovación</span>
               </div>
 
-              <h2>
-                El Futuro de la Sostenibilidad
-                Universitaria
-              </h2>
+              <h2>El Futuro de la Sostenibilidad Universitaria</h2>
 
               <p>
-                Cómo las nuevas generaciones están
-                revolucionando el reciclaje y las
-                donaciones en los campus...
+                Cómo las nuevas generaciones están revolucionando el reciclaje y
+                las donaciones en los campus...
               </p>
 
               <div className={styles.heroMeta}>
@@ -57,7 +51,7 @@ export default function Blog() {
 
           <div className={styles.postsGrid}>
             <div className={styles.card}>
-              <img src="/images/4.jpg" alt="" />
+              <img src="/images/recyclingTools.webp" alt="recycling tools" />
 
               <div className={styles.cardContent}>
                 <div className={styles.smallTags}>
@@ -65,14 +59,10 @@ export default function Blog() {
                   <span>Reciclaje</span>
                 </div>
 
-                <h3>
-                  10 Consejos para Maximizar tu
-                  Impacto Ecológico
-                </h3>
+                <h3>10 Consejos para Maximizar tu Impacto Ecológico</h3>
 
                 <p>
-                  Pequeñas acciones que generan
-                  grandes cambios en tu día a día
+                  Pequeñas acciones que generan grandes cambios en tu día a día
                   universitario...
                 </p>
 
@@ -91,7 +81,7 @@ export default function Blog() {
             </div>
 
             <div className={styles.card}>
-              <img src="/images/1.jpg" alt="" />
+              <img src="/images/donations.webp" alt="donations" />
 
               <div className={styles.cardContent}>
                 <div className={styles.smallTags}>
@@ -99,14 +89,10 @@ export default function Blog() {
                   <span>Comunidad</span>
                 </div>
 
-                <h3>
-                  Cómo Organizar una Campaña de
-                  Donación Exitosa
-                </h3>
+                <h3>Cómo Organizar una Campaña de Donación Exitosa</h3>
 
                 <p>
-                  Guía paso a paso para crear eventos
-                  que realmente marquen la
+                  Guía paso a paso para crear eventos que realmente marquen la
                   diferencia...
                 </p>
 
@@ -125,7 +111,7 @@ export default function Blog() {
             </div>
 
             <div className={styles.card}>
-              <img src="/images/2.jpg" alt="" />
+              <img src="/images/socialWork.webp" alt="social Work" />
 
               <div className={styles.cardContent}>
                 <div className={styles.smallTags}>
@@ -133,14 +119,10 @@ export default function Blog() {
                   <span>Datos</span>
                 </div>
 
-                <h3>
-                  El Impacto Real: Números que
-                  Inspiran
-                </h3>
+                <h3>El Impacto Real: Números que Inspiran</h3>
 
                 <p>
-                  Estadísticas sobre cómo ECO CANJE
-                  ha transformado la comunidad
+                  Estadísticas sobre cómo ECO CANJE ha transformado la comunidad
                   universitaria...
                 </p>
 
@@ -159,20 +141,18 @@ export default function Blog() {
             </div>
 
             <div className={styles.card}>
-              <img src="/images/3.jpg" alt="" />
+              <img src="/images/trash.webp" alt="trash" />
 
               <div className={styles.cardContent}>
                 <div className={styles.smallTags}>
                   <span>Economía Circular</span>
                 </div>
 
-                <h3>
-                  Economía Circular en el Campus
-                </h3>
+                <h3>Economía Circular en el Campus</h3>
 
                 <p>
-                  Cómo dar nueva vida a objetos y
-                  reducir residuos en tu universidad...
+                  Cómo dar nueva vida a objetos y reducir residuos en tu
+                  universidad...
                 </p>
 
                 <div className={styles.cardMeta}>
@@ -197,10 +177,7 @@ export default function Blog() {
           <div className={styles.sideCard}>
             <h3>Buscar Artículos</h3>
 
-            <input 
-              type="text" 
-              placeholder="Buscar..."
-            />
+            <input type="text" placeholder="Buscar..." />
           </div>
 
           <div className={styles.sideCard}>
@@ -209,7 +186,6 @@ export default function Blog() {
             <div className={styles.category}>
               <span>Sostenibilidad</span>
               <span>(45)</span>
-              
             </div>
 
             <div className={styles.category}>
@@ -240,15 +216,9 @@ export default function Blog() {
           <div className={styles.newsletter}>
             <h3>Newsletter Semanal</h3>
 
-            <p>
-              Recibe los mejores artículos
-              directamente en tu correo
-            </p>
+            <p>Recibe los mejores artículos directamente en tu correo</p>
 
-            <input
-              type="email"
-              placeholder="tu@email.com"
-            />
+            <input type="email" placeholder="tu@email.com" />
 
             <button>Suscribirme</button>
           </div>

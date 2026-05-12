@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { loginUser } from "../authService";
+import { loginUser } from "../../src/app/authService";
 import styles from "../login/login.module.css";
 
 function Login() {
@@ -22,21 +22,27 @@ function Login() {
 
   return (
     <main className={styles.page}>
-
       <h1 className={styles.headline}>Bienvenido</h1>
       <p className={styles.subline}>
         Ingresa a tu cuenta para continuar donando y acumulando puntos
       </p>
 
       <div className={styles.card}>
-
         <button type="button" className={styles.socialBtn}>
-          <img src="/svg/google.svg" alt="Google" className={styles.socialIcon} />
+          <img
+            src="/svg/google.svg"
+            alt="Google"
+            className={styles.socialIcon}
+          />
           Continuar con Google
         </button>
 
         <button type="button" className={styles.socialBtn}>
-          <img src="/svg/facebook.svg" alt="Facebook" className={styles.socialIcon} />
+          <img
+            src="/svg/facebook.svg"
+            alt="Facebook"
+            className={styles.socialIcon}
+          />
           Continuar con Facebook
         </button>
 
@@ -99,9 +105,7 @@ function Login() {
         </p>
       </div>
 
-      <p className={styles.ssl}>
-        Conexión segura con encriptación SSL
-      </p>
+      <p className={styles.ssl}>Conexión segura con encriptación SSL</p>
     </main>
   );
 }

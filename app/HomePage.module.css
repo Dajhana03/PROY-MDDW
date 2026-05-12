@@ -31,7 +31,7 @@
 }
 
 .heroContent h1 {
-  font-family: 'Manrope', sans-serif;
+  font-family: "Manrope", sans-serif;
   font-size: 4rem;
   line-height: 1.1;
   font-weight: 800;
@@ -60,7 +60,7 @@
 .heroImage {
   border-radius: 30px;
   overflow: hidden;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.10);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.1);
   border: 10px solid rgba(255, 255, 255, 0.85);
   transform: rotate(-1deg);
 }
@@ -112,7 +112,7 @@
 }
 
 .infoCard h3 {
-  font-family: 'Manrope', sans-serif;
+  font-family: "Manrope", sans-serif;
   font-size: 1.1rem;
   margin-bottom: 10px;
 }
@@ -142,7 +142,7 @@
 }
 
 .gamificationContent h2 {
-  font-family: 'Manrope', sans-serif;
+  font-family: "Manrope", sans-serif;
   font-size: 2.2rem;
   color: var(--primary-dark);
   margin-bottom: 18px;
@@ -242,7 +242,7 @@
 }
 
 .statsGrid :global(.stat-item) h2 {
-  font-family: 'Manrope', sans-serif;
+  font-family: "Manrope", sans-serif;
   font-size: 3rem;
   margin-bottom: 8px;
 }
@@ -311,6 +311,17 @@
   gap: 16px;
 }
 
+.titleHome {
+  background: linear-gradient(to right, #13b87c, #78c531);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.starHome {
+  width: 24px;
+  height: 24px;
+}
 /* ── Responsive ── */
 @media (max-width: 992px) {
   .heroContainer,
