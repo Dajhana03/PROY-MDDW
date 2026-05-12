@@ -1,0 +1,343 @@
+.page {
+  margin: 0 auto;
+  padding: 40px;
+  background-color: #eef5ef;
+  font-family: Arial, Helvetica, sans-serif;
+  max-width: 1200px;
+}
+
+/* TITULO */
+.h1 {
+  text-align: center;
+  color: #0ea56b;
+  font-size: 58px;
+  margin-bottom: 15px;
+}
+
+.subtexto {
+  text-align: center;
+  font-size: 22px;
+  color: #5f6b66;
+  margin-bottom: 60px;
+}
+
+/* LAYOUT PRINCIPAL */
+.topSection {
+  display: flex;
+  gap: 40px;
+  align-items: stretch;
+  margin-bottom: 40px;
+}
+
+.rightSide {
+  width: 460px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* FORMULARIO */
+.formulario {
+  flex: 1;
+  background-color: white;
+  padding: 32px;
+  border-radius: 22px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  min-height: 760px;
+}
+
+.formulario h2 {
+  font-size: 22px;
+  color: #111827;
+  margin-bottom: 28px;
+  font-weight: 700;
+}
+
+.filaInputs {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.inputGrupo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.inputCompleto {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+.formulario label {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.formulario input,
+.formulario select,
+.formulario textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 15px 18px;
+  border-radius: 14px;
+  border: 1px solid #b7e3d0;
+  font-size: 15px;
+  background-color: white;
+  outline: none;
+  transition: 0.3s;
+  color: black;
+}
+
+.formulario input:focus,
+.formulario select:focus,
+.formulario textarea:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 4px rgba(16,185,129,0.12);
+}
+
+.formulario textarea {
+  min-height: 170px;
+  resize: none;
+}
+
+.formulario input::placeholder,
+.formulario textarea::placeholder {
+  color: #9ca3af;
+}
+
+.btnVerde {
+  width: 100%;
+  margin-top: 8px;
+  background: linear-gradient(135deg, #0ea56b, #10c48b);
+  border: none;
+  color: white;
+  padding: 16px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btnVerde:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(16,185,129,0.25);
+}
+
+/* INFORMACION */
+.infoContacto {
+  background-color: white;
+  padding: 24px;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.infoContacto label {
+  display: block;
+  font-size: 18px;
+  margin-bottom: 20px;
+  color: black;
+  font-weight: bold;
+}
+
+.infoContacto div {
+  border: 1px solid #b8e2cf;
+  padding: 20px;
+  border-radius: 18px;
+  margin-bottom: 16px;
+  transition: 0.3s;
+}
+
+.Email {
+  background-color: #f3faf7;
+}
+
+.telefono {
+  background-color: #eef9f5;
+}
+
+.Ubicacion {
+  background-color: #f3f8e8;
+}
+
+.infoContacto div:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.infoContacto h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: black;
+}
+
+.txt {
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.text {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* CHAT */
+.chatBox {
+  background: linear-gradient(135deg, #0ea56b, #10c48b);
+  padding: 24px;
+  border-radius: 24px;
+  color: white;
+  box-shadow: 0 10px 30px rgba(16,185,129,0.25);
+}
+
+.chatBox h2 {
+  font-size: 18px;
+  margin-bottom: 18px;
+}
+
+.chatBox p {
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.chatBox button {
+  width: 100%;
+  margin-top: 20px;
+  background-color: white;
+  color: #0ea56b;
+  border: none;
+  padding: 14px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.chatBox button:hover {
+  transform: scale(1.02);
+}
+
+/* HORARIO */
+.horario {
+  background-color: white;
+  padding: 24px;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  width: 620px;
+}
+
+.horario h3 {
+  font-size: 23px;
+  margin-bottom: 20px;
+  color: black;
+}
+
+.horarioSpan {          /* ← reemplaza el selector "span" global */
+  color: #6b7280;
+}
+
+.horario div {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+.horario div:last-child {
+  border-bottom: none;
+}
+
+/* FAQ */
+.faq {
+  margin-top: 20px;
+  background-color: white;
+  padding: 35px;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.faq h2 {
+  color: black;
+  font-size: 38px;
+}
+
+.faqGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 30px;
+}
+
+.faqCard {
+  background-color: #f8fffb;
+  border: 1px solid #b8e2cf;
+  border-radius: 18px;
+  padding: 28px;
+  transition: 0.3s;
+}
+
+.faqCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.faqCard h3 {
+  color: #0ea56b;
+  font-size: 20px;
+}
+
+.faqCard p {
+  color: #181b22b3;
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1100px) {
+  .topSection {
+    flex-direction: column;
+  }
+  .rightSide {
+    width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .faqGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 20px;
+  }
+  .h1 {
+    font-size: 42px;
+  }
+  .subtexto {
+    font-size: 18px;
+  }
+  .filaInputs {
+    flex-direction: column;
+  }
+  .formulario,
+  .infoContacto,
+  .chatBox,
+  .horario,
+  .faq {
+    padding: 25px;
+  }
+  .horario div {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
