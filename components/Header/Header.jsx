@@ -27,7 +27,12 @@ export default function Header() {
 
           <Link href="#">Donaciones</Link>
 
-          <Link href="#">Publicar</Link>
+          <Link
+            href="/publish"
+            className={pathname === "/publish" ? styles.active : ""}
+          >
+            Publicar
+          </Link>
 
           <Link
             href="/benefits"
