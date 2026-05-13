@@ -25,7 +25,9 @@ export default function Header() {
             Inicio
           </Link>
 
-          <Link href="#">Donaciones</Link>
+          <Link href="/donations" className={pathname === "/donations" ? styles.active : ""}>
+            Donaciones
+          </Link>
 
           <Link
             href="/publish"
