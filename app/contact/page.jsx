@@ -1,9 +1,49 @@
-import styles from "./contacto.module.css";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+import styles from "./contacto.module.css";
+import { sendContactMessage } from "./contactService";
+
+export default function ContactPage() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("ST");
+  const [message, setMessage] = useState("");
+
+  const handleContact = async (e) => {
+    e.preventDefault();
+
+    if (!firstName || !lastName || !email || !message) {
+      alert("Por favor, completa todos los campos obligatorios");
+      return;
+    }
+
+    console.log("Intentando enviar mensaje de: ", email);
+
+    const result = await sendContactMessage(
+      firstName,
+      lastName,
+      email,
+      subject,
+      message,
+    );
+
+    if (result.success) {
+      alert("¡Mensaje enviado con éxito!");
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+      setSubject("ST");
+      setMessage("");
+    } else {
+      console.log("Error al enviar: ", result.error);
+      alert("Hubo un error al enviar el mensaje.");
+    }
+  };
+
   return (
     <div className={styles.page}>
-
       <h1 className={styles.h1}>Contacto y soporte</h1>
 
       <p className={styles.subtexto}>
@@ -11,61 +51,89 @@ export default function Home() {
       </p>
 
       <div className={styles.topSection}>
-
         {/* FORMULARIO */}
-        <div className={styles.formulario}>
+        <form onSubmit={handleContact} className={styles.formulario}>
           <h2>Envíanos un Mensaje</h2>
 
           <div className={styles.filaInputs}>
             <div className={styles.inputGrupo}>
               <label>Nombre</label>
-              <input type="text" placeholder="Tu nombre" />
+              <input
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                type="text"
+                id="firstName"
+                name="FirstName"
+                placeholder="Tu nombre"
+                required
+              />
             </div>
             <div className={styles.inputGrupo}>
               <label>Apellido</label>
-              <input type="text" placeholder="Tu apellido" />
+              <input
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                type="text"
+                id="lastName"
+                name="LastName"
+                placeholder="Tu apellido"
+                required
+              />
             </div>
           </div>
 
           <div className={styles.inputCompleto}>
             <label htmlFor="email">Correo Electrónico</label>
-            <input type="email" id="email" name="Email" placeholder="tu@email.com" />
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+              id="email"
+              name="Email"
+              placeholder="tu@email.com"
+              required
+            />
           </div>
 
           <div className={styles.inputCompleto}>
-            <label htmlFor="paises">Asunto</label>
-            <select name="paises" id="paises">
-              <option value="ST">
-                Soporte Técnico
-              </option>
+            <label htmlFor="subject">Asunto</label>
+            <select
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              name="subject"
+              id="subject"
+            >
+              <option value="ST">Soporte Técnico</option>
 
-              <option value="PD">
-                Pregunta sobre donaciones
-              </option>
+              <option value="PD">Pregunta sobre donaciones</option>
 
-              <option value="ar">
-                Problemas con puntos
-              </option>
+              <option value="PP">Problemas con puntos</option>
 
-              <option value="Sug">
-                Sugerencia
-              </option>
+              <option value="Sug">Sugerencia</option>
 
               <option value="Otro">Otro</option>
             </select>
           </div>
 
           <div className={styles.inputCompleto}>
-            <label htmlFor="Area">Mensaje</label>
-            <textarea name="txtArea" id="Area" placeholder="Cuéntanos en qué podemos ayudarte..."></textarea>
+            <label htmlFor="message">Mensaje</label>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              id="message"
+              name="message"
+              placeholder="Cuéntanos en qué podemos ayudarte..."
+              required
+            ></textarea>
           </div>
 
-          <button className={styles.btnVerde}>Enviar Mensaje</button>
-        </div>
+          <button type="submit" className={styles.btnVerde}>
+            Enviar Mensaje
+          </button>
+        </form>
 
         {/* COLUMNA DERECHA */}
         <div className={styles.rightSide}>
-
           {/* INFO CONTACTO */}
           <div className={styles.infoContacto}>
             <label>Información de contacto</label>
@@ -93,8 +161,7 @@ export default function Home() {
           <div className={styles.chatBox}>
             <h2>Chat en vivo</h2>
             <p>
-              ¿Necesitas ayuda inmediata? Nuestro equipo
-              está
+              ¿Necesitas ayuda inmediata? Nuestro equipo está
               <br />
               disponible para ayudarte en tiempo real.
             </p>
@@ -130,17 +197,26 @@ export default function Home() {
         <div className={styles.faqGrid}>
           <div className={styles.faqCard}>
             <h3>¿Cómo puedo registrarme en ECO CANJE?</h3>
-            <p>Haz clic en el botón 'Registrarse' en el menú superior y completa el formulario en 2 simples pasos.</p>
+            <p>
+              Haz clic en el botón 'Registrarse' en el menú superior y completa
+              el formulario en 2 simples pasos.
+            </p>
           </div>
 
           <div className={styles.faqCard}>
             <h3>¿Cómo funcionan los puntos?</h3>
-            <p>Cada donación te otorga puntos que puedes canjear por beneficios exclusivos.</p>
+            <p>
+              Cada donación te otorga puntos que puedes canjear por beneficios
+              exclusivos.
+            </p>
           </div>
 
           <div className={styles.faqCard}>
             <h3>¿Qué tipo de artículos puedo donar?</h3>
-            <p>Aceptamos libros, ropa, muebles, tecnología y materiales reciclables.</p>
+            <p>
+              Aceptamos libros, ropa, muebles, tecnología y materiales
+              reciclables.
+            </p>
           </div>
 
           <div className={styles.faqCard}>
@@ -149,7 +225,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
     </div>
   );
 }
