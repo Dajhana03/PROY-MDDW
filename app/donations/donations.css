@@ -1,11 +1,11 @@
-.container {
+.containerDonations {
   display: flex;
   justify-content: center;
   align-items: center;    
   height: 100vh;          
 }
 
-.title {
+.titleDonations {
   color: green;     
   font-size: 20px;  
 }
