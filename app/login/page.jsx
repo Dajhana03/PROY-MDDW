@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { loginUser } from "../../src/app/authService";
+import { loginUser } from "../authService";
 import styles from "../login/login.module.css";
 
 function Login() {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { registerUser } from "../../src/app/authService";
+import { registerUser } from "../authService";
 import { useRouter } from "next/navigation";
 import styles from "./register.module.css";
 
