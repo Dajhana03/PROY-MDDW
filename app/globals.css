@@ -170,3 +170,29 @@ button {
   font-size: 0.88rem;
   color: var(--text-medium);
 }
+
+/* === Publish page globals === */
+:root {
+  --green-primary: #10b981;
+  --green-dark: #059669;
+  --green-lime: #84cc16;
+  --green-forest: #047857;
+  --green-light: #ecfccb;
+  --green-bg: #f4fbf7;
+  --green-border: #d1fae5;
+  --green-pale: #d9f99d;
+  --font-main: inherit;
+  --font-display: inherit;
+  --text-mid: #6b7280;
+  --transition: 0.2s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
