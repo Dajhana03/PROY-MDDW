@@ -18,7 +18,7 @@ export default function Blog() {
 
           <div className={styles.heroCard}>
             <img
-              src="/images/bucket.webp"
+              src="/images/donations.webp"
               alt="bucket"
               className={styles.heroImage}
             />
@@ -32,7 +32,7 @@ export default function Blog() {
                 <span>Innovación</span>
               </div>
 
-              <h2>El Futuro de la Sostenibilidad Universitaria</h2>
+              <h2 >El Futuro de la Sostenibilidad Universitaria</h2>
 
               <p>
                 Cómo las nuevas generaciones están revolucionando el reciclaje y

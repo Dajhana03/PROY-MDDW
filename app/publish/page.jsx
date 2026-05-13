@@ -1,6 +1,6 @@
 "use client";
 
-import "./publish.css";
+import "./publish.module.css";
 import { useEffect, useRef, useState } from "react";
 
 const typeOptions = [
