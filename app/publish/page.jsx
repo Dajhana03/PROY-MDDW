@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import styles from "./publish.module.css";
-import { db, storage } from "../../firebase/dataDonations.js";
+import { db, storage } from "../../firebase/client.js";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
