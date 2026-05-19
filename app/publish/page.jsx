@@ -161,9 +161,18 @@ export default function PublishPage() {
           <button
             type="button"
             className={styles.btnPublish}
-            onClick={() =>
-              setToast("🎉 Publicado correctamente")
-            }
+           onClick={async () => {
+  try {
+    await addDoc(collection(db, "donations"), {
+      type,
+      title,
+      description,
+    });
+    setToast("🎉 Publicado correctamente");
+  } catch (e) {
+    console.error(e);
+  }
+}}
           >
             Publicar
           </button>
