@@ -1,8 +1,7 @@
-// src/firebase/dataDonations.js
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage"; // ← AGREGAR
 
-// Reutiliza las variables de entorno que ya pusiste en tu .env.local
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -12,8 +11,7 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-// Inicialización segura para que Next.js no duplique la app en el build
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Exportas TU instancia de Firestore lista para usar
 export const db = getFirestore(app);
+export const storage = getStorage(app); // ← AGREGAR

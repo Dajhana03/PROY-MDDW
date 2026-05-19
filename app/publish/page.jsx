@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import styles from "./publish.module.css";
-import { db } from "../../firebase/dataDonations.js";
-import { collection, addDoc } from "firebase/firestore";
+import { db, storage } from "../../firebase/dataDonations.js";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const typeOptions = [
   { label: "Artículos", value: "articulos" },
