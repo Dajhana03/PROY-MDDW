@@ -1,0 +1,198 @@
+@import "tailwindcss";
+
+:root {
+  --primary: #19c37d;
+  --primary-dark: #13a868;
+  --primary-light: #eefdf5;
+  --secondary-green: #daf5e7;
+  --background: #f7fcf9;
+  --foreground: #171717;
+  --white: #ffffff;
+  --text-dark: #24332d;
+  --text-medium: #6f8478;
+  --text-light: #9eb0a7;
+  --border: #e7f2eb;
+  --shadow-sm: 0 4px 14px rgba(16, 66, 40, 0.04);
+  --shadow-md: 0 12px 30px rgba(16, 66, 40, 0.07);
+  --shadow-lg: 0 24px 60px rgba(16, 66, 40, 0.1);
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 26px;
+  --transition: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--white);
+  color: var(--text-dark);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+img {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+button {
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-family: "Inter", sans-serif;
+}
+
+/* ── Layout ── */
+.container {
+  width: min(1180px, 92%);
+  margin: auto;
+}
+
+.section-spacing {
+  padding: 90px 0;
+}
+
+/* ── Section title ── */
+.section-title {
+  text-align: center;
+  margin-bottom: 55px;
+}
+
+.section-title h1,
+.section-title h2 {
+  font-family: "Manrope", sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--primary-dark);
+  margin-bottom: 10px;
+  letter-spacing: -1px;
+}
+
+.section-title p {
+  font-size: 0.95rem;
+  color: var(--text-medium);
+}
+
+/* ── Buttons ── */
+.primary-btn,
+.secondary-btn {
+  padding: 14px 26px;
+  border-radius: 14px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  transition: var(--transition);
+  display: inline-block;
+  cursor: pointer;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #1fd681, #17b86f);
+  color: white;
+  box-shadow: 0 12px 24px rgba(25, 195, 125, 0.22);
+  border: none;
+}
+
+.primary-btn:hover {
+  transform: translateY(-3px);
+}
+
+.secondary-btn {
+  background: white;
+  border: 1px solid #dcece2;
+  color: var(--primary-dark);
+}
+
+.secondary-btn:hover {
+  background: #f2fbf5;
+}
+
+.small-btn {
+  padding: 12px 22px;
+}
+
+/* ── Reveal animation ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease;
+}
+
+.reveal.show-reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Feature item (global, used in HomePage) ── */
+.feature-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.feature-item h4 {
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.feature-item p {
+  font-size: 0.88rem;
+  color: var(--text-medium);
+}
+
+/* === Publish page globals === */
+:root {
+  --green-primary: #10b981;
+  --green-dark: #059669;
+  --green-lime: #84cc16;
+  --green-forest: #047857;
+  --green-light: #ecfccb;
+  --green-bg: #f4fbf7;
+  --green-border: #d1fae5;
+  --green-pale: #d9f99d;
+  --font-main: inherit;
+  --font-display: inherit;
+  --text-mid: #6b7280;
+  --transition: 0.2s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
