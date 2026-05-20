@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useReveal } from "../hooks/useReveal";
 import { useCounter } from "../hooks/useCounter";
 import styles from "./HomePage.module.css";
@@ -98,6 +99,11 @@ function HomePage() {
   const pageRef = useReveal();
   const statsRef = useCounter();
 
+  const router = useRouter();
+  const isGuest = true;
+  const handleRestrictedAccess = () => {
+    alert("Inicia sesión o crea una cuenta para acceder a esta función.");
+  };
   return (
     <div ref={pageRef}>
       {/* ── HERO ── */}
@@ -115,12 +121,22 @@ function HomePage() {
               reciclaje y solidaridad.
             </p>
             <div className={styles.heroButtons}>
-              <a href="#" className="primary-btn">
+              <button
+                onClick={() => router.push("/register")}
+                className="primary-btn"
+              >
                 Comenzar Ahora
-              </a>
-              <a href="#" className="secondary-btn">
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  window.scrollTo(0, 0);
+                  router.push("/donations");
+                }}
+                className="secondary-btn"
+              >
                 Ver Donaciones
-              </a>
+              </button>
             </div>
           </div>
 
@@ -191,9 +207,13 @@ function HomePage() {
               ))}
             </div>
 
-            <Link href="/benefits" className="primary-btn small-btn">
+            <button
+              type="button"
+              onClick={() => router.push("/benefits")}
+              className="primary-btn small-btn"
+            >
               Ver Beneficios
-            </Link>
+            </button>
           </div>
         </div>
       </section>
@@ -267,12 +287,25 @@ function HomePage() {
           </div>
 
           <div className={styles.centerButtons}>
-            <a href="#" className="primary-btn small-btn">
+            <button
+              onClick={() => router.push("/donations")}
+              className="primary-btn small-btn"
+            >
               Ver Todas las Donaciones
-            </a>
-            <a href="#" className="secondary-btn small-btn">
+            </button>
+            <button
+              onClick={() => {
+                if (isGuest) {
+                  handleRestrictedAccess();
+                  return;
+                }
+
+                router.push("/publish");
+              }}
+              className="secondary-btn small-btn"
+            >
               Publicar Donación
-            </a>
+            </button>
           </div>
         </div>
       </section>
