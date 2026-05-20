@@ -1,6 +1,8 @@
 :global(:root) {
   --green-primary: #10b981;
   --green-dark: #059669;
+  --green-soft: #ecfdf5;
+  --border: #d1fae5;
   --text-dark: #1f2937;
   --text-mid: #6b7280;
 }
@@ -32,22 +34,26 @@
 }
 
 .pageHeader h1 {
-  font-size: 2.2rem;
+  font-size: 2.3rem;
   color: var(--green-primary);
   margin-bottom: 8px;
+  font-weight: 800;
 }
 
 .pageHeader p {
   color: var(--text-mid);
+  font-size: 15px;
 }
 
 .formCard {
-  max-width: 700px;
+  max-width: 760px;
   margin: auto;
   background: white;
   border-radius: 24px;
   padding: 35px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+  box-shadow:
+    0 10px 40px rgba(0,0,0,0.08);
+  border: 1px solid #eef2f7;
 }
 
 .formGroup {
@@ -57,18 +63,21 @@
 .formLabel {
   display: block;
   margin-bottom: 10px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-dark);
+  font-size: 14px;
 }
 
 .formInput,
 .formTextarea {
   width: 100%;
-  border: 1px solid #d1d5db;
+  border: 1.5px solid #e5e7eb;
   border-radius: 14px;
   padding: 14px;
   font-size: 15px;
   outline: none;
+  transition: 0.25s;
+  background: white;
 }
 
 .formTextarea {
@@ -79,6 +88,8 @@
 .formInput:focus,
 .formTextarea:focus {
   border-color: var(--green-primary);
+  box-shadow:
+    0 0 0 4px rgba(16,185,129,.1);
 }
 
 .donationTypes {
@@ -88,17 +99,18 @@
 }
 
 .typeBtn {
-  border: 2px solid #d1fae5;
+  border: 2px solid var(--border);
   background: white;
   padding: 18px;
   border-radius: 18px;
   cursor: pointer;
   font-weight: 700;
   transition: 0.25s;
+  color: var(--text-dark);
 }
 
 .typeBtn:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
 }
 
 .active {
@@ -107,24 +119,48 @@
     var(--green-primary),
     var(--green-dark)
   );
+
   color: white;
   border-color: transparent;
 }
 
 .uploadZone {
-  border: 2px dashed #10b981;
+  border: 2px dashed #b7ebcf;
   padding: 30px;
   border-radius: 20px;
   text-align: center;
   cursor: pointer;
-  background: #f0fdf4;
+  background: #fafdfb;
+  transition: 0.25s;
+}
+
+.uploadZone:hover {
+  border-color: var(--green-primary);
+}
+
+.uploadIcon {
+  font-size: 32px;
+  color: var(--green-primary);
+  margin-bottom: 10px;
+}
+
+.uploadZone p {
+  color: var(--text-dark);
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.uploadZone span {
+  color: #9ca3af;
+  font-size: 13px;
 }
 
 .previewGrid {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   margin-top: 20px;
+  justify-content: center;
 }
 
 .previewImgWrap {
@@ -149,16 +185,22 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0,0,0,.6);
   color: white;
   cursor: pointer;
+}
+
+.rowGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
 .formActions {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
-  margin-top: 25px;
+  margin-top: 30px;
 }
 
 .btnDraft,
@@ -169,10 +211,12 @@
   font-weight: 700;
   cursor: pointer;
   transition: 0.25s;
+  font-size: 15px;
 }
 
 .btnDraft {
   background: #f3f4f6;
+  color: var(--text-dark);
 }
 
 .btnPublish {
@@ -181,12 +225,20 @@
     var(--green-primary),
     var(--green-dark)
   );
+
   color: white;
 }
 
 .btnPublish:hover,
 .btnDraft:hover {
   transform: translateY(-2px);
+}
+
+.bottomText {
+  margin-top: 18px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 13px;
 }
 
 .toast {
@@ -199,10 +251,15 @@
   padding: 14px 24px;
   border-radius: 999px;
   font-weight: 700;
+  z-index: 999;
 }
 
 @media (max-width: 768px) {
   .donationTypes {
+    grid-template-columns: 1fr;
+  }
+
+  .rowGrid {
     grid-template-columns: 1fr;
   }
 
@@ -211,6 +268,10 @@
   }
 
   .formCard {
-    padding: 25px 20px;
+    padding: 24px 18px;
+  }
+
+  .pageHeader h1 {
+    font-size: 1.8rem;
   }
 }
