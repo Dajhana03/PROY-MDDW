@@ -1,9 +1,385 @@
-import "./donations.css"; 
+"use client";
 
-export default function DonationsPage() {
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+
+import styles from "./donations.module.css";
+
+import { db } from "../../firebase/donations";
+
+import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+
+const IMPACT_BASE = {
+  donaciones: 0,
+  puntos: 0,
+  nivel: "Nuevo",
+};
+
+const TAG_LABELS = {
+  articulos: "Artículo",
+  reciclables: "Reciclable",
+  alimentos: "Alimento",
+};
+
+/* ============================================
+   DONATION CARD
+============================================ */
+function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
+  const { id, type, title, description, likes, liked, solicitado } = donation;
+
   return (
-    <div className="containerDonations">
-      <h1 className="titleDonations">Próximamente</h1>
+    <article className={styles.card}>
+      <div className={styles.cardHeader}>
+        <div className={styles.cardUser}>
+          <div className={styles.avatar}>{title?.charAt(0).toUpperCase()}</div>
+
+          <div className={styles.userInfo}>
+            <span className={styles.userName}>Usuario ECO</span>
+
+            <span className={styles.userTime}>Publicación reciente</span>
+          </div>
+        </div>
+
+        <span className={styles.ptsBadge}>+50 pts</span>
+      </div>
+
+      <div className={styles.cardBody}>
+        <span className={`${styles.cardTag} ${styles[`tag_${type}`]}`}>
+          {TAG_LABELS[type]}
+        </span>
+
+        <h2 className={styles.cardTitle}>{title}</h2>
+
+        <p className={styles.cardDesc}>{description}</p>
+      </div>
+
+      <div className={styles.cardFooter}>
+        <div className={styles.cardActions}>
+          <button
+            className={`${styles.actionBtn} ${liked ? styles.liked : ""}`}
+            onClick={() => onLike(id)}
+          >
+            ❤️ {likes || 0}
+          </button>
+
+          <button
+            className={styles.actionBtn}
+            onClick={() => onShare(donation)}
+          >
+            Compartir
+          </button>
+        </div>
+
+        <button
+          className={`${styles.btnSolicitar} ${
+            solicitado || isGuest ? styles.solicitado : ""
+          }`}
+          onClick={() => {
+            if (isGuest) {
+              alert("Debes iniciar sesión para solicitar donaciones");
+              return;
+            }
+
+            onSolicitar(donation);
+          }}
+          disabled={solicitado || isGuest}
+        >
+          {isGuest
+            ? "Inicia sesión"
+            : solicitado
+              ? "✓ Solicitado"
+              : "Solicitar"}
+        </button>
+      </div>
+    </article>
+  );
+}
+
+/* ============================================
+   MODAL
+============================================ */
+function SolicitarModal({ donation, onClose, onConfirm }) {
+  const textareaRef = useRef(null);
+
+  useEffect(() => {
+    if (donation) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [donation]);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+
+    document.addEventListener("keydown", onKey);
+
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  if (!donation) return null;
+
+  return (
+    <div
+      className={styles.overlay}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className={styles.modalCard}>
+        <div className={styles.modalHeader}>
+          <h2 className={styles.modalTitle}>Solicitar: {donation.title}</h2>
+
+          <button className={styles.closeBtn} onClick={onClose}>
+            ✕
+          </button>
+        </div>
+
+        <div className={styles.modalBody}>
+          <p className={styles.modalDesc}>{donation.description}</p>
+
+          <label className={styles.modalLabel}>Mensaje para el donante</label>
+
+          <textarea
+            ref={textareaRef}
+            className={styles.modalTextarea}
+            placeholder="Ej: Hola, me gustaría solicitar esta donación..."
+          />
+
+          <button
+            className={styles.confirmBtn}
+            onClick={() => {
+              onConfirm(donation.id);
+              onClose();
+            }}
+          >
+            Confirmar Solicitud
+          </button>
+        </div>
+      </div>
     </div>
+  );
+}
+
+/* ============================================
+   TOAST
+============================================ */
+function Toast({ message, onHide }) {
+  useEffect(() => {
+    if (!message) return;
+
+    const t = setTimeout(onHide, 3000);
+
+    return () => clearTimeout(t);
+  }, [message, onHide]);
+
+  return (
+    <div className={`${styles.toast} ${message ? styles.toastShow : ""}`}>
+      {message}
+    </div>
+  );
+}
+
+/* ============================================
+   PAGE PRINCIPAL
+============================================ */
+export default function DonacionesPage() {
+  const isGuest = true;
+  const [donations, setDonations] = useState([]);
+
+  const [currentFilter, setCurrentFilter] = useState("todas");
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [activeModal, setActiveModal] = useState(null);
+
+  const [toastMsg, setToastMsg] = useState("");
+
+  /* ============================================
+     FIREBASE REALTIME
+  ============================================ */
+  useEffect(() => {
+    const q = query(collection(db, "donations"), orderBy("createdAt", "desc"));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        liked: false,
+        solicitado: false,
+      }));
+
+      setDonations(data);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const showToast = useCallback((msg) => {
+    setToastMsg(msg);
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = searchQuery.toLowerCase();
+
+    return donations.filter((d) => {
+      const matchFilter = currentFilter === "todas" || d.type === currentFilter;
+
+      const matchSearch =
+        !q ||
+        d.title?.toLowerCase().includes(q) ||
+        d.description?.toLowerCase().includes(q);
+
+      return matchFilter && matchSearch;
+    });
+  }, [donations, currentFilter, searchQuery]);
+
+  const handleLike = useCallback((id) => {
+    setDonations((prev) =>
+      prev.map((d) =>
+        d.id === id
+          ? {
+              ...d,
+              liked: !d.liked,
+              likes: d.liked ? (d.likes || 0) - 1 : (d.likes || 0) + 1,
+            }
+          : d,
+      ),
+    );
+  }, []);
+
+  const handleShare = useCallback(
+    (donation) => {
+      if (navigator.share) {
+        navigator.share({
+          title: donation.title,
+          text: donation.description,
+          url: window.location.href,
+        });
+      } else {
+        navigator.clipboard
+          .writeText(window.location.href)
+          .then(() => showToast("🔗 Enlace copiado"));
+      }
+    },
+    [showToast],
+  );
+
+  const handleConfirmSolicitar = useCallback(
+    (id) => {
+      setDonations((prev) =>
+        prev.map((d) =>
+          d.id === id
+            ? {
+                ...d,
+                solicitado: true,
+              }
+            : d,
+        ),
+      );
+
+      showToast("🎉 Solicitud enviada");
+    },
+    [showToast],
+  );
+
+  return (
+    <main className={styles.mainBg}>
+      <div className={styles.layout}>
+        {/* SIDEBAR */}
+        <aside className={styles.sidebar}>
+          <div className={styles.searchBox}>
+            <input
+              type="text"
+              placeholder="Buscar donaciones..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          <div className={styles.filterCard}>
+            <div className={styles.filterTitle}>Filtrar por Tipo</div>
+
+            <div className={styles.filterOptions}>
+              {["Todas", "Articulos", "Reciclables", "Alimentos"].map((f) => (
+                <button
+                  key={f}
+                  className={`${styles.filterBtn} ${
+                    currentFilter === f ? styles.active : ""
+                  }`}
+                  onClick={() => setCurrentFilter(f)}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.impactCard}>
+            <div className={styles.impactHeader}>Tu Impacto</div>
+
+            <div className={styles.impactRows}>
+              <div className={styles.impactRow}>
+                <span className={styles.impactLabel}>Donaciones:</span>
+
+                <span className={styles.impactValue}>
+                  {IMPACT_BASE.donaciones}
+                </span>
+              </div>
+
+              <div className={styles.impactRow}>
+                <span className={styles.impactLabel}>Puntos:</span>
+
+                <span className={styles.impactValue}>{IMPACT_BASE.puntos}</span>
+              </div>
+
+              <div className={styles.impactRow}>
+                <span className={styles.impactLabel}>Nivel:</span>
+
+                <span className={styles.impactNivel}>{IMPACT_BASE.nivel}</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* FEED */}
+        <section className={styles.feed}>
+          <div className={styles.feedHeader}>
+            <h1>Feed de Donaciones</h1>
+
+            <p>Descubre y solicita donaciones de la comunidad universitaria</p>
+          </div>
+
+          {filtered.length === 0 ? (
+            <div className={styles.emptyState}>
+              <p>No hay donaciones publicadas.</p>
+            </div>
+          ) : (
+            <div className={styles.cardsContainer}>
+              {filtered.map((donation) => (
+                <DonationCard
+                  key={donation.id}
+                  donation={donation}
+                  onSolicitar={setActiveModal}
+                  onLike={handleLike}
+                  onShare={handleShare}
+                  isGuest={isGuest}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+
+      <SolicitarModal
+        donation={activeModal}
+        onClose={() => setActiveModal(null)}
+        onConfirm={handleConfirmSolicitar}
+      />
+
+      <Toast message={toastMsg} onHide={() => setToastMsg("")} />
+    </main>
   );
 }
