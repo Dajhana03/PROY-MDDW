@@ -367,3 +367,36 @@ width: 100%;
     font-size: 48px;
   }
 }
+
+.guestWarning {
+  margin-top: 18px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: fit-content;
+
+  margin-left: auto;
+  margin-right: auto;
+
+  background: linear-gradient(
+    135deg,
+    #ecfdf5,
+    #d1fae5
+  );
+
+  color: #065f46;
+
+  padding: 12px 20px;
+
+  border-radius: 999px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  border: 1px solid #a7f3d0;
+
+  box-shadow:
+    0 4px 14px rgba(16,185,129,0.08);
+}

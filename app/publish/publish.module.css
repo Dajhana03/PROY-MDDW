@@ -275,3 +275,55 @@
     font-size: 1.8rem;
   }
 }
+
+.guestWarning {
+  margin-top: 16px;
+  display: inline-block;
+
+  background: linear-gradient(
+    135deg,
+    #ecfdf5,
+    #d1fae5
+  );
+
+  color: #065f46;
+
+  padding: 12px 20px;
+
+  border-radius: 999px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  border: 1px solid #a7f3d0;
+
+  box-shadow:
+    0 4px 14px rgba(16,185,129,0.08);
+}
+
+.typeBtn:disabled,
+.btnDraft:disabled,
+.btnPublish:disabled,
+.formInput:disabled,
+.formTextarea:disabled,
+select:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.typeBtn:disabled:hover,
+.btnDraft:disabled:hover,
+.btnPublish:disabled:hover {
+  transform: none;
+}
+
+.uploadZone {
+  position: relative;
+}
+
+.uploadZone::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+

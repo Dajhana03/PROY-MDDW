@@ -49,6 +49,8 @@ export default function PublishPage() {
 
   const [toast, setToast] = useState("");
 
+  const isGuest = true;
+
   useEffect(() => {
     const draft = localStorage.getItem("draftDonation");
 
@@ -74,6 +76,10 @@ export default function PublishPage() {
   }, [toast]);
 
   const handleFiles = (files) => {
+    if (isGuest) {
+      setToast("🔒 Regístrate para subir imágenes");
+      return;
+    }
     const images = Array.from(files);
 
     images.forEach((file) => {
@@ -98,80 +104,72 @@ export default function PublishPage() {
     setUploadedFiles((prev) => prev.filter((img) => img.id !== id));
   };
 
- const handlePublish = async () => {
-
-  if (
-    !title.trim() ||
-    !description.trim() ||
-    !location.trim()
-  ) {
-    setToast("⚠️ Completa todos los campos");
-    return;
-  }
-
-  try {
-
-    setLoading(true);
-
-    const imageUrls = [];
-
-    for (const image of uploadedFiles) {
-
-      if (!image.file) continue;
-
-      const imageRef = ref(
-        storage,
-        `donations/${Date.now()}-${image.file.name}`
-      );
-
-      await uploadBytes(imageRef, image.file);
-
-      const downloadURL = await getDownloadURL(imageRef);
-
-      imageUrls.push(downloadURL);
+  const handlePublish = async () => {
+    if (isGuest) {
+      setToast("🔒 Regístrate para poder publicar donaciones");
+      return;
     }
 
-    await addDoc(collection(db, "donations"), {
+    if (!title.trim() || !description.trim() || !location.trim()) {
+      setToast("⚠️ Completa todos los campos");
+      return;
+    }
 
-      type,
-      title,
-      description,
-      location,
-      condition,
-      quantity: Number(quantity),
+    try {
+      setLoading(true);
 
-      images: imageUrls,
+      const imageUrls = [];
 
-      likes: 0,
-      comments: 0,
+      for (const image of uploadedFiles) {
+        if (!image.file) continue;
 
-      createdAt: serverTimestamp(),
+        const imageRef = ref(
+          storage,
+          `donations/${Date.now()}-${image.file.name}`,
+        );
 
-    });
+        await uploadBytes(imageRef, image.file);
 
-    setToast("🎉 Donación publicada correctamente");
+        const downloadURL = await getDownloadURL(imageRef);
 
-    setTitle("");
-    setDescription("");
-    setLocation("");
-    setCondition("Nuevo");
-    setQuantity(1);
-    setUploadedFiles([]);
-    setType("articulos");
+        imageUrls.push(downloadURL);
+      }
 
-    localStorage.removeItem("draftDonation");
+      await addDoc(collection(db, "donations"), {
+        type,
+        title,
+        description,
+        location,
+        condition,
+        quantity: Number(quantity),
 
-  } catch (error) {
+        images: imageUrls,
 
-    console.error("ERROR FIREBASE:", error);
+        likes: 0,
+        comments: 0,
 
-    setToast("Error al publicar");
+        createdAt: serverTimestamp(),
+      });
 
-  } finally {
+      setToast("🎉 Donación publicada correctamente");
 
-    setLoading(false);
-  }
-};
+      setTitle("");
+      setDescription("");
+      setLocation("");
+      setCondition("Nuevo");
+      setQuantity(1);
+      setUploadedFiles([]);
+      setType("articulos");
+
+      localStorage.removeItem("draftDonation");
+    } catch (error) {
+      console.error("ERROR FIREBASE:", error);
+
+      setToast("Error al publicar");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main className={styles.mainBg}>
@@ -179,6 +177,11 @@ export default function PublishPage() {
         <h1>Publicar Donación</h1>
 
         <p>Comparte lo que ya no usas y ayuda a quien lo necesita</p>
+        {isGuest && (
+          <div className={styles.guestWarning}>
+            ✨ Regístrate para publicar y compartir donaciones con la comunidad
+          </div>
+        )}
       </div>
 
       <div className={styles.formCard}>
@@ -190,6 +193,7 @@ export default function PublishPage() {
             {typeOptions.map((option) => (
               <button
                 key={option.value}
+                disabled={isGuest}
                 type="button"
                 onClick={() => setType(option.value)}
                 className={`${styles.typeBtn} ${
@@ -208,6 +212,7 @@ export default function PublishPage() {
 
           <input
             type="text"
+            disabled={isGuest}
             placeholder="Ej: Libros de programación"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -220,6 +225,7 @@ export default function PublishPage() {
           <label className={styles.formLabel}>Descripción</label>
 
           <textarea
+            disabled={isGuest}
             placeholder="Describe el estado, cantidad y cualquier detalle importante..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -248,6 +254,7 @@ export default function PublishPage() {
             <input
               ref={fileInputRef}
               hidden
+              disabled={isGuest}
               multiple
               type="file"
               accept="image/*"
@@ -293,6 +300,7 @@ export default function PublishPage() {
 
             <input
               type="number"
+              disabled={isGuest}
               min="1"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
@@ -304,6 +312,7 @@ export default function PublishPage() {
             <label className={styles.formLabel}>Condición</label>
 
             <select
+              disabled={isGuest}
               value={condition}
               onChange={(e) => setCondition(e.target.value)}
               className={styles.formInput}
@@ -326,6 +335,7 @@ export default function PublishPage() {
 
           <input
             type="text"
+            disabled={isGuest}
             placeholder="Campus, edificio o punto de encuentro"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
@@ -337,6 +347,7 @@ export default function PublishPage() {
         <div className={styles.formActions}>
           <button
             type="button"
+            disabled={isGuest}
             className={styles.btnDraft}
             onClick={() => {
               localStorage.setItem(
@@ -351,15 +362,16 @@ export default function PublishPage() {
               setToast("Borrador guardado");
             }}
           >
-            Guardar Borrador
+            {isGuest ? "Registrarse" : "Guardar Borrador"}
           </button>
 
           <button
             type="button"
+            disabled={isGuest}
             className={styles.btnPublish}
             onClick={handlePublish}
           >
-            Publicar Donación
+            {isGuest ? "Crear Cuenta" : "Publicar Donación"}
           </button>
         </div>
 

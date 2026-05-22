@@ -85,10 +85,16 @@ export default function BenefitsPage() {
   const pageRef = useReveal();
   const statsRef = useCounter();
   const [btnStates, setBtnStates] = useState({});
+  const isGuest = true;
 
   const handleCanjear = (id) => {
+    if (isGuest) return;
+
     setBtnStates((s) => ({ ...s, [id]: "canjeado" }));
-    setTimeout(() => setBtnStates((s) => ({ ...s, [id]: "" })), 2200);
+
+    setTimeout(() => {
+      setBtnStates((s) => ({ ...s, [id]: "" }));
+    }, 2200);
   };
 
   return (
@@ -102,6 +108,12 @@ export default function BenefitsPage() {
               Canjea tus puntos por increíbles beneficios y descuentos
               exclusivos
             </p>
+            {isGuest && (
+              <div className={styles.guestWarning}>
+                ✨ Regístrate para desbloquear beneficios y recompensas
+                exclusivas
+              </div>
+            )}
           </div>
 
           {/* Stats bar */}
@@ -135,14 +147,18 @@ export default function BenefitsPage() {
                     <span>{pts}</span>
                     <button
                       className={`${styles.canjearBtn} ${btnStates[id] === "canjeado" ? styles.canjeado : ""}`}
-                      disabled={disabled || btnStates[id] === "canjeado"}
+                      disabled={
+                        isGuest || disabled || btnStates[id] === "canjeado"
+                      }
                       onClick={() => !disabled && handleCanjear(id)}
                     >
-                      {disabled
-                        ? "Bloqueado"
-                        : btnStates[id] === "canjeado"
-                          ? "✓ Canjeado"
-                          : "Canjear"}
+                      {isGuest
+                        ? "Registrarse"
+                        : disabled
+                          ? "Bloqueado"
+                          : btnStates[id] === "canjeado"
+                            ? "✓ Canjeado"
+                            : "Canjear"}
                     </button>
                   </div>
                 </div>

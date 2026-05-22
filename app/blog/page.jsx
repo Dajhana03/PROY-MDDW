@@ -1,6 +1,7 @@
 import styles from "./blog.module.css";
 
 export default function Blog() {
+  const isGuest = true;
   return (
     <div className={styles.container}>
       <h1 className={styles.titulo}>Blog ECO CANJE</h1>
@@ -9,6 +10,11 @@ export default function Blog() {
         Artículos, consejos e historias sobre sostenibilidad y solidaridad
         universitaria
       </p>
+      {isGuest && (
+        <div className={styles.guestWarning}>
+          ✨ Regístrate para comentar y acceder a contenido exclusivo
+        </div>
+      )}
 
       <div className={styles.layout}>
         {/* LEFT */}
@@ -32,7 +38,7 @@ export default function Blog() {
                 <span>Innovación</span>
               </div>
 
-              <h2 >El Futuro de la Sostenibilidad Universitaria</h2>
+              <h2>El Futuro de la Sostenibilidad Universitaria</h2>
 
               <p>
                 Cómo las nuevas generaciones están revolucionando el reciclaje y
@@ -75,7 +81,7 @@ export default function Blog() {
                 <div className={styles.bottomRow}>
                   <span>23 comentarios</span>
 
-                  <a href="#">Leer más →</a>
+                  <a href="#">{isGuest ? "Registrarse →" : "Leer más →"}</a>
                 </div>
               </div>
             </div>
@@ -105,7 +111,7 @@ export default function Blog() {
                 <div className={styles.bottomRow}>
                   <span>18 comentarios</span>
 
-                  <a href="#">Leer más →</a>
+                  <a href="#">{isGuest ? "Registrarse →" : "Leer más →"}</a>
                 </div>
               </div>
             </div>
@@ -177,7 +183,7 @@ export default function Blog() {
           <div className={styles.sideCard}>
             <h3>Buscar Artículos</h3>
 
-            <input type="text" placeholder="Buscar..." />
+            <input type="text" placeholder="Buscar..." disabled={isGuest} />
           </div>
 
           <div className={styles.sideCard}>
@@ -218,9 +224,11 @@ export default function Blog() {
 
             <p>Recibe los mejores artículos directamente en tu correo</p>
 
-            <input type="email" placeholder="tu@email.com" />
+            <input type="email" placeholder="tu@email.com" disabled={isGuest} />
 
-            <button>Suscribirme</button>
+            <button disabled={isGuest}>
+              {isGuest ? "Registrarse" : "Suscribirme"}
+            </button>
           </div>
 
           <div className={styles.sideCard}>
