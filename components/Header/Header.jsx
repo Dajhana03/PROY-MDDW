@@ -1,78 +1,107 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "../../firebase/auth"; // 👈 AJUSTA si tu ruta cambia
+
 import styles from "./Header.module.css";
 import { useScrollShadow } from "../../hooks/useScrollShadow";
 
 export default function Header() {
   const scrolled = useScrollShadow();
   const pathname = usePathname();
+  const router = useRouter();
+
+  const [user, setUser] = useState(null);
+  const [open, setOpen] = useState(false);
+
+  // 👤 detectar usuario logueado
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    setUser(null);
+    setOpen(false);
+    router.push("/");
+  };
+
+  const getInitial = (name) => {
+    if (!name) return "U";
+    return name.charAt(0).toUpperCase();
+  };
 
   return (
     <header className={`${styles.header} ${scrolled ? styles.scrolled : ""}`}>
       <div className={`container ${styles.navContainer}`}>
+        
+        {/* LOGO */}
         <Link href="/" className={styles.logo}>
           <div className={styles.logoIcon}>
             <img src="/images/logo.webp" alt="EcoCanje Logo" />
           </div>
-
           <span className={styles.logoName}>ECO CANJE</span>
         </Link>
 
+        {/* NAV */}
         <nav className={styles.navbar}>
-          <Link href="/" className={pathname === "/" ? styles.active : ""}>
-            Inicio
-          </Link>
-
-          <Link href="/donations" className={pathname === "/donations" ? styles.active : ""}>
-            Donaciones
-          </Link>
-
-          <Link
-            href="/publish"
-            className={pathname === "/publish" ? styles.active : ""}
-          >
-            Publicar
-          </Link>
-
-          <Link
-            href="/benefits"
-            className={pathname === "/benefits" ? styles.active : ""}
-          >
-            Beneficios
-          </Link>
-
-          <Link
-            href="/community"
-            className={pathname === "/community" ? styles.active : ""}
-          >
-            Comunidad
-          </Link>
-
-          <Link
-            href="/blog"
-            className={pathname === "/blog" ? styles.active : ""}
-          >
-            Blog
-          </Link>
-
-          <Link
-            href="/contact"
-            className={pathname === "/contact" ? styles.active : ""}
-          >
-            Contacto
-          </Link>
+          <Link href="/" className={pathname === "/" ? styles.active : ""}>Inicio</Link>
+          <Link href="/donations" className={pathname === "/donations" ? styles.active : ""}>Donaciones</Link>
+          <Link href="/publish" className={pathname === "/publish" ? styles.active : ""}>Publicar</Link>
+          <Link href="/benefits" className={pathname === "/benefits" ? styles.active : ""}>Beneficios</Link>
+          <Link href="/community" className={pathname === "/community" ? styles.active : ""}>Comunidad</Link>
+          <Link href="/blog" className={pathname === "/blog" ? styles.active : ""}>Blog</Link>
+          <Link href="/contact" className={pathname === "/contact" ? styles.active : ""}>Contacto</Link>
         </nav>
 
+        {/* 🔥 AUTH SECTION */}
         <div className={styles.navActions}>
-          <Link href="/login" className={styles.loginBtn}>
-            Iniciar sesión
-          </Link>
 
-          <Link href="/register" className={styles.registerBtn}>
-            Registrarse
-          </Link>
+          {!user ? (
+            <>
+              <Link href="/login" className={styles.loginBtn}>
+                Iniciar sesión
+              </Link>
+
+              <Link href="/register" className={styles.registerBtn}>
+                Registrarse
+              </Link>
+            </>
+          ) : (
+            <div className={styles.userBox}>
+              
+              {/* Avatar + nombre */}
+              <div
+                className={styles.userBtn}
+                onClick={() => setOpen(!open)}
+              >
+                <div className={styles.avatar}>
+                  {getInitial(user.displayName || user.email)}
+                </div>
+
+                <span className={styles.userName}>
+                  {user.displayName || "Usuario"}
+                </span>
+              </div>
+
+              {/* Dropdown */}
+              {open && (
+                <div className={styles.dropdown}>
+                  <button onClick={handleLogout}>
+                    Cerrar sesión
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
         </div>
       </div>
     </header>
