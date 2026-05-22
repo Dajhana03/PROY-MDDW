@@ -182,15 +182,17 @@
 }
 
 .feedHeader h1 {
-  font-size: 2rem;
-  font-weight: 800;
-  color: #10b981;
-  margin-bottom: 6px;
+  font-size: 64px;
+  font-weight: 500;
+  color: #0ea56b;
+  margin-bottom: 10px;
 }
 
 .feedHeader p {
-  color: #4b5563;
-  font-size: 0.95rem;
+  color: #5f6b66;
+  font-size: 22px;
+  margin-top: 10px;
+  font-weight: 400;
 }
 
 .cardsContainer {

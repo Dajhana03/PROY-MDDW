@@ -296,13 +296,13 @@ export default function CommunityPage() {
                           disabled={isGuest}
                           className={`${styles.likeBtn} ${
                             story.liked ? styles.liked : ""
-                          }`}
+                          }`} 
                           onClick={() => !isGuest && toggleStoryLike(story.id)}
                         >
                           ❤️ {story.likes}
                         </button>
 
-                        <button className={styles.readMore}>
+                        <button disabled={isGuest} className={styles.readMore}>
                           {isGuest ? "Registrarse →" : "Leer más →"}
                         </button>
                       </div>
