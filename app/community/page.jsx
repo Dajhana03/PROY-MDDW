@@ -106,6 +106,7 @@ export default function CommunityPage() {
   const [stories, setStories] = useState(initialStories);
 
   const [showModal, setShowModal] = useState(false);
+  const isGuest = true;
   const [newTitle, setNewTitle] = useState("");
 
   const toggleForumLike = (id) => {
@@ -117,8 +118,8 @@ export default function CommunityPage() {
               liked: !f.liked,
               likes: f.liked ? f.likes - 1 : f.likes + 1,
             }
-          : f
-      )
+          : f,
+      ),
     );
   };
 
@@ -131,8 +132,8 @@ export default function CommunityPage() {
               liked: !s.liked,
               likes: s.liked ? s.likes - 1 : s.likes + 1,
             }
-          : s
-      )
+          : s,
+      ),
     );
   };
 
@@ -145,8 +146,8 @@ export default function CommunityPage() {
               attending: !e.attending,
               people: e.attending ? e.people - 1 : e.people + 1,
             }
-          : e
-      )
+          : e,
+      ),
     );
   };
 
@@ -182,6 +183,12 @@ export default function CommunityPage() {
             Conecta, comparte y aprende con estudiantes comprometidos con el
             cambio
           </p>
+          {isGuest && (
+            <div className={styles.guestWarning}>
+              ✨ Regístrate para participar en la comunidad y acceder a
+              funciones exclusivas
+            </div>
+          )}
         </section>
 
         {/* STATS */}
@@ -218,15 +225,14 @@ export default function CommunityPage() {
             {/* FORO */}
             <div className={styles.card}>
               <div className={styles.cardHeader}>
-                <h2 className={styles.cardTitle}>
-                  💬 Foro de Discusión
-                </h2>
+                <h2 className={styles.cardTitle}> Foro de Discusión</h2>
 
                 <button
                   className={styles.btnPrimary}
-                  onClick={() => setShowModal(true)}
+                  disabled={isGuest}
+                  onClick={() => !isGuest && setShowModal(true)}
                 >
-                  ＋ Nueva Discusión
+                  {isGuest ? "Registrarse" : "Nueva Discusión"}
                 </button>
               </div>
 
@@ -248,10 +254,11 @@ export default function CommunityPage() {
                         </span>
 
                         <button
+                          disabled={isGuest}
                           className={`${styles.likeBtn} ${
                             forum.liked ? styles.liked : ""
                           }`}
-                          onClick={() => toggleForumLike(forum.id)}
+                          onClick={() => !isGuest && toggleForumLike(forum.id)}
                         >
                           ❤️ {forum.likes}
                         </button>
@@ -264,9 +271,7 @@ export default function CommunityPage() {
 
             {/* HISTORIAS */}
             <div className={styles.card}>
-              <h2 className={styles.cardTitle}>
-                ⭐ Historias Inspiradoras
-              </h2>
+              <h2 className={styles.cardTitle}> Historias Inspiradoras</h2>
 
               <div className={styles.storiesGrid}>
                 {stories.map((story) => (
@@ -288,16 +293,17 @@ export default function CommunityPage() {
 
                       <div className={styles.storyFooter}>
                         <button
+                          disabled={isGuest}
                           className={`${styles.likeBtn} ${
                             story.liked ? styles.liked : ""
-                          }`}
-                          onClick={() => toggleStoryLike(story.id)}
+                          }`} 
+                          onClick={() => !isGuest && toggleStoryLike(story.id)}
                         >
                           ❤️ {story.likes}
                         </button>
 
-                        <button className={styles.readMore}>
-                          Leer más →
+                        <button disabled={isGuest} className={styles.readMore}>
+                          {isGuest ? "Registrarse →" : "Leer más →"}
                         </button>
                       </div>
                     </div>
@@ -311,9 +317,7 @@ export default function CommunityPage() {
           <aside className={styles.sidebar}>
             {/* EVENTOS */}
             <div className={styles.card}>
-              <h2 className={styles.cardTitle}>
-                📅 Próximos Eventos
-              </h2>
+              <h2 className={styles.cardTitle}> Próximos Eventos</h2>
 
               {events.map((event) => (
                 <div className={styles.eventItem} key={event.id}>
@@ -327,14 +331,17 @@ export default function CommunityPage() {
                   </div>
 
                   <button
+                    disabled={isGuest}
                     className={
-                      event.attending
-                        ? styles.btnAttending
-                        : styles.btnPrimary
+                      event.attending ? styles.btnAttending : styles.btnPrimary
                     }
-                    onClick={() => toggleAttend(event.id)}
+                    onClick={() => !isGuest && toggleAttend(event.id)}
                   >
-                    {event.attending ? "✔ Asistiendo" : "Asistir"}
+                    {isGuest
+                      ? "Registrarse"
+                      : event.attending
+                        ? "Asistiendo"
+                        : "Asistir"}
                   </button>
                 </div>
               ))}
@@ -342,9 +349,7 @@ export default function CommunityPage() {
 
             {/* CONTRIBUTORS */}
             <div className={styles.contributorsCard}>
-              <h2 className={styles.contributorsTitle}>
-                📈 Top Contributors
-              </h2>
+              <h2 className={styles.contributorsTitle}> Top Contributors</h2>
 
               <div className={styles.contributorsList}>
                 {contributors.map((c) => (
@@ -370,15 +375,12 @@ export default function CommunityPage() {
       </main>
 
       {/* MODAL */}
-      {showModal && (
+      {showModal && !isGuest && (
         <div
           className={styles.modalOverlay}
           onClick={() => setShowModal(false)}
         >
-          <div
-            className={styles.modal}
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h2>Nueva Discusión</h2>
 

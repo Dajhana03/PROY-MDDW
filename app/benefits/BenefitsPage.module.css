@@ -1,7 +1,20 @@
 .benefitsHero {
   padding: 60px 0 30px;
 }
+.benefitsHero h1 {
+  text-align: center;
+  font-size: 64px;
+  color: #0ea56b;
+  font-weight: 500;
+}
 
+.benefitsHero p {
+  text-align: center;
+  color: #5f6b66;
+  font-size: 22px;
+  margin-top: 10px;
+  font-weight: 400;
+}
 /* ── Stats bar ── */
 .benefitStats {
   background: linear-gradient(135deg, #16b76f, #27d682);
@@ -12,7 +25,7 @@
   margin-top: 40px;
   margin-bottom: 40px;
   color: white;
-  box-shadow: 0 20px 50px rgba(25, 195, 125, 0.20);
+  box-shadow: 0 20px 50px rgba(25, 195, 125, 0.2);
 }
 
 .benefitStatCard {
@@ -27,12 +40,16 @@
 
 .benefitStatCard h2 {
   font-size: 2.2rem;
+  font-weight: 500;
   margin-bottom: 6px;
+  color: white;
 }
 
 .benefitStatCard p {
   opacity: 0.9;
   font-size: 0.9rem;
+  font-weight: 400;
+  color: white;
 }
 
 /* ── Benefit cards ── */
@@ -71,15 +88,28 @@
   font-size: 1.1rem;
 }
 
-.iconGreen  { background: #7bcf2e; }
-.iconTeal   { background: #17b76f; }
-.iconDark   { background: #1f7f5f; }
-.iconOrange { background: #ff9a3d; }
-.iconPink   { background: #ef4f9b; }
-.iconGold   { background: #f3c84f; }
+.iconGreen {
+  background: #7bcf2e;
+}
+.iconTeal {
+  background: #17b76f;
+}
+.iconDark {
+  background: #1f7f5f;
+}
+.iconOrange {
+  background: #ff9a3d;
+}
+.iconPink {
+  background: #ef4f9b;
+}
+.iconGold {
+  background: #f3c84f;
+}
 
 .benefitCard h3 {
   font-size: 1rem;
+  font-weight: 500;
   margin-bottom: 10px;
 }
 
@@ -88,6 +118,7 @@
   font-size: 0.88rem;
   line-height: 1.7;
   margin-bottom: 22px;
+  font-weight: 400;
 }
 
 .benefitFooter {
@@ -98,7 +129,7 @@
 
 .benefitFooter span {
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--text-medium);
 }
 
@@ -108,7 +139,7 @@
   padding: 10px 18px;
   border-radius: 10px;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 500;
   border: none;
   cursor: pointer;
   transition: var(--transition);
@@ -155,12 +186,14 @@
 }
 
 .stepCard h3 {
+  font-weight: 500;
   margin-bottom: 10px;
 }
 
 .stepCard p {
   color: var(--text-medium);
   font-size: 0.9rem;
+  font-weight: 400;
 }
 
 .stepNumber {
@@ -174,7 +207,7 @@
   justify-content: center;
   color: white;
   font-size: 1.2rem;
-  font-weight: 800;
+  font-weight: 500;
   box-shadow: 0 14px 30px rgba(25, 195, 125, 0.25);
 }
 
@@ -199,4 +232,27 @@
   .benefitStats {
     grid-template-columns: 1fr;
   }
+}
+
+.guestWarning {
+  margin-top: 16px;
+  display: inline-block;
+
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+
+  color: #5f6b66;
+
+  padding: 12px 20px;
+
+  border-radius: 999px;
+
+  font-size: 14px;
+
+  font-weight: 400; 
+
+  letter-spacing: 0.1px; 
+
+  border: 1px solid #a7f3d0;
+
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.08);
 }

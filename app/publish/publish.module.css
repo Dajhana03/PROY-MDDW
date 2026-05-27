@@ -30,19 +30,23 @@
 
 .pageHeader {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 15px;
+  padding-top: 10px;
 }
 
 .pageHeader h1 {
-  font-size: 2.3rem;
-  color: var(--green-primary);
-  margin-bottom: 8px;
-  font-weight: 800;
+  font-size: 64px;
+  font-weight: 500;
+  color: #0ea56b;
+  margin-bottom: 10px;
 }
 
 .pageHeader p {
-  color: var(--text-mid);
-  font-size: 15px;
+  text-align: center;
+  color: #5f6b66;
+  font-size: 22px;
+  margin-top: 10px;
+  font-weight: 400;
 }
 
 .formCard {
@@ -274,4 +278,67 @@
   .pageHeader h1 {
     font-size: 1.8rem;
   }
+}
+
+.guestWarning {
+  margin-top: 16px;
+  display: inline-block;
+
+  background: linear-gradient(
+    135deg,
+    #ecfdf5,
+    #d1fae5
+  );
+
+  color: #5f6b66;
+
+  padding: 12px 20px;
+
+  border-radius: 999px;
+
+  font-size: 14px;
+  font-weight: 400;
+
+  border: 1px solid #a7f3d0;
+
+  box-shadow:
+    0 4px 14px rgba(16,185,129,0.08);
+}
+
+.typeBtn:disabled,
+.btnDraft:disabled,
+.btnPublish:disabled,
+.formInput:disabled,
+.formTextarea:disabled,
+select:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.typeBtn:disabled:hover,
+.btnDraft:disabled:hover,
+.btnPublish:disabled:hover {
+  transform: none;
+}
+
+.uploadZone {
+  position: relative;
+}
+
+.uploadZone::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.heroTitle {
+  font-size: 64px;
+  font-weight: 500;
+  color: #0ea56b;
+}
+
+.heroSubtitle {
+  font-size: 22px;
+  font-weight: 400;
+  color: #5f6b66;
 }
