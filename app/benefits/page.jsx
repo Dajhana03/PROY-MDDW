@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 import { useReveal } from "../../hooks/useReveal";
 import { useCounter } from "../../hooks/useCounter";
-import styles from "./BenefitsPage.module.css";
+import styles from "./benefitsPage.module.css";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase/auth";
 const BENEFIT_STATS = [
   { icon: "fa-gift", value: "850", label: "Puntos Disponibles" },
   { icon: "fa-star", value: "12", label: "Beneficios Canjeados" },
-  { icon: "fa-wallet", value: "$2,500", label: "Ahorro Total" },
+  { icon: "fa-wallet", value: "s/2,500", label: "Ahorro Total" },
 ];
 
 const BENEFITS = [
@@ -120,7 +120,7 @@ export default function BenefitsPage() {
             </p>
             {isGuest && (
               <div className={styles.guestWarning}>
-                ✨ Regístrate para desbloquear beneficios y recompensas
+               Regístrate para desbloquear beneficios y recompensas
                 exclusivas
               </div>
             )}

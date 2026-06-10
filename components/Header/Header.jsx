@@ -106,12 +106,6 @@ export default function Header() {
             Comunidad
           </Link>
           <Link
-            href="/blog"
-            className={pathname === "/blog" ? styles.active : ""}
-          >
-            Blog
-          </Link>
-          <Link
             href="/contact"
             className={pathname === "/contact" ? styles.active : ""}
           >

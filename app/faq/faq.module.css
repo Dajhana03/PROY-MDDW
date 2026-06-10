@@ -1,0 +1,328 @@
+/* CONTENEDOR PRINCIPAL: Degradado uniforme en toda la pantalla */
+.pageContainer {
+  width: 100%;
+  min-height: calc(100vh - 64px);
+  background: linear-gradient(180deg, #f0fdf4 0%, #e8f5e9 100%);
+  padding: 60px 24px 80px 24px;
+  box-sizing: border-box;
+  text-align: center;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: #374151;
+}
+
+.contentWrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ENCABEZADO */
+.headerArea {
+  margin-bottom: 32px;
+}
+.iconCircle {
+  width: 56px;
+  height: 56px;
+  background-color: #059669;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px auto;
+}
+.topIconImg {
+  width: 26px;
+  height: 26px;
+  filter: brightness(0) invert(1);
+}
+.mainTitle {
+  font-size: 36px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px 0;
+}
+.mainSubtitle {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* BUSCADOR */
+.searchBox {
+  position: relative;
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto 24px auto;
+}
+.searchIcon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+}
+.searchBox input {
+  width: 100%;
+  padding: 14px 16px 14px 48px;
+  font-size: 15px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background-color: #ffffff;
+  color: #111827;
+  outline: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  box-sizing: border-box;
+  transition: all 0.2s;
+}
+.searchBox input:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+.resultBadge {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  font-weight: 600;
+  background-color: #dcfce7;
+  color: #15803d;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+/* TABS DE CATEGORÍAS */
+.tabsRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+.tabButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 500;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tabButton:hover {
+  border-color: #059669;
+  color: #059669;
+}
+.tabIcon {
+  width: 16px;
+  height: 16px;
+  filter: invert(30%) sepia(10%) saturate(200%) hue-rotate(180deg);
+}
+.tabButton:hover .tabIcon {
+  filter: invert(41%) sepia(61%) saturate(2359%) hue-rotate(137deg) brightness(96%) contrast(97%);
+}
+.tabActive {
+  background-color: #059669;
+  border-color: #059669;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+}
+.tabActive .tabIcon {
+  filter: brightness(0) invert(1) !important;
+}
+
+/* LISTA DE ACORDEONES */
+.faqList {
+  text-align: left;
+}
+.categoryTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  margin-top: 16px;
+}
+.miniIconCircle {
+  width: 32px;
+  height: 32px;
+  background-color: #e8f5e9;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.miniIcon {
+  width: 16px;
+  height: 16px;
+  filter: invert(41%) sepia(61%) saturate(2359%) hue-rotate(137deg) brightness(96%) contrast(97%);
+}
+.categoryTitleRow h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #059669;
+  margin: 0;
+}
+.countBadge {
+  font-size: 12px;
+  color: #6b7280;
+  background-color: rgba(0, 0, 0, 0.04);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+.accordionContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* CADA ITEM ACORDEÓN */
+.accordionCard {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+.cardOpen {
+  border-color: #059669;
+  box-shadow: 0 4px 15px rgba(5, 150, 105, 0.04);
+}
+.accordionHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.accordionHeader:hover {
+  background-color: #f0fdf4;
+}
+.questionText {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #1f2937;
+}
+.questionActive {
+  color: #059669;
+}
+.arrowIcon {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.2s;
+  filter: invert(41%) sepia(61%) saturate(2359%) hue-rotate(137deg) brightness(96%) contrast(97%);
+}
+.arrowRotate {
+  transform: rotate(180deg);
+}
+.accordionBody {
+  padding: 16px 20px 20px 20px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #4b5563;
+  border-top: 1px dashed #bbf7d0;
+  background-color: rgba(240, 253, 244, 0.3);
+}
+
+/* SIN RESULTADOS */
+.noResults {
+  padding: 40px 0;
+  font-size: 15px;
+  color: #6b7280;
+}
+.clearBtn {
+  background: none;
+  border: none;
+  color: #059669;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-top: 8px;
+}
+
+/* BANNER INFERIOR CTA */
+.ctaBanner {
+  background-color: #059669;
+  border-radius: 20px;
+  padding: 40px;
+  color: #ffffff;
+  margin-top: 56px;
+  box-shadow: 0 4px 25px rgba(5, 150, 105, 0.15);
+}
+.ctaIconWrap {
+  width: 48px;
+  height: 48px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px auto;
+}
+.ctaIcon {
+  width: 24px;
+  height: 24px;
+  filter: brightness(0) invert(1);
+}
+.ctaTitle {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+}
+.ctaSubtitle {
+  font-size: 14px;
+  max-width: 540px;
+  margin: 0 auto 24px auto;
+  opacity: 0.9;
+  line-height: 1.5;
+}
+.ctaButtonsGroup {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.btnPrimary {
+  background-color: #ffffff;
+  color: #059669;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 12px 24px;
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+.btnPrimary:hover {
+  background-color: #f0fdf4;
+}
+.btnSecondary {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 12px 24px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.2s;
+}
+.btnSecondary:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+@media (max-width: 640px) {
+  .ctaBanner {
+    padding: 24px;
+  }
+}

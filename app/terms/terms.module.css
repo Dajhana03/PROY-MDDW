@@ -1,0 +1,245 @@
+/* CONTENEDOR PRINCIPAL*/
+.pageContainer {
+  width: 100%;
+  min-height: calc(100vh - 64px); /* Resta la altura real de tu Header global */
+  background: linear-gradient(180deg, #f0fdf4 0%, #e8f5e9 100%);
+  padding: 60px 24px 80px 24px;
+  box-sizing: border-box;
+  text-align: center;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: #374151;
+}
+
+/* ENVOLTURA INTERNA*/
+.contentWrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ESCUDO SUPERIOR */
+.topShieldArea {
+  margin-bottom: 16px;
+}
+.shieldCircle {
+  width: 56px;
+  height: 56px;
+  background-color: #059669;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+.mainShieldIcon {
+  width: 26px;
+  height: 26px;
+  filter: brightness(0) invert(1);
+}
+
+/* TITULOS */
+.mainTitle {
+  font-size: 36px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px 0;
+}
+.mainSubtitle {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0 0 20px 0;
+}
+
+/* BADGE DE ACTUALIZACION */
+.updateBadge {
+  display: inline-block;
+  background-color: #dcfce7;
+  color: #15803d;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 auto 32px auto;
+}
+
+/* TARJETA BIENVENIDA */
+.welcomeCard {
+  background-color: #ffffff;
+  border: 1px solid #bbf7d0;
+  border-radius: 16px;
+  padding: 24px;
+  text-align: left;
+  line-height: 1.6;
+  font-size: 14.5px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
+}
+
+/* INDICE DE CONTENIDOS */
+.indexCard {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 28px;
+  text-align: left;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
+}
+.indexTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #059669;
+  margin: 0 0 20px 0;
+}
+.indexGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 24px;
+}
+.indexLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #059669;
+  transition: opacity 0.2s;
+}
+.indexLink:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+.indexIcon {
+  width: 16px;
+  height: 16px;
+  filter: invert(41%) sepia(61%) saturate(2359%) hue-rotate(137deg) brightness(96%) contrast(97%);
+}
+
+/* SECCIONES COMPONENTES (LAS 10 TARJETAS) */
+.sectionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+.sectionCard {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 32px;
+  text-align: left;
+  scroll-margin-top: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
+}
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.cardIconWrap {
+  width: 36px;
+  height: 36px;
+  background-color: #e8f5e9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cardIconImg {
+  width: 18px;
+  height: 18px;
+  filter: invert(41%) sepia(61%) saturate(2359%) hue-rotate(137deg) brightness(96%) contrast(97%);
+}
+.cardTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.cardParagraph {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #4b5563;
+  margin: 0;
+}
+
+/* BANNER DE CONTACTO INFERIOR */
+.ctaBanner {
+  background-color: #059669;
+  border-radius: 20px;
+  padding: 40px;
+  color: #ffffff;
+  text-align: center;
+  box-shadow: 0 4px 25px rgba(5, 150, 105, 0.15);
+}
+.ctaCheckIconWrap {
+  width: 48px;
+  height: 48px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px auto;
+}
+.ctaCheckIcon {
+  width: 24px;
+  height: 24px;
+  filter: brightness(0) invert(1);
+}
+.ctaTitle {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+}
+.ctaSubtitle {
+  font-size: 14px;
+  max-width: 540px;
+  margin: 0 auto 24px auto;
+  opacity: 0.9;
+  line-height: 1.5;
+}
+.ctaButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #ffffff;
+  color: #059669;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14.5px;
+  padding: 12px 28px;
+  border-radius: 10px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.ctaButton:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+.btnIcon {
+  width: 16px;
+  height: 16px;
+  filter: invert(41%) sepia(61%) saturate(2359%) hue-rotate(137deg) brightness(96%) contrast(97%);
+}
+
+/* RESPONSIVE */
+@media (max-width: 640px) {
+  .indexGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .ctaBanner {
+    padding: 24px;
+  }
+  .sectionCard {
+    padding: 20px;
+  }
+}

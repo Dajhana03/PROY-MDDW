@@ -45,15 +45,14 @@ export default function Footer() {
         <div className={styles.footerLinks}>
           <div>
             <h4>Enlaces</h4>
-            <a href="#">Donaciones</a>
-            <a href="#">Beneficios</a>
-            <a href="#">Comunidad</a>
+            <a href="/donations">Donaciones</a>
+            <a href="/benefits">Beneficios</a>
+            <a href="/community">Comunidad</a>
           </div>
           <div>
             <h4>Recursos</h4>
-            <a href="#">Blog</a>
-            <a href="#">Eventos</a>
-            <a href="#">FAQ</a>
+            <a href="/faq">FAQ</a>
+            <a href="/terms">Terminos y condiciones</a>
           </div>
         </div>
 
