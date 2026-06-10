@@ -175,10 +175,61 @@ export default function BenefitsPage() {
             <h2>Nuestros Socios Comerciales</h2>
           </div>
           <div className={styles.partnersGrid}>
-            {[1, 2, 3, 4].map((n) => (
-              <div key={n} className={styles.partnerCard} />
-            ))}
-          </div>
+  <div className={styles.partnerCard}>
+    <svg viewBox="0 0 24 24" fill="none" width="70" height="70">
+      <path
+        d="M12 2L15 8L22 9L17 14L18 22L12 19L6 22L7 14L2 9L9 8L12 2Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+    </svg>
+  </div>
+
+  <div className={styles.partnerCard}>
+    <svg viewBox="0 0 24 24" fill="none" width="70" height="70">
+      <path
+        d="M12 3L20 7V17L12 21L4 17V7L12 3Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+    </svg>
+  </div>
+
+  <div className={styles.partnerCard}>
+    <svg viewBox="0 0 24 24" fill="none" width="70" height="70">
+      <circle
+        cx="12"
+        cy="12"
+        r="8"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M8 12H16"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M12 8V16"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+    </svg>
+  </div>
+
+  <div className={styles.partnerCard}>
+    <svg viewBox="0 0 24 24" fill="none" width="70" height="70">
+      <path
+        d="M4 12L12 4L20 12L12 20L4 12Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+    </svg>
+  </div>
+</div>
         </div>
       </section>
 

@@ -70,8 +70,11 @@
 }
 
 .statCard svg {
-  margin-bottom: 10px;
+  width: 32px;
+  height: 32px;
   color: white;
+  margin: 0 auto 14px;
+  display: block;
 }
 
 .statCard h2 {
@@ -265,14 +268,18 @@
   transform: translateY(-4px);
   box-shadow: 0 12px 28px rgba(16, 185, 129, 0.15);
 }
+.storyCard:hover .storyImg {
+  transform: scale(1.05);
+}
 
 .storyImg {
   height: 220px;
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   position: relative;
+  transition: transform 0.4s ease;
 }
-
 .storyOverlay {
   position: absolute;
   inset: 0;
@@ -590,4 +597,21 @@
 .readMore:disabled:hover {
   transform: none;
   box-shadow: none;
+}
+.statIcon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.cardTitle svg,
+.contributorsTitle svg {
+  width: 20px;
+  height: 20px;
+}
+
+.cardTitle,
+.contributorsTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }

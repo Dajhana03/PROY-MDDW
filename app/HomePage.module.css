@@ -111,6 +111,12 @@
   font-size: 1rem;
 }
 
+.cardIcon svg {
+  width: 28px;
+  height: 28px;
+  color: white;
+}
+
 .infoCard h3 {
   font-family: "Manrope", sans-serif;
   font-size: 1.1rem;
@@ -157,8 +163,8 @@
 .featureList {
   display: flex;
   flex-direction: column;
-  gap: 22px;
-  margin-bottom: 34px;
+  gap: 12px;
+  margin-bottom: 28px;
 }
 
 .featureIcon {
@@ -367,4 +373,28 @@
   .heroContent h1 {
     font-size: 2.1rem;
   }
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1fd681, #17b76f);
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.avatar svg {
+  width: 22px;
+  height: 22px;
+}
+
+.donationTop svg {
+  width: 64px;
+  height: 64px;
+  stroke: #0f9f67;
 }
