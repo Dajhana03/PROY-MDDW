@@ -30,7 +30,7 @@ function RegisterPage() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    loading(true);
+    setLoading(true);
 
     if (!phone || !birthDate || !city || !userType) {
       alert("Completa todos los campos antes de enviar");
@@ -55,16 +55,31 @@ function RegisterPage() {
     }
 
     try {
-      const result = await registerUser(email, password, firstName, lastName);
+      const result = await registerUser({
+        email,
+        password,
+        firstName,
+        lastName,
+        phone,
+        birthDate,
+        city,
+        userType,
+      });
+
       if (result.success) {
         router.push("/");
       } else {
-        if (result.error.code === "auth/email-already-in-use") {
+        if (result.error?.code === "auth/email-already-in-use") {
           alert("El correo ya está registrado");
+        } else {
+          alert(
+            "Error en el registro: " +
+              (result.error?.message || "Inténtalo de nuevo"),
+          );
         }
       }
     } catch (error) {
-      console.log(error);
+      console.error("Error en el manejador de registro:", error);
     } finally {
       setLoading(false);
     }
@@ -188,7 +203,7 @@ function RegisterPage() {
                   <div className={styles["input-wrapper"]}>
                     <img
                       src="/svg/lock.svg"
-                      alt="Icono de celularIcono de contraseña"
+                      alt="Icono de contraseña"
                       className={styles["input-icon"]}
                     />
                     <input
@@ -242,7 +257,7 @@ function RegisterPage() {
                   <div className={styles["input-wrapper"]}>
                     <img
                       src="/svg/date.svg"
-                      alt="Icono de celular"
+                      alt="Icono de calendario"
                       className={styles["input-icon"]}
                     />
                     <input

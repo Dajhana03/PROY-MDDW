@@ -22,7 +22,16 @@ export const loginUser = async (email, password) => {
   }
 };
 
-export const registerUser = async (email, password, firstName, lastName) => {
+export const registerUser = async ({
+  email,
+  password,
+  firstName,
+  lastName,
+  phone,
+  birthDate,
+  city,
+  userType,
+}) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(
       auth,
@@ -41,10 +50,15 @@ export const registerUser = async (email, password, firstName, lastName) => {
       email,
       first_name: firstName,
       last_name: lastName,
+      phone: phone,
+      birth_date: birthDate,
+      city: city,
+      user_type: userType,
     });
 
     return { success: true };
   } catch (error) {
+    console.error("Error en registerUser:", error);
     return { success: false, error };
   }
 };
