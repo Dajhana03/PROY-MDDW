@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useReveal } from "../../hooks/useReveal";
 import { useCounter } from "../../hooks/useCounter";
-import styles from "./benefitsPage.module.css";
+import styles from "./benefits.module.css";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase/auth";
 const BENEFIT_STATS = [
