@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../firebase/auth";
 import { useReveal } from "../hooks/useReveal";
 import { useCounter } from "../hooks/useCounter";
 import styles from "./HomePage.module.css";
@@ -100,7 +103,16 @@ function HomePage() {
   const statsRef = useCounter();
 
   const router = useRouter();
-  const isGuest = true;
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
+  const isGuest = !user;
   const handleRestrictedAccess = () => {
     alert("Inicia sesión o crea una cuenta para acceder a esta función.");
   };
@@ -165,11 +177,104 @@ function HomePage() {
                 className={`info-card ${styles.infoCard} ${cls}`}
               >
                 <div className={styles.cardIcon}>
-                  <img
-                    src="/svg/recycling.svg"
-                    alt="recycling"
-                    className={styles.starHome}
-                  />
+                  {title === "Reciclables" && (
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M7 7L10 2L13 7"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M13 7H8"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M17 9L22 10L19 15"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M19 15L17 12"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M7 17L2 14L5 9"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M5 9L7 12"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  )}
+
+                  {title === "Artículos" && (
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M5 4H15C16.1 4 17 4.9 17 6V20H7C5.9 20 5 19.1 5 18V4Z"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M17 6H19C20.1 6 21 6.9 21 8V20H17"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M8 8H14"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  )}
+
+                  {title === "Alimentos" && (
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <rect
+                        x="7"
+                        y="5"
+                        width="10"
+                        height="14"
+                        rx="2"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M10 3V5"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M14 3V5"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M10 11H14"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  )}
                 </div>
                 <h3>{title}</h3>
                 <p>{desc}</p>
@@ -197,7 +302,72 @@ function HomePage() {
               {FEATURES.map(({ icon, title, desc }) => (
                 <div key={title} className="feature-item">
                   <div className={styles.featureIcon}>
-                    <i className={`fa-solid ${icon}`} />
+                    {title === "Recompensas Instantáneas" && (
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <path
+                          d="M4 10H20V20H4V10Z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M12 10V20"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                        <path
+                          d="M4 14H20"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                        <path
+                          d="M12 10C12 8 10.5 6.5 9 6.5C7.5 6.5 7 8 8 9C9 10 12 10 12 10Z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                        <path
+                          d="M12 10C12 8 13.5 6.5 15 6.5C16.5 6.5 17 8 16 9C15 10 12 10 12 10Z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                      </svg>
+                    )}
+
+                    {title === "Retos y Logros" && (
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <circle
+                          cx="12"
+                          cy="8"
+                          r="4"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                        <path
+                          d="M8 12L6 20L12 17L18 20L16 12"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+
+                    {title === "Impacto Medible" && (
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <path
+                          d="M5 19L19 5"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                        <path
+                          d="M12 5H19V12"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
                   </div>
                   <div>
                     <h4>{title}</h4>
@@ -235,7 +405,23 @@ function HomePage() {
                 className={`testimonial-card ${styles.testimonialCard} ${cls}`}
               >
                 <div className={styles.testimonialHeader}>
-                  <div className={styles.avatar} />
+                  <div className={styles.avatar}>
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M20 21C20 17.5 16.5 15 12 15C7.5 15 4 17.5 4 21"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <circle
+                        cx="12"
+                        cy="8"
+                        r="4"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      />
+                    </svg>
+                  </div>
                   <div>
                     <h4>{name}</h4>
                     <span>{role}</span>
@@ -275,7 +461,59 @@ function HomePage() {
                 className={`donation-card ${styles.donationCard} ${cls}`}
               >
                 <div className={styles.donationTop}>
-                  <i className={`fa-solid ${icon}`} />
+                  {title.includes("Libros") && (
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M6 4H18V20H6V4Z"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M9 8H15"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M9 12H15"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  )}
+
+                  {title.includes("Electrónicos") && (
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <rect
+                        x="7"
+                        y="3"
+                        width="10"
+                        height="18"
+                        rx="2"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M10 6H14"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <circle cx="12" cy="17" r="1" fill="currentColor" />
+                    </svg>
+                  )}
+
+                  {title.includes("Ropa") && (
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M9 4L12 6L15 4L19 8L16 10V20H8V10L5 8L9 4Z"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  )}
                 </div>
                 <div className={styles.donationBody}>
                   <h3>{title}</h3>

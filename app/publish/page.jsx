@@ -8,7 +8,9 @@ import { db, storage } from "../../firebase/donations";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../firebase/auth";
+import { useRouter } from "next/navigation";
 const typeOptions = [
   {
     label: " Artículos",
@@ -25,6 +27,21 @@ const typeOptions = [
 ];
 
 export default function PublishPage() {
+  const router = useRouter();
+
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+
+      if (!currentUser) {
+        router.push("/login");
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
   const [type, setType] = useState("articulos");
 
   const [title, setTitle] = useState("");
@@ -49,7 +66,7 @@ export default function PublishPage() {
 
   const [toast, setToast] = useState("");
 
-  const isGuest = true;
+  const isGuest = !user;
 
   useEffect(() => {
     const draft = localStorage.getItem("draftDonation");
