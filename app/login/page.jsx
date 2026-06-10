@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { auth } from "../../firebase/auth";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { loginUser } from "../authService";
@@ -14,19 +15,19 @@ export default function Login() {
   const [errorMsg, setErrorMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const router = useRouter();
+
   const handleGoogleLogin = async () => {
     setErrorMsg("");
     setIsLoading(true);
 
     try {
       const provider = new GoogleAuthProvider();
-
       provider.setCustomParameters({ prompt: "select_account" });
-
       const result = await signInWithPopup(auth, provider);
-
       const user = result.user;
       console.log("¡Usuario autenticado con éxito en Firebase!", user);
+      router.push("/");
     } catch (error) {
       console.error("Error en Google Sign-In con Firebase:", error);
       if (error.code === "auth/popup-closed-by-user") {
@@ -39,6 +40,8 @@ export default function Login() {
     }
   };
 
+  
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMsg("");
@@ -46,6 +49,7 @@ export default function Login() {
     try {
       const user = await loginUser(email, password);
       console.log("Usuario tradicional: ", user);
+      router.push("/");
     } catch (error) {
       setErrorMsg("Credenciales incorrectas. Inténtalo de nuevo.");
     }
