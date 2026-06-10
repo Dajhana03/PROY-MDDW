@@ -7,16 +7,40 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../../firebase/auth"; // 👈 AJUSTA si tu ruta cambia
 import styles from "./Header.module.css";
 import { useScrollShadow } from "../../hooks/useScrollShadow";
+import { db } from "../../firebase/db";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function Header() {
   const scrolled = useScrollShadow();
   const pathname = usePathname();
   const router = useRouter();
-
+  const [profilePhoto, setProfilePhoto] = useState(null);
   const [user, setUser] = useState(null);
   const [open, setOpen] = useState(false);
 
   // 👤 detectar usuario logueado
+  useEffect(() => {
+    const loadProfilePhoto = async () => {
+      if (!user) return;
+
+      try {
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+
+          if (data.photoURL) {
+            setProfilePhoto(data.photoURL);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    loadProfilePhoto();
+  }, [user]);
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       console.log("USUARIO:", currentUser);
@@ -38,27 +62,22 @@ export default function Header() {
   const getInitials = (name) => {
     if (!name) return "U";
 
-    const parts = name.trim().split(" ");
+    const parts = name.trim().split(" ").filter(Boolean);
 
-    if (parts.length === 1) {
-      return parts[0][0].toUpperCase();
+    if (parts.length >= 2) {
+      return (
+        parts[0].charAt(0).toUpperCase() + parts[1].charAt(0).toUpperCase()
+      );
     }
 
-    return parts[0][0].toUpperCase() + parts[1][0].toUpperCase();
+    return parts[0].charAt(0).toUpperCase();
   };
   const getShortName = (name) => {
-    if (!name) return "Usuario";
+    if (!name) return user?.email?.split("@")[0] || "Usuario";
 
-    const parts = name.trim().split(" ");
+    const parts = name.trim().split(" ").filter(Boolean);
 
-    // Luis Alberto Lopez Quispe
-    // => Luis Lopez
-
-    if (parts.length >= 3) {
-      return `${parts[0]} ${parts[2]}`;
-    }
-
-    if (parts.length === 2) {
+    if (parts.length >= 2) {
       return `${parts[0]} ${parts[1]}`;
     }
 
@@ -130,7 +149,15 @@ export default function Header() {
               {/* Avatar + nombre */}
               <div className={styles.userBtn} onClick={() => setOpen(!open)}>
                 <div className={styles.avatar}>
-                  {getInitials(user.displayName || user.email)}
+                  {profilePhoto ? (
+                    <img
+                      src={profilePhoto}
+                      alt="Perfil"
+                      className={styles.avatarImage}
+                    />
+                  ) : (
+                    getInitials(user.displayName || user.email)
+                  )}
                 </div>
 
                 <span className={styles.userName}>
