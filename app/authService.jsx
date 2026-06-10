@@ -1,6 +1,7 @@
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  updateProfile,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/db";
@@ -27,6 +28,10 @@ export const registerUser = async (email, password, firstName, lastName) => {
       password,
     );
 
+    await updateProfile(userCredential.user, {
+      displayName: `${firstName} ${lastName}`,
+    });
+
     const uid = userCredential.user.uid;
 
     await setDoc(doc(db, "users", uid), {
@@ -41,4 +46,3 @@ export const registerUser = async (email, password, firstName, lastName) => {
     return { success: false, error };
   }
 };
-
