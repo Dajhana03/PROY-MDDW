@@ -1,6 +1,7 @@
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  updateProfile,
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
@@ -28,6 +29,10 @@ export const registerUser = async (email, password, firstName, lastName) => {
       email,
       password,
     );
+
+    await updateProfile(userCredential.user, {
+      displayName: `${firstName} ${lastName}`,
+    });
 
     const uid = userCredential.user.uid;
 
