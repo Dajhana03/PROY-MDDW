@@ -33,7 +33,7 @@ function LoginContent() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMsg("");
-    
+
     try {
       const user = await loginUser(email, password);
       console.log("Usuario: ", user);
@@ -50,19 +50,35 @@ function LoginContent() {
       </p>
 
       <div className={styles.card}>
-        <button type="button" className={styles.socialBtn} onClick={() => loginWithGoogle()}>
-          <img src="/svg/google.svg" alt="Google" className={styles.socialIcon} />
+        <button
+          type="button"
+          className={styles.socialBtn}
+          onClick={() => loginWithGoogle()}
+        >
+          <img
+            src="/svg/google.svg"
+            alt="Google"
+            className={styles.socialIcon}
+          />
           Continuar con Google
         </button>
 
         <FacebookLogin
           appId={process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}
           autoLoad={false}
-          fields="name,email,picture"
+          fields="name,picture"
           callback={responseFacebook}
           render={(renderProps) => (
-            <button type="button" className={styles.socialBtn} onClick={renderProps.onClick}>
-              <img src="/svg/facebook.svg" alt="Facebook" className={styles.socialIcon} />
+            <button
+              type="button"
+              className={styles.socialBtn}
+              onClick={renderProps.onClick}
+            >
+              <img
+                src="/svg/facebook.svg"
+                alt="Facebook"
+                className={styles.socialIcon}
+              />
               Continuar con Facebook
             </button>
           )}
@@ -103,14 +119,14 @@ function LoginContent() {
             </div>
 
             {errorMsg && (
-              <p 
-                style={{ 
-                  color: "#dc3545", 
-                  fontSize: "12px", 
-                  marginTop: "6px", 
+              <p
+                style={{
+                  color: "#dc3545",
+                  fontSize: "12px",
+                  marginTop: "6px",
                   marginBottom: "0px",
                   textAlign: "left",
-                  fontWeight: "500"
+                  fontWeight: "500",
                 }}
               >
                 {errorMsg}
