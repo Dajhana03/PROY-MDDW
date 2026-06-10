@@ -146,22 +146,20 @@ export default function Header() {
 
               {/* Dropdown */}
               {open && (
-  <div className={styles.dropdown}>
-    <button
-  className={styles.profileBtn}
-  onClick={() => {
-    setOpen(false);
-    router.push("/profile");
-  }}
->
-  Perfil
-</button>
+                <div className={styles.dropdown}>
+                  <button
+                    className={styles.profileBtn}
+                    onClick={() => {
+                      setOpen(false);
+                      router.push("/profile");
+                    }}
+                  >
+                    Perfil
+                  </button>
 
-    <button onClick={handleLogout}>
-      Cerrar sesión
-    </button>
-  </div>
-)}
+                  <button onClick={handleLogout}>Cerrar sesión</button>
+                </div>
+              )}
             </div>
           )}
         </div>
