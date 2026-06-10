@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../firebase/auth";
 import { useReveal } from "../hooks/useReveal";
 import { useCounter } from "../hooks/useCounter";
 import styles from "./HomePage.module.css";
@@ -100,7 +103,16 @@ function HomePage() {
   const statsRef = useCounter();
 
   const router = useRouter();
-  const isGuest = true;
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
+  const isGuest = !user;
   const handleRestrictedAccess = () => {
     alert("Inicia sesión o crea una cuenta para acceder a esta función.");
   };
@@ -449,65 +461,60 @@ function HomePage() {
                 className={`donation-card ${styles.donationCard} ${cls}`}
               >
                 <div className={styles.donationTop}>
-  {title.includes("Libros") && (
-    <svg viewBox="0 0 24 24" fill="none">
-      <path
-        d="M6 4H18V20H6V4Z"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-      <path
-        d="M9 8H15"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M9 12H15"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  )}
+                  {title.includes("Libros") && (
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M6 4H18V20H6V4Z"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M9 8H15"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M9 12H15"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  )}
 
-  {title.includes("Electrónicos") && (
-    <svg viewBox="0 0 24 24" fill="none">
-      <rect
-        x="7"
-        y="3"
-        width="10"
-        height="18"
-        rx="2"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-      <path
-        d="M10 6H14"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <circle
-        cx="12"
-        cy="17"
-        r="1"
-        fill="currentColor"
-      />
-    </svg>
-  )}
+                  {title.includes("Electrónicos") && (
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <rect
+                        x="7"
+                        y="3"
+                        width="10"
+                        height="18"
+                        rx="2"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M10 6H14"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <circle cx="12" cy="17" r="1" fill="currentColor" />
+                    </svg>
+                  )}
 
-  {title.includes("Ropa") && (
-    <svg viewBox="0 0 24 24" fill="none">
-      <path
-        d="M9 4L12 6L15 4L19 8L16 10V20H8V10L5 8L9 4Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )}
-</div>
+                  {title.includes("Ropa") && (
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M9 4L12 6L15 4L19 8L16 10V20H8V10L5 8L9 4Z"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  )}
+                </div>
                 <div className={styles.donationBody}>
                   <h3>{title}</h3>
                   <p>{desc}</p>
