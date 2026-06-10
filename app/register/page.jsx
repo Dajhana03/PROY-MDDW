@@ -134,7 +134,7 @@ function RegisterPage() {
                     <div className={styles["input-wrapper"]}>
                       <img
                         src="/svg/user.svg"
-                        alt=""
+                        alt="Icono de un usuario"
                         className={styles["input-icon"]}
                       />
                       <input
@@ -151,7 +151,7 @@ function RegisterPage() {
                     <div className={styles["input-wrapper"]}>
                       <img
                         src="/svg/user.svg"
-                        alt=""
+                        alt="Icono de un usuario"
                         className={styles["input-icon"]}
                       />
                       <input
@@ -170,7 +170,7 @@ function RegisterPage() {
                   <div className={styles["input-wrapper"]}>
                     <img
                       src="/svg/email.svg"
-                      alt=""
+                      alt="Icono de email"
                       className={styles["input-icon"]}
                     />
                     <input
@@ -188,7 +188,7 @@ function RegisterPage() {
                   <div className={styles["input-wrapper"]}>
                     <img
                       src="/svg/lock.svg"
-                      alt=""
+                      alt="Icono de celularIcono de contraseña"
                       className={styles["input-icon"]}
                     />
                     <input
@@ -221,15 +221,19 @@ function RegisterPage() {
                   <div className={styles["input-wrapper"]}>
                     <img
                       src="/svg/phone.svg"
-                      alt=""
+                      alt="Icono de celular"
                       className={styles["input-icon"]}
                     />
                     <input
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      onChange={(e) => {
+                        const onlyNums = e.target.value.replace(/[^0-9]/g, "");
+                        const limitedNums = onlyNums.slice(0, 9);
+                        setPhone(limitedNums);
+                      }}
                       type="tel"
                       required
-                      placeholder="+51 999 000 000"
+                      placeholder="999 000 000"
                     />
                   </div>
                 </div>
@@ -238,7 +242,7 @@ function RegisterPage() {
                   <div className={styles["input-wrapper"]}>
                     <img
                       src="/svg/date.svg"
-                      alt=""
+                      alt="Icono de celular"
                       className={styles["input-icon"]}
                     />
                     <input
@@ -269,7 +273,7 @@ function RegisterPage() {
                 <div className={styles["input-wrapper"]}>
                   <img
                     src="/svg/place.svg"
-                    alt=""
+                    alt="Icono de ciudad"
                     className={styles["input-icon"]}
                   />
                   <input
@@ -287,7 +291,7 @@ function RegisterPage() {
                 <div className={styles["input-wrapper"]}>
                   <img
                     src="/svg/user.svg"
-                    alt=""
+                    alt="Icono de tipo de usuario"
                     className={styles["input-icon"]}
                   />
                   <select
