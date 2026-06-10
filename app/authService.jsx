@@ -2,6 +2,8 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/db";
@@ -42,6 +44,34 @@ export const registerUser = async (email, password, firstName, lastName) => {
     });
 
     return { success: true };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+export const registerWithGoogle = async () => {
+  try {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    const [firstName = "", ...lastNameArr] = (user.displayName || "").split(
+      " ",
+    );
+    const lastName = lastNameArr.join(" ");
+
+    await setDoc(
+      doc(db, "users", user.uid),
+      {
+        userId: user.uid,
+        email: user.email,
+        first_name: firstName,
+        last_name: lastName,
+      },
+      { merge: true },
+    );
+
+    return { success: true, user };
   } catch (error) {
     return { success: false, error };
   }

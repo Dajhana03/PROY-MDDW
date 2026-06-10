@@ -1,28 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { registerUser } from "../authService";
+import { registerUser, registerWithGoogle } from "../authService";
 import { useRouter } from "next/navigation";
 import styles from "./register.module.css";
 
 function RegisterPage() {
   const [step, setStep] = useState(1);
-
-  // Paso 1
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  // Paso 2
   const [phone, setPhone] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [city, setCity] = useState("");
   const [userType, setUserType] = useState("");
   const [ageError, setAgeError] = useState("");
-
   const [loading, setLoading] = useState(false);
-
   const router = useRouter();
 
   const handleNext = (e) => {
@@ -36,7 +30,7 @@ function RegisterPage() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    loading(true);
 
     if (!phone || !birthDate || !city || !userType) {
       alert("Completa todos los campos antes de enviar");
@@ -44,7 +38,6 @@ function RegisterPage() {
       return;
     }
 
-    // Validación de edad
     const birth = new Date(birthDate);
     const today = new Date();
     const age = today.getFullYear() - birth.getFullYear();
@@ -64,8 +57,7 @@ function RegisterPage() {
     try {
       const result = await registerUser(email, password, firstName, lastName);
       if (result.success) {
-        alert("Cuenta creada correctamente");
-        router.push("/login");
+        router.push("/");
       } else {
         if (result.error.code === "auth/email-already-in-use") {
           alert("El correo ya está registrado");
@@ -78,16 +70,28 @@ function RegisterPage() {
     }
   };
 
+  const handleGoogleAuth = async () => {
+    setLoading(true);
+    try {
+      const result = await registerWithGoogle();
+      if (result.success) {
+        router.push("/");
+      } else {
+        alert("Error al iniciar sesión con Google");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className={styles["register-container"]}>
       <div className={styles["register-card"]}>
         <div className={styles["title-register"]}>Únete a ECO CANJE</div>
-
         <div className={styles["subtitle-register"]}>
           Crea tu cuenta en 2 simples pasos
         </div>
 
-        {/* STEPS */}
         <div className={styles.steps}>
           <div
             className={step === 1 ? styles["step-active"] : styles["step-done"]}
@@ -103,25 +107,20 @@ function RegisterPage() {
         </div>
 
         <div className={styles["form-container"]}>
-          {/* ── PASO 1 ── */}
           {step === 1 && (
             <>
-              <button className={styles["social-btn"]} type="button">
+              <button
+                className={styles["social-btn"]}
+                type="button"
+                onClick={handleGoogleAuth}
+                disabled={loading}
+              >
                 <img
                   src="/svg/google.svg"
                   alt="Google"
                   className={styles["social-icon"]}
                 />
                 Registrarse con Google
-              </button>
-
-              <button className={styles["social-btn"]} type="button">
-                <img
-                  src="/svg/facebook.svg"
-                  alt="Facebook"
-                  className={styles["social-icon"]}
-                />
-                Registrarse con Facebook
               </button>
 
               <div className={styles.divider}>
@@ -135,7 +134,7 @@ function RegisterPage() {
                     <div className={styles["input-wrapper"]}>
                       <img
                         src="/svg/user.svg"
-                        alt=""
+                        alt="Icono de un usuario"
                         className={styles["input-icon"]}
                       />
                       <input
@@ -147,13 +146,12 @@ function RegisterPage() {
                       />
                     </div>
                   </div>
-
                   <div className={styles["input-group"]}>
                     <label>Apellido</label>
                     <div className={styles["input-wrapper"]}>
                       <img
                         src="/svg/user.svg"
-                        alt=""
+                        alt="Icono de un usuario"
                         className={styles["input-icon"]}
                       />
                       <input
@@ -172,7 +170,7 @@ function RegisterPage() {
                   <div className={styles["input-wrapper"]}>
                     <img
                       src="/svg/email.svg"
-                      alt=""
+                      alt="Icono de email"
                       className={styles["input-icon"]}
                     />
                     <input
@@ -190,7 +188,7 @@ function RegisterPage() {
                   <div className={styles["input-wrapper"]}>
                     <img
                       src="/svg/lock.svg"
-                      alt=""
+                      alt="Icono de celularIcono de contraseña"
                       className={styles["input-icon"]}
                     />
                     <input
@@ -208,7 +206,6 @@ function RegisterPage() {
                   Continuar →
                 </button>
               </form>
-
               <div className={styles["login-text"]}>
                 ¿Ya tienes cuenta?{" "}
                 <span onClick={() => router.push("/login")}>Inicia sesión</span>
@@ -216,7 +213,6 @@ function RegisterPage() {
             </>
           )}
 
-          {/* ── PASO 2 ── */}
           {step === 2 && (
             <form onSubmit={handleRegister}>
               <div className={styles.row}>
@@ -225,25 +221,28 @@ function RegisterPage() {
                   <div className={styles["input-wrapper"]}>
                     <img
                       src="/svg/phone.svg"
-                      alt=""
+                      alt="Icono de celular"
                       className={styles["input-icon"]}
                     />
                     <input
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      onChange={(e) => {
+                        const onlyNums = e.target.value.replace(/[^0-9]/g, "");
+                        const limitedNums = onlyNums.slice(0, 9);
+                        setPhone(limitedNums);
+                      }}
                       type="tel"
                       required
-                      placeholder="+51 999 000 000"
+                      placeholder="999 000 000"
                     />
                   </div>
                 </div>
-
                 <div className={styles["input-group"]}>
                   <label>Fecha de nacimiento</label>
                   <div className={styles["input-wrapper"]}>
                     <img
                       src="/svg/date.svg"
-                      alt=""
+                      alt="Icono de celular"
                       className={styles["input-icon"]}
                     />
                     <input
@@ -274,7 +273,7 @@ function RegisterPage() {
                 <div className={styles["input-wrapper"]}>
                   <img
                     src="/svg/place.svg"
-                    alt=""
+                    alt="Icono de ciudad"
                     className={styles["input-icon"]}
                   />
                   <input
@@ -292,7 +291,7 @@ function RegisterPage() {
                 <div className={styles["input-wrapper"]}>
                   <img
                     src="/svg/user.svg"
-                    alt=""
+                    alt="Icono de tipo de usuario"
                     className={styles["input-icon"]}
                   />
                   <select
@@ -317,7 +316,6 @@ function RegisterPage() {
                 >
                   ← Volver
                 </button>
-
                 <button
                   type="submit"
                   disabled={loading}
