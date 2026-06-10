@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
-import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
 import { loginUser } from "../authService";
+import { auth } from "../../firebase/auth";
+import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import styles from "../login/login.module.css";
 
 function LoginContent() {
@@ -15,20 +16,25 @@ function LoginContent() {
   const loginWithGoogle = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setErrorMsg("");
-      console.log("Token de Google:", tokenResponse);
+      try {
+        const credential = GoogleAuthProvider.credential(
+          null,
+          tokenResponse.access_token,
+        );
+
+        const result = await signInWithCredential(auth, credential);
+
+        const user = result.user;
+        console.log("Usuario autenticado en Firebase:", user);
+      } catch (error) {
+        console.error("Error al autenticar con Firebase:", error);
+        setErrorMsg("Hubo un problema al sincronizar tu cuenta con Firebase.");
+      }
     },
     onError: () => {
       setErrorMsg("Hubo un problema al autenticar con Google.");
     },
   });
-
-  const responseFacebook = (response) => {
-    setErrorMsg("");
-    if (response.accessToken) {
-    } else {
-      setErrorMsg("Hubo un error al autenticar con Facebook.");
-    }
-  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -62,27 +68,6 @@ function LoginContent() {
           />
           Continuar con Google
         </button>
-
-        <FacebookLogin
-          appId={process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}
-          autoLoad={false}
-          fields="name,picture"
-          callback={responseFacebook}
-          render={(renderProps) => (
-            <button
-              type="button"
-              className={styles.socialBtn}
-              onClick={renderProps.onClick}
-            >
-              <img
-                src="/svg/facebook.svg"
-                alt="Facebook"
-                className={styles.socialIcon}
-              />
-              Continuar con Facebook
-            </button>
-          )}
-        />
 
         <div className={styles.divider}>
           <span>O con tu email</span>
@@ -143,7 +128,7 @@ function LoginContent() {
               />
               Recordarme
             </label>
-            <a href="#" className={styles.forgot}>
+            <a href="/forgotPassword" className={styles.forgot}>
               ¿Olvidaste tu contraseña?
             </a>
           </div>
@@ -154,7 +139,7 @@ function LoginContent() {
         </form>
 
         <p className={styles.registerLine}>
-          ¿No tienes cuenta? <a href="#">Regístrate aquí</a>
+          ¿No tienes cuenta? <a href="/register">Regístrate aquí</a>
         </p>
       </div>
 
