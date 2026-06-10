@@ -393,19 +393,28 @@
 .actionBtn {
   border: none;
   background: none;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  color: #4b5563;
+  gap: 8px; 
   cursor: pointer;
   font-size: 0.85rem;
   transition: 0.25s ease;
   font-family: inherit;
+  white-space: nowrap;
+}
+
+.actionBtn img {
+  width: 22px;         
+  height: 22px;      
+  display: block;
+  object-fit: contain;
+  flex-shrink: 0;       
 }
 
 .actionBtn:hover {
   color: #10b981;
 }
+
 
 .liked {
   color: #ef4444;
@@ -575,6 +584,113 @@
   transform: translateX(-50%) translateY(0);
 }
 
+/* ============================================
+   COMMENTS
+============================================ */
+.commentsBox {
+  padding: 0 22px 20px;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #ecfdf5;
+  margin-bottom: 16px;
+}
+
+.commentsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.commentItem {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: #f8fffe;
+  border: 1px solid #e6faf2;
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.commentItem strong {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #10b981;
+  white-space: nowrap;
+}
+
+.commentItem span {
+  font-size: 0.88rem;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.noComments {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.85rem;
+  padding: 12px 0;
+}
+
+.commentForm {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.commentInput {
+  flex: 1;
+  border: 1.5px solid #d1fae5;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  outline: none;
+  font-family: inherit;
+  background: #fff;
+  transition: 0.25s ease;
+  color: #111827;
+}
+
+.commentInput:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.commentInput::placeholder {
+  color: #9ca3af;
+}
+
+.commentSubmitBtn {
+  border: none;
+  background: #10b981;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.25s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.commentSubmitBtn:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.loginWarning {
+  font-size: 0.83rem;
+  color: #9ca3af;
+  text-align: center;
+  padding: 8px 0;
+}
+
+.activeComments {
+  color: #10b981;
+}
 /* ============================================
    RESPONSIVE
 ============================================ */

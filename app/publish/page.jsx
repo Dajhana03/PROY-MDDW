@@ -253,7 +253,8 @@ export default function PublishPage() {
         quantity: Number(quantity),
         images: imageUrls,
         likes: 0,
-        comments: 0,
+        comments: [],
+
         createdAt: serverTimestamp(),
       });
 
@@ -315,8 +316,8 @@ export default function PublishPage() {
                 {/* TITULO */}       {" "}
         <div className={styles.formGroup}>
                    {" "}
-          <label className={styles.formLabel}>Título de la Donación</label>
-                   {" "}
+          <label className={styles.formLabel}>Título de la Donación</label>     
+             {" "}
           <input
             type="text"
             disabled={isGuest}
@@ -329,8 +330,8 @@ export default function PublishPage() {
         </div>
                 {/* DESCRIPCION */}       {" "}
         <div className={styles.formGroup}>
-                    <label className={styles.formLabel}>Descripción</label>
-                   {" "}
+                    <label className={styles.formLabel}>Descripción</label>     
+             {" "}
           <textarea
             disabled={isGuest}
             placeholder="Describe el estado, cantidad y cualquier detalle importante..."
@@ -398,8 +399,8 @@ export default function PublishPage() {
         <div className={styles.rowGrid}>
                    {" "}
           <div className={styles.formGroup}>
-                        <label className={styles.formLabel}>Cantidad</label>
-                       {" "}
+                        <label className={styles.formLabel}>Cantidad</label>   
+                   {" "}
             <input
               type="number"
               disabled={isGuest}
