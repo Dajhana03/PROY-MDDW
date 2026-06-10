@@ -17,6 +17,7 @@ export default function Header() {
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [user, setUser] = useState(null);
   const [open, setOpen] = useState(false);
+  const [userType, setUserType] = useState(null);
 
   // 👤 detectar usuario logueado
   useEffect(() => {
@@ -33,6 +34,7 @@ export default function Header() {
           if (data.photoURL) {
             setProfilePhoto(data.photoURL);
           }
+          setUserType(data.user_type);
         }
       } catch (error) {
         console.error(error);
@@ -183,6 +185,18 @@ export default function Header() {
                   >
                     Perfil
                   </button>
+
+                  {userType === "admin" && ( // 👈 bloque nuevo
+                    <button
+                      className={styles.profileBtn}
+                      onClick={() => {
+                        setOpen(false);
+                        router.push("/admin");
+                      }}
+                    >
+                      Panel Admin
+                    </button>
+                  )}
 
                   <button onClick={handleLogout}>Cerrar sesión</button>
                 </div>

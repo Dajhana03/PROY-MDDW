@@ -2,397 +2,404 @@
 
 import { useEffect, useState } from "react";
 import { auth } from "../../firebase/auth";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import { db } from "../../firebase/db";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore";
 import styles from "./profile.module.css";
-import { updateDoc } from "firebase/firestore";
+
+const TABS = ["Perfil", "Editar", "Seguridad", "Actividad"];
+
+const ROLE_MAP = {
+  donante: { label: "Donante", emoji: "♻️", color: "#16a34a" },
+  receptor: { label: "Receptor", emoji: "🎁", color: "#2563eb" },
+  admin: { label: "Administrador", emoji: "🛡️", color: "#ea580c" },
+  ambos: { label: "Donante y Receptor", emoji: "🤝", color: "#7c3aed" },
+};
+
 export default function ProfilePage() {
-  const [showModal, setShowModal] = useState(false);
-  const [showEditorModal, setShowEditorModal] = useState(false);
-  const [zoom, setZoom] = useState(1);
+  const [activeTab, setActiveTab] = useState("Perfil");
   const [userData, setUserData] = useState({});
-  const [loading, setLoading] = useState(true);
   const [preview, setPreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [zoom, setZoom] = useState(1);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  // Edit form
+  const [editForm, setEditForm] = useState({ first_name: "", last_name: "", phone: "", city: "" });
+
+  // Password form
+  const [passForm, setPassForm] = useState({ current: "", next: "", confirm: "" });
+  const [passError, setPassError] = useState("");
+
+  // Actividad
+  const [donations, setDonations] = useState([]);
+  const [requests, setRequests] = useState([]);
+
+  const showToast = (msg, type = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      console.log("Usuario Firebase:", user);
-
-      if (!user) {
-        console.log("No hay usuario logueado");
-        return;
-      }
-
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
       try {
-        const docRef = doc(db, "users", user.uid);
-
-        const docSnap = await getDoc(docRef);
-
-        console.log("Documento:", docSnap.exists());
-
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-
+        const snap = await getDoc(doc(db, "users", user.uid));
+        if (snap.exists()) {
+          const data = snap.data();
           setUserData(data);
-
-          if (data.photoURL) {
-            setPreview(data.photoURL);
-          }
-
-          if (data.zoom) {
-            setZoom(data.zoom);
-          }
-        } else {
-          console.log("No existe documento users/" + user.uid);
+          setPreview(data.photoURL || null);
+          setZoom(data.zoom || 1);
+          setEditForm({
+            first_name: data.first_name || "",
+            last_name: data.last_name || "",
+            phone: data.phone || "",
+            city: data.city || "",
+          });
         }
-      } catch (error) {
-        console.error("ERROR COMPLETO:", error);
-        alert(error.message);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
       }
     });
-
-    return () => unsubscribe();
+    return () => unsub();
   }, []);
-  const saveProfilePhoto = async () => {
+
+  // Cargar actividad cuando se abre la pestaña
+  useEffect(() => {
+    if (activeTab !== "Actividad" || !userData.userId) return;
+    const load = async () => {
+      try {
+        const dSnap = await getDocs(query(collection(db, "donations"), where("userId", "==", userData.userId)));
+        setDonations(dSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+        const rSnap = await getDocs(query(collection(db, "requests"), where("userId", "==", userData.userId)));
+        setRequests(rSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+      } catch (e) { console.error(e); }
+    };
+    load();
+  }, [activeTab, userData.userId]);
+
+  const savePhoto = async () => {
+    if (!selectedFile) return;
+    setSaving(true);
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const photoURL = reader.result;
+      await updateDoc(doc(db, "users", auth.currentUser.uid), { photoURL, zoom });
+      setUserData(prev => ({ ...prev, photoURL }));
+      setPreview(photoURL);
+      setShowPhotoModal(false);
+      setSaving(false);
+      showToast("Foto actualizada");
+    };
+    reader.readAsDataURL(selectedFile);
+  };
+
+  const saveEdit = async () => {
+    setSaving(true);
     try {
-      const user = auth.currentUser;
-
-      if (!user || !selectedFile) return;
-
-      const reader = new FileReader();
-
-      reader.onloadend = async () => {
-        const photoURL = reader.result;
-
-        await updateDoc(doc(db, "users", user.uid), {
-          photoURL,
-          zoom,
-        });
-
-        setUserData({
-          ...userData,
-          photoURL,
-        });
-
-        setPreview(photoURL);
-
-        setShowEditorModal(false);
-      };
-
-      reader.readAsDataURL(selectedFile);
-    } catch (error) {
-      console.error(error);
+      await updateDoc(doc(db, "users", auth.currentUser.uid), editForm);
+      setUserData(prev => ({ ...prev, ...editForm }));
+      showToast("Perfil actualizado");
+    } catch (e) {
+      showToast("Error al guardar", "error");
+    } finally {
+      setSaving(false);
     }
   };
-  if (!userData)
-    return (
-      <div className={styles.container}>
-        <p>Cargando perfil...</p>
-      </div>
-    );
+
+  const savePassword = async () => {
+    setPassError("");
+    if (passForm.next !== passForm.confirm) return setPassError("Las contraseñas no coinciden");
+    if (passForm.next.length < 6) return setPassError("Mínimo 6 caracteres");
+    setSaving(true);
+    try {
+      const cred = EmailAuthProvider.credential(auth.currentUser.email, passForm.current);
+      await reauthenticateWithCredential(auth.currentUser, cred);
+      await updatePassword(auth.currentUser, passForm.next);
+      setPassForm({ current: "", next: "", confirm: "" });
+      showToast("Contraseña actualizada");
+    } catch (e) {
+      setPassError("Contraseña actual incorrecta");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const role = ROLE_MAP[userData.user_type] || { label: "Usuario", emoji: "👤", color: "#64748b" };
+  const initials = `${userData.first_name?.[0] || ""}${userData.last_name?.[0] || ""}`.toUpperCase();
+
+  if (loading) return (
+    <div className={styles.loadingScreen}>
+      <div className={styles.spinner} />
+      <p>Cargando perfil...</p>
+    </div>
+  );
 
   return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M12 15.5A3.5 3.5 0 1012 8.5a3.5 3.5 0 000 7z"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
-          <path
-            d="M19.4 15a1.7 1.7 0 00.34 1.87l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.7 1.7 0 00-1.87-.34 1.7 1.7 0 00-1.04 1.55V21a2 2 0 11-4 0v-.09a1.7 1.7 0 00-1.04-1.55 1.7 1.7 0 00-1.87.34l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.7 1.7 0 004.6 15a1.7 1.7 0 00-1.55-1.04H3a2 2 0 110-4h.09A1.7 1.7 0 004.64 8.9a1.7 1.7 0 00-.34-1.87l-.06-.06a2 2 0 112.83-2.83l.06.06a1.7 1.7 0 001.87.34H9a1.7 1.7 0 001.04-1.55V3a2 2 0 114 0v.09a1.7 1.7 0 001.04 1.55 1.7 1.7 0 001.87-.34l.06-.06a2 2 0 112.83 2.83l-.06.06A1.7 1.7 0 0019.4 8.9V9a1.7 1.7 0 001.55 1.04H21a2 2 0 110 4h-.09A1.7 1.7 0 0019.4 15z"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
-        </svg>
-        Configuración
-      </h1>
+    <div className={styles.page}>
+      {/* Toast */}
+      {toast && (
+        <div className={`${styles.toast} ${styles[toast.type]}`}>
+          {toast.type === "success" ? "✓" : "✕"} {toast.msg}
+        </div>
+      )}
 
-      <div className={styles.card}>
-        <h2>Perfil</h2>
-
-        <div className={styles.photoSection}>
-          <div className={styles.avatarPreview}>
-            {preview || userData.photoURL ? (
-              <img
-                src={preview || userData.photoURL}
-                alt="Preview"
-                className={styles.profileImage}
-                style={{
-                  transform: `scale(${zoom})`,
-                  transition: "0.2s",
-                }}
-              />
+      {/* Hero card */}
+      <div className={styles.heroCard}>
+        <div className={styles.heroBg} />
+        <div className={styles.heroContent}>
+          <div className={styles.avatarWrapper} onClick={() => setShowPhotoModal(true)}>
+            {preview ? (
+              <img src={preview} alt="foto" className={styles.avatarImg} style={{ transform: `scale(${zoom})` }} />
             ) : (
-              <>
-                {userData.first_name?.charAt(0).toUpperCase()}
-                {userData.last_name?.charAt(0).toUpperCase()}
-              </>
+              <span className={styles.avatarInitials}>{initials || "U"}</span>
             )}
-          </div>
-
-          <button
-            className={styles.changePhotoBtn}
-            onClick={() => setShowModal(true)}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M4 7h4l2-2h4l2 2h4v12H4V7z"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-              <circle
-                cx="12"
-                cy="13"
-                r="3"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-            </svg>
-            Cambiar foto
-            <input
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={(e) => {
-                const file = e.target.files[0];
-
-                if (file) {
-                  setSelectedFile(file);
-                  setPreview(URL.createObjectURL(file));
-                  setShowModal(false);
-                  setShowEditorModal(true);
-                }
-              }}
-            />
-          </button>
-        </div>
-
-        <div className={styles.info}>
-          <div className={styles.infoItem}>
-            <span>Nombre</span>
-            <p>
-              {userData.first_name} {userData.last_name}
-            </p>
-          </div>
-
-          <div className={styles.infoItem}>
-            <span>Correo</span>
-            <p>{userData.email}</p>
-          </div>
-
-          <div className={styles.infoItem}>
-            <span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M12 12a4 4 0 100-8 4 4 0 000 8z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-                <path
-                  d="M4 20a8 8 0 0116 0"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
+            <div className={styles.avatarOverlay}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M4 7h4l2-2h4l2 2h4v12H4V7z" stroke="white" strokeWidth="2"/>
+                <circle cx="12" cy="13" r="3" stroke="white" strokeWidth="2"/>
               </svg>
-              Rol
+            </div>
+          </div>
+          <div className={styles.heroInfo}>
+            <h1>{userData.first_name} {userData.last_name}</h1>
+            <p className={styles.heroEmail}>{userData.email}</p>
+            <span className={styles.rolePill} style={{ background: role.color + "20", color: role.color, border: `1px solid ${role.color}40` }}>
+              {role.emoji} {role.label}
             </span>
-            <p>
-              {userData.user_type === "donante"
-                ? "♻️ Donador"
-                : userData.user_type === "receptor"
-                  ? "🎁 Receptor"
-                  : userData.user_type === "ambos"
-                    ? "🤝 Donador y Receptor"
-                    : "Usuario"}
-            </p>
+          </div>
+          <div className={styles.heroStats}>
+            <div className={styles.stat}>
+              <strong>{donations.length || "—"}</strong>
+              <span>Donaciones</span>
+            </div>
+            <div className={styles.statDivider} />
+            <div className={styles.stat}>
+              <strong>{requests.length || "—"}</strong>
+              <span>Solicitudes</span>
+            </div>
+            <div className={styles.statDivider} />
+            <div className={styles.stat}>
+              <strong>{userData.city || "—"}</strong>
+              <span>Ciudad</span>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div className={styles.actions}>
-          <button className={styles.actionBtn}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M4 20h4l10-10-4-4L4 16v4z"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-            </svg>
-            Editar perfil
-          </button>
-
-          <button className={styles.actionBtn}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <rect
-                x="5"
-                y="11"
-                width="14"
-                height="9"
-                rx="2"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-              <path
-                d="M8 11V8a4 4 0 118 0v3"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-            </svg>
-            Cambiar contraseña
-          </button>
-
-          <button className={styles.actionBtn}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M12 22a2.5 2.5 0 002.5-2.5h-5A2.5 2.5 0 0012 22z"
-                fill="currentColor"
-              />
-              <path
-                d="M18 16V11a6 6 0 10-12 0v5l-2 2h16l-2-2z"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-            </svg>
-            Notificaciones
-          </button>
-
-          <button className={styles.actionBtn}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M12 3l7 3v5c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6l7-3z"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-            </svg>
-            Privacidad
-          </button>
-        </div>
-        {showModal && (
-          <div
-            className={styles.modalOverlay}
-            onClick={() => setShowModal(false)}
+      {/* Tabs */}
+      <div className={styles.tabs}>
+        {TABS.map(tab => (
+          <button
+            key={tab}
+            className={`${styles.tab} ${activeTab === tab ? styles.tabActive : ""}`}
+            onClick={() => setActiveTab(tab)}
           >
-            <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-              <div className={styles.modalHeader}>
-                <h3>Selecciona una imagen</h3>
+            {tab}
+          </button>
+        ))}
+      </div>
 
-                <button
-                  className={styles.closeBtn}
-                  onClick={() => setShowModal(false)}
-                >
-                  ✕
-                </button>
-              </div>
+      {/* Content */}
+      <div className={styles.content}>
 
-              <div className={styles.modalBody}>
-                <label className={styles.uploadBox}>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    onChange={(e) => {
-                      const file = e.target.files[0];
-
-                      if (file) {
-                        setSelectedFile(file);
-                        setPreview(URL.createObjectURL(file));
-                        setShowModal(false);
-                        setShowEditorModal(true);
-                      }
-                    }}
-                  />
-
-                  <div className={styles.uploadContent}>
-                    <div className={styles.uploadContent}>
-                      <div className={styles.uploadCircle}>+</div>
-
-                      <h4>Subir imagen</h4>
-
-                      <span>PNG, JPG o JPEG</span>
-                    </div>
-                  </div>
-                </label>
-
-                <div className={styles.gifGrid}>
-                  <img
-                    src="https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif"
-                    alt=""
-                    onClick={() => {
-                      setPreview(
-                        "https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif",
-                      );
-                      setShowModal(false);
-                    }}
-                  />
-                  <img
-                    src="https://media.giphy.com/media/l3vRlT2k2L35Cnn5C/giphy.gif"
-                    alt=""
-                  />
-                  <img
-                    src="https://media.giphy.com/media/3oriO0OEd9QIDdllqo/giphy.gif"
-                    alt=""
-                  />
-                  <img
-                    src="https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif"
-                    alt=""
-                  />
+        {/* ── PERFIL ── */}
+        {activeTab === "Perfil" && (
+          <div className={styles.section}>
+            <h2 className={styles.sectionTitle}>Información personal</h2>
+            <div className={styles.infoGrid}>
+              {[
+                { label: "Nombre", value: `${userData.first_name} ${userData.last_name}` },
+                { label: "Correo", value: userData.email },
+                { label: "Teléfono", value: userData.phone || "No registrado" },
+                { label: "Ciudad", value: userData.city || "No registrada" },
+                { label: "Fecha de nacimiento", value: userData.birth_date || "No registrada" },
+                { label: "Rol", value: `${role.emoji} ${role.label}` },
+              ].map(({ label, value }) => (
+                <div key={label} className={styles.infoItem}>
+                  <span className={styles.infoLabel}>{label}</span>
+                  <p className={styles.infoValue}>{value}</p>
                 </div>
-              </div>
+              ))}
             </div>
           </div>
         )}
+
+        {/* ── EDITAR ── */}
+        {activeTab === "Editar" && (
+          <div className={styles.section}>
+            <h2 className={styles.sectionTitle}>Editar perfil</h2>
+            <div className={styles.form}>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label>Nombre</label>
+                  <input
+                    value={editForm.first_name}
+                    onChange={e => setEditForm(p => ({ ...p, first_name: e.target.value }))}
+                    placeholder="Tu nombre"
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Apellido</label>
+                  <input
+                    value={editForm.last_name}
+                    onChange={e => setEditForm(p => ({ ...p, last_name: e.target.value }))}
+                    placeholder="Tu apellido"
+                  />
+                </div>
+              </div>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label>Teléfono</label>
+                  <input
+                    value={editForm.phone}
+                    onChange={e => setEditForm(p => ({ ...p, phone: e.target.value }))}
+                    placeholder="Ej: 999888777"
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Ciudad</label>
+                  <input
+                    value={editForm.city}
+                    onChange={e => setEditForm(p => ({ ...p, city: e.target.value }))}
+                    placeholder="Ej: Lima"
+                  />
+                </div>
+              </div>
+              <button className={styles.saveBtn} onClick={saveEdit} disabled={saving}>
+                {saving ? "Guardando..." : "Guardar cambios"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── SEGURIDAD ── */}
+        {activeTab === "Seguridad" && (
+          <div className={styles.section}>
+            <h2 className={styles.sectionTitle}>Cambiar contraseña</h2>
+            <div className={styles.form}>
+              <div className={styles.formGroup}>
+                <label>Contraseña actual</label>
+                <input
+                  type="password"
+                  value={passForm.current}
+                  onChange={e => setPassForm(p => ({ ...p, current: e.target.value }))}
+                  placeholder="••••••••"
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Nueva contraseña</label>
+                <input
+                  type="password"
+                  value={passForm.next}
+                  onChange={e => setPassForm(p => ({ ...p, next: e.target.value }))}
+                  placeholder="Mínimo 6 caracteres"
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Confirmar nueva contraseña</label>
+                <input
+                  type="password"
+                  value={passForm.confirm}
+                  onChange={e => setPassForm(p => ({ ...p, confirm: e.target.value }))}
+                  placeholder="Repite la contraseña"
+                />
+              </div>
+              {passError && <p className={styles.errorMsg}>⚠ {passError}</p>}
+              <button className={styles.saveBtn} onClick={savePassword} disabled={saving}>
+                {saving ? "Actualizando..." : "Actualizar contraseña"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── ACTIVIDAD ── */}
+        {activeTab === "Actividad" && (
+          <div className={styles.section}>
+            <h2 className={styles.sectionTitle}>Mis donaciones</h2>
+            {donations.length === 0 ? (
+              <p className={styles.empty}>Aún no has hecho donaciones.</p>
+            ) : (
+              <div className={styles.activityList}>
+                {donations.map(d => (
+                  <div key={d.id} className={styles.activityCard}>
+                    <div className={styles.activityIcon}>♻️</div>
+                    <div>
+                      <p className={styles.activityTitle}>{d.title || "Donación"}</p>
+                      <p className={styles.activitySub}>{d.category || ""} · {d.city || ""}</p>
+                    </div>
+                    <span className={`${styles.activityStatus} ${styles[d.status] || ""}`}>
+                      {d.status || "activa"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <h2 className={styles.sectionTitle} style={{ marginTop: "2rem" }}>Mis solicitudes</h2>
+            {requests.length === 0 ? (
+              <p className={styles.empty}>Aún no has hecho solicitudes.</p>
+            ) : (
+              <div className={styles.activityList}>
+                {requests.map(r => (
+                  <div key={r.id} className={styles.activityCard}>
+                    <div className={styles.activityIcon}>🎁</div>
+                    <div>
+                      <p className={styles.activityTitle}>{r.title || "Solicitud"}</p>
+                      <p className={styles.activitySub}>{r.category || ""}</p>
+                    </div>
+                    <span className={`${styles.activityStatus}`}>{r.status || "pendiente"}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
-      {showEditorModal && (
-        <div
-          className={styles.modalOverlay}
-          onClick={() => setShowEditorModal(false)}
-        >
-          <div
-            className={styles.editorModal}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2>Editar foto</h2>
 
-            <div className={styles.editorPreview}>
-              <img
-                src={preview || userData.photoURL}
-                alt="Preview"
-                className={styles.profileImage}
-                style={{
-                  transform: `scale(${zoom})`,
-                  transition: "0.2s",
-                }}
-              />
+      {/* Modal foto */}
+      {showPhotoModal && (
+        <div className={styles.overlay} onClick={() => setShowPhotoModal(false)}>
+          <div className={styles.photoModal} onClick={e => e.stopPropagation()}>
+            <div className={styles.photoModalHeader}>
+              <h3>Cambiar foto de perfil</h3>
+              <button onClick={() => setShowPhotoModal(false)}>✕</button>
             </div>
 
-            <input
-              type="range"
-              min="1"
-              max="3"
-              step="0.1"
-              value={zoom}
-              onChange={(e) => setZoom(Number(e.target.value))}
-            />
-
-            <div className={styles.modalActions}>
-              <button className={styles.resetBtn} onClick={() => setZoom(1)}>
-                Restablecer zoom
-              </button>
-
-              <button
-                className={styles.cancelBtn}
-                onClick={() => setShowEditorModal(false)}
-              >
-                Cancelar
-              </button>
-
-              <button className={styles.applyBtn} onClick={saveProfilePhoto}>
-                Aplicar
-              </button>
+            <div className={styles.photoPreviewBox}>
+              {preview ? (
+                <img src={preview} alt="preview" style={{ transform: `scale(${zoom})`, transition: "0.2s" }} />
+              ) : (
+                <span className={styles.avatarInitials}>{initials}</span>
+              )}
             </div>
+
+            {selectedFile && (
+              <div className={styles.zoomControl}>
+                <label>Zoom</label>
+                <input type="range" min="1" max="2.5" step="0.05" value={zoom}
+                  onChange={e => setZoom(Number(e.target.value))} />
+              </div>
+            )}
+
+            <label className={styles.uploadBtn}>
+              📁 Seleccionar imagen
+              <input type="file" accept="image/*" hidden onChange={e => {
+                const f = e.target.files[0];
+                if (f) { setSelectedFile(f); setPreview(URL.createObjectURL(f)); }
+              }} />
+            </label>
+
+            {selectedFile && (
+              <button className={styles.saveBtn} onClick={savePhoto} disabled={saving}>
+                {saving ? "Guardando..." : "Guardar foto"}
+              </button>
+            )}
           </div>
         </div>
       )}
