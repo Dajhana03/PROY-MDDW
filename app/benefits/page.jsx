@@ -16,7 +16,7 @@ const BENEFITS = [
   {
     id: "cafe",
     iconCls: styles.iconGreen,
-    icon: "fa-mug-hot",
+    icon: "/svg/cup.svg",
     title: "Café Gratis",
     desc: "Obtén un café gratis en la cafetería del campus.",
     pts: "50 pts",
@@ -24,7 +24,7 @@ const BENEFITS = [
   {
     id: "libro",
     iconCls: styles.iconTeal,
-    icon: "fa-book",
+    icon: "/svg/book.svg",
     title: "Descuento en Librería",
     desc: "20% de descuento en material académico.",
     pts: "100 pts",
@@ -32,7 +32,7 @@ const BENEFITS = [
   {
     id: "comida",
     iconCls: styles.iconDark,
-    icon: "fa-utensils",
+    icon: "/svg/utensils.svg",
     title: "Vale de Comida",
     desc: "Vale de S/20 para el comedor universitario.",
     pts: "150 pts",
@@ -40,7 +40,7 @@ const BENEFITS = [
   {
     id: "tienda",
     iconCls: styles.iconOrange,
-    icon: "fa-store",
+    icon: "/svg/bag.svg",
     title: "Descuento Tiendas",
     desc: "15% en comercios afiliados.",
     pts: "75 pts",
@@ -48,7 +48,7 @@ const BENEFITS = [
   {
     id: "eventos",
     iconCls: styles.iconPink,
-    icon: "fa-ticket",
+    icon: "/svg/ticket.svg",
     title: "Entradas a Eventos",
     desc: "Acceso gratis a eventos culturales y deportivos.",
     pts: "200 pts",
@@ -56,9 +56,9 @@ const BENEFITS = [
   {
     id: "premium",
     iconCls: styles.iconGold,
-    icon: "fa-star",
+    icon: "/svg/star3.svg",
     title: "Membresía Premium",
-    desc: "Beneficios premium y acceso exclusivo.",
+    desc: "Befa-bookneficios premium y acceso exclusivo.",
     pts: "500 pts",
     disabled: true,
   },
@@ -120,8 +120,7 @@ export default function BenefitsPage() {
             </p>
             {isGuest && (
               <div className={styles.guestWarning}>
-               Regístrate para desbloquear beneficios y recompensas
-                exclusivas
+                Regístrate para desbloquear beneficios y recompensas exclusivas
               </div>
             )}
           </div>
@@ -149,7 +148,19 @@ export default function BenefitsPage() {
                   className={`benefit-card ${styles.benefitCard} ${disabled ? styles.disabled : ""}`}
                 >
                   <div className={`${styles.benefitCardIcon} ${iconCls}`}>
-                    <i className={`fa-solid ${icon}`} />
+                    {icon.startsWith("/") || icon.endsWith(".svg") ? (
+                      <img
+                        src={icon}
+                        alt={title}
+                        style={{
+                          width: "24px",
+                          height: "24px",
+                          objectFit: "contain",
+                        }}
+                      />
+                    ) : (
+                      <i className={`fa-solid ${icon}`} />
+                    )}
                   </div>
                   <h3>{title}</h3>
                   <p>{desc}</p>
