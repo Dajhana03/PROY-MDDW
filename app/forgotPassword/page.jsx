@@ -1,72 +1,46 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { auth } from "../../firebase/auth";
+import { sendPasswordResetEmail, confirmPasswordReset } from "firebase/auth";
 import styles from "./forgotPassword.module.css";
 
 export default function ForgotPassword() {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-  // Paso 2: Estados del OTP
-  const [otp, setOtp] = useState(new Array(6).fill(""));
-  const [timer, setTimer] = useState(120); 
-  const inputRefs = useRef([]);
+  // Estados de errores y éxitos locales debajo de los controles
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  
+  // 🟢 NUEVO: Estado para el mensaje verde de éxito
+  const [successMsg, setSuccessMsg] = useState("");
+  // 🟢 NUEVO: Estado para alternar el texto del botón de reenvío
+  const [isResent, setIsResent] = useState(false);
 
-  // Paso 3: Estados de Nueva Contraseña
+  // Estados de Nueva Contraseña
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const [oobCode, setOobCode] = useState("");
+
   useEffect(() => {
-    if (step !== 2 || timer === 0) return;
-    const interval = setInterval(() => {
-      setTimer((prev) => prev - 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [step, timer]);
-
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  const handleOtpChange = (element, index) => {
-    const value = element.value.replace(/[^0-9]/g, "");
-    if (!value) return;
-
-    const newOtp = [...otp];
-    newOtp[index] = value.substring(value.length - 1);
-    setOtp(newOtp);
-
-    if (index < 5 && element.value) {
-      inputRefs.current[index + 1].focus();
-    }
-  };
-
-  const handleOtpKeyDown = (e, index) => {
-    if (e.key === "Backspace") {
-      if (!otp[index] && index > 0) {
-        inputRefs.current[index - 1].focus();
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get("oobCode"); 
+      if (code) {
+        setOobCode(code);
+        setStep(3); 
       }
-      const newOtp = [...otp];
-      newOtp[index] = "";
-      setOtp(newOtp);
     }
-  };
-
-  const handleOtpPaste = (e) => {
-    e.preventDefault();
-    const pasteData = e.clipboardData.getData("text").trim();
-    if (!/^\d{6}$/.test(pasteData)) return;
-
-    const newOtp = pasteData.split("");
-    setOtp(newOtp);
-    inputRefs.current[5].focus();
-  };
+  }, []);
 
   const validations = {
     length: password.length >= 8,
@@ -75,64 +49,101 @@ export default function ForgotPassword() {
     special: /[^A-Za-z0-9]/.test(password),
   };
 
-  const handleStep1Submit = (e) => {
+  const handleStep1Submit = async (e) => {
     e.preventDefault();
-    if (!email) {
-      setErrorMsg("Por favor, ingresa un correo electrónico válido.");
-      return;
+    setEmailError("");
+    setSuccessMsg("");
+    setIsLoading(true);
+
+    const actionCodeSettings = {
+      url: `${window.location.origin}/login`, 
+      handleCodeInApp: true,
+    };
+
+    try {
+      await sendPasswordResetEmail(auth, email, actionCodeSettings);
+      setStep(2); 
+    } catch (error) {
+      if (error.code === "auth/user-not-found" || error.code === "auth/invalid-email") {
+        setEmailError("El correo electrónico no se encuentra registrado.");
+      } else {
+        setEmailError("Hubo un problema al enviar el enlace. Inténtalo de nuevo.");
+      }
+    } finally {
+      setIsLoading(false);
     }
-    setErrorMsg("");
-    setStep(2);
-    setTimer(120);
   };
 
-  const handleStep2Submit = (e) => {
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    const code = otp.join("");
-    if (code === "123456") { 
-      setErrorMsg("");
-      setStep(3);
-    } else {
-      setErrorMsg("Código OTP incorrecto. Usa el código demo 123456.");
-    }
-  };
+    setPasswordError("");
+    setConfirmPasswordError("");
 
-  const handleStep3Submit = (e) => {
-    e.preventDefault();
     if (!Object.values(validations).every(Boolean)) {
-      setErrorMsg("La contraseña no cumple con los requisitos de seguridad.");
+      setPasswordError("La contraseña no cumple con los requisitos de seguridad.");
       return;
     }
     if (password !== confirmPassword) {
-      setErrorMsg("Las contraseñas no coinciden.");
+      setConfirmPasswordError("Las contraseñas no coinciden.");
       return;
     }
-    setErrorMsg("");
-    setStep(4);
+    setIsLoading(true);
+
+    try {
+      if (!oobCode) {
+        setPasswordError("El enlace no es válido o ha expirado.");
+        return;
+      }
+      
+      await confirmPasswordReset(auth, oobCode, password);
+      router.push("/login");
+
+    } catch (error) {
+      if (error.code === "auth/expired-action-code") {
+        setPasswordError("El enlace ha expirado. Solicita uno nuevo.");
+      } else {
+        setPasswordError("No se pudo actualizar la contraseña. Inténtalo más tarde.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleResendOtp = () => {
-    setOtp(new Array(6).fill(""));
-    setTimer(120);
-    setErrorMsg("");
-    inputRefs.current[0]?.focus();
+  // 🟢 FUNCIÓN DE REENVÍO CORREGIDA (SIN ALERT)
+  const handleResendEmail = async () => {
+    setEmailError("");
+    setSuccessMsg("");
+    setIsLoading(true);
+    setIsResent(false);
+    
+    const actionCodeSettings = {
+      url: `${window.location.origin}/login`,
+      handleCodeInApp: true,
+    };
+
+    try {
+      await sendPasswordResetEmail(auth, email, actionCodeSettings);
+      // Cambiamos el estado a true si la promesa de Firebase se cumple
+      setIsResent(true);
+      setSuccessMsg("Enlace reenviado con éxito.");
+    } catch (error) {
+      setEmailError("No se pudo reenviar el correo.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <section className={styles.pageContainer}>
       
-      {/* Indicador de progreso (Pasos 1, 2 y 3) */}
-      {step <= 3 && (
+      {/* Indicador de progreso */}
+      {step <= 2 && (
         <div className={styles.progressContainer}>
           <div className={`${styles.stepCircle} ${step >= 1 ? styles.activeStep : ""}`}>
             {step > 1 ? "✓" : "1"}
           </div>
           <div className={`${styles.progressLine} ${step >= 2 ? styles.lineActive : ""}`}></div>
-          <div className={`${styles.stepCircle} ${step >= 2 ? styles.activeStep : ""}`}>
-            {step > 2 ? "✓" : "2"}
-          </div>
-          <div className={`${styles.progressLine} ${step >= 3 ? styles.lineActive : ""}`}></div>
-          <div className={`${styles.stepCircle} ${step === 3 ? styles.activeStep : ""}`}>3</div>
+          <div className={`${styles.stepCircle} ${step === 2 ? styles.activeStep : ""}`}>2</div>
         </div>
       )}
 
@@ -140,22 +151,17 @@ export default function ForgotPassword() {
       <div className={styles.centerIconArea}>
         {step === 1 && (
           <div className={styles.iconCircle}>
-            <img src="/svg/email.svg" alt="svg email" className={styles.topIconImg} />
+            <img src="/svg/email.svg" alt="Email" className={styles.topIconImg} />
           </div>
         )}
         {step === 2 && (
           <div className={`${styles.iconCircle} ${styles.iconCircleGreen}`}>
-            <img src="/svg/security.svg" alt="svg security" className={styles.topIconImg} />
+            <img src="/svg/security.svg" alt="Verificación" className={styles.topIconImg} />
           </div>
         )}
         {step === 3 && (
           <div className={`${styles.iconCircle} ${styles.iconCircleGreen}`}>
-            <img src="/svg/lock.svg" alt="" className={styles.topIconImg} />
-          </div>
-        )}
-        {step === 4 && (
-          <div className={`${styles.iconCircle} ${styles.iconCircleSuccess}`}>
-            <img src="/svg/checkCircle.svg" alt="svg circle" className={styles.topIconImg} />
+            <img src="/svg/lock.svg" alt="Candado" className={styles.topIconImg} />
           </div>
         )}
       </div>
@@ -163,20 +169,17 @@ export default function ForgotPassword() {
       {/* Textos de la cabecera */}
       <h1 className={styles.mainTitle}>
         {step === 1 && "Recuperar contraseña"}
-        {step === 2 && "Ingresa tu código"}
-        {step === 3 && "Nueva contraseña"}
-        {step === 4 && "¡Contraseña actualizada!"}
+        {step === 2 && "Verifica tu correo"}
+        {step === 3 && "Restablecer contraseña"}
       </h1>
       <p className={styles.mainSubtitle}>
-        {step === 1 && "Ingresa tu correo y te enviaremos un código de verificación"}
-        {step === 2 && <>Enviamos un código de 6 dígitos a <strong className={styles.emailHighlighted}>{email || "tu@correo.com"}</strong></>}
-        {step === 3 && "Elige una contraseña segura para tu cuenta"}
-        {step === 4 && "Tu contraseña ha sido cambiada exitosamente. Ya puedes iniciar sesión con tu nueva contraseña."}
+        {step === 1 && "Ingresa tu correo y te enviaremos un enlace oficial de recuperación."}
+        {step === 2 && <>Hemos enviado un enlace de acceso a <strong className={styles.emailHighlighted}>{email || "tu@correo.com"}</strong>.</>}
+        {step === 3 && "Elige una nueva contraseña segura para tu cuenta de EcoCanje."}
       </p>
 
       {/* Tarjeta de Formulario */}
       <div className={styles.card}>
-        {errorMsg && <p className={styles.generalError}>{errorMsg}</p>}
 
         {/* PASO 1: Captura de Email */}
         {step === 1 && (
@@ -192,11 +195,13 @@ export default function ForgotPassword() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  disabled={isLoading}
                 />
               </div>
+              {emailError && <p className={styles.errorMessage}>{emailError}</p>}
             </div>
-            <button type="submit" className={styles.btnSubmit}>
-              Enviar código OTP
+            <button type="submit" className={styles.btnSubmit} disabled={isLoading}>
+              {isLoading ? "Enviando..." : "Enviar enlace de recuperación"}
             </button>
             <Link href="/login" className={styles.backLink}>
               ← Volver al inicio de sesión
@@ -204,57 +209,37 @@ export default function ForgotPassword() {
           </form>
         )}
 
-        {/* PASO 2: Entrada del código de 6 dígitos */}
+        {/* PASO 2: Espera del correo */}
         {step === 2 && (
-          <form onSubmit={handleStep2Submit}>
-            <div className={styles.otpRow} onPaste={handleOtpPaste}>
-              {otp.map((data, index) => (
-                <input
-                  key={index}
-                  type="text"
-                  maxLength="1"
-                  className={styles.otpInput}
-                  value={data}
-                  ref={(el) => (inputRefs.current[index] = el)}
-                  onChange={(e) => handleOtpChange(e.target, index)}
-                  onKeyDown={(e) => handleOtpKeyDown(e, index)}
-                />
-              ))}
-            </div>
-
-            <p className={styles.timerText}>
-              El código expira en <span className={styles.timeCount}>{formatTime(timer)}</span>
+          <div className={styles.successWrapper}>
+            <p className={styles.securityNotice} style={{ textAlign: "center", marginBottom: "20px" }}>
+              Por favor, revisa tu bandeja de entrada y la carpeta de spam. Sigue el enlace recibido para cambiar tu contraseña.
             </p>
 
-            <button type="submit" className={styles.btnSubmit}>
-              Verificar código
+            {/* 🟢 EL BOTÓN MANEJA SU TEXTO DINÁMICAMENTE SEGÚN LOS ESTADOS */}
+            <button 
+              type="button" 
+              onClick={handleResendEmail} 
+              disabled={isLoading}
+              className={styles.btnSubmit}
+              style={{ marginBottom: "8px" }}
+            >
+              {isLoading ? "Reenviando..." : isResent ? "¡Reenviado con éxito! ✓" : "🔄 Reenviar enlace por correo"}
             </button>
 
-            <div className={styles.resendArea}>
-              <p>¿No recibiste el código?</p>
-              <button 
-                type="button" 
-                onClick={handleResendOtp} 
-                disabled={timer > 0}
-                className={styles.btnResend}
-              >
-                🔄 Reenviar código
-              </button>
-            </div>
+            {/* 🟢 MENSAJES DE ERROR O ÉXITO UBICADOS DEBAJO DEL BOTÓN */}
+            {emailError && <p className={styles.errorMessage} style={{ marginBottom: "15px", textAlign: "center" }}>{emailError}</p>}
+            {successMsg && <p className={styles.successMessage}>{successMsg}</p>}
 
-            <div className={styles.demoBox}>
-              Demo: usa el código <strong className={styles.demoCode}>123456</strong> para avanzar
-            </div>
-
-            <button type="button" onClick={() => setStep(1)} className={styles.backLink}>
+            <button type="button" onClick={() => { setStep(1); setIsResent(false); setSuccessMsg(""); }} className={styles.backLink} style={{ marginTop: "12px" }}>
               ← Cambiar correo
             </button>
-          </form>
+          </div>
         )}
 
-        {/* PASO 3: Nueva Contraseña */}
+        {/* PASO 3 INTERNO: Nueva Contraseña */}
         {step === 3 && (
-          <form onSubmit={handleStep3Submit}>
+          <form onSubmit={handlePasswordSubmit}>
             <div className={styles.field}>
               <label htmlFor="password">Nueva contraseña</label>
               <div className={styles.inputWrap}>
@@ -266,6 +251,7 @@ export default function ForgotPassword() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
@@ -275,6 +261,7 @@ export default function ForgotPassword() {
                   {showPassword ? "👁️" : "👁️‍🗨️"}
                 </button>
               </div>
+              {passwordError && <p className={styles.errorMessage}>{passwordError}</p>}
             </div>
 
             <div className={styles.field}>
@@ -288,6 +275,7 @@ export default function ForgotPassword() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
@@ -297,6 +285,7 @@ export default function ForgotPassword() {
                   {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
                 </button>
               </div>
+              {confirmPasswordError && <p className={styles.errorMessage}>{confirmPasswordError}</p>}
             </div>
 
             <ul className={styles.validationList}>
@@ -314,23 +303,10 @@ export default function ForgotPassword() {
               </li>
             </ul>
 
-            <button type="submit" className={styles.btnSubmit}>
-              Guardar nueva contraseña
+            <button type="submit" className={styles.btnSubmit} disabled={isLoading}>
+              {isLoading ? "Guardando..." : "Guardar nueva contraseña"}
             </button>
           </form>
-        )}
-
-        {/* PASO 4: Éxito Final */}
-        {step === 4 && (
-          <div className={styles.successWrapper}>
-            <div className={styles.dashedDivider}></div>
-            <p className={styles.securityNotice}>
-              Por seguridad, tu sesión anterior ha sido cerrada en todos los dispositivos.
-            </p>
-            <Link href="/login" className={styles.btnSubmit} style={{ display: "block", textDecoration: "none", lineHeight: "24px" }}>
-              Ir a iniciar sesión
-            </Link>
-          </div>
         )}
       </div>
 
