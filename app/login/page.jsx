@@ -1,13 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { loginUser } from "../authService";
+import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
+import { loginUser } from "../authService"; 
 import styles from "../login/login.module.css";
 
-function Login() {
+function LoginContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
+
+  const loginWithGoogle = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      console.log("Token de Google obtenido con éxito:", tokenResponse);
+      
+      try {
+        alert("¡Inicio de sesión con Google exitoso!");
+      } catch (error) {
+        alert("Error al iniciar sesion");
+      }
+    },
+    onError: () => {
+      alert("Hubo un problema al autenticar con Google.");
+    },
+  });
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -28,7 +44,12 @@ function Login() {
       </p>
 
       <div className={styles.card}>
-        <button type="button" className={styles.socialBtn}>
+
+        <button 
+          type="button" 
+          className={styles.socialBtn} 
+          onClick={() => loginWithGoogle()}
+        >
           <img
             src="/svg/google.svg"
             alt="Google"
@@ -110,4 +131,12 @@ function Login() {
   );
 }
 
-export default Login;
+export default function Login() {
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
+  return (
+    <GoogleOAuthProvider clientId={clientId}>
+      <LoginContent />
+    </GoogleOAuthProvider>
+  );
+}
