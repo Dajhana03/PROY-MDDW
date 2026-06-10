@@ -256,3 +256,18 @@
 
   box-shadow: 0 4px 14px rgba(16, 185, 129, 0.08);
 }
+
+.partnerCard svg {
+  color: #10b981;
+}
+.partnerCard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.partnerCard svg {
+  width: 70px;
+  height: 70px;
+  color: #10b981;
+  display: block;
+}

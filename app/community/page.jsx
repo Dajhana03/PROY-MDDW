@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./community.module.css";
-
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../firebase/auth";
+import { useRouter } from "next/navigation";
 const initialForums = [
   {
     id: 1,
@@ -72,7 +74,7 @@ const initialStories = [
       "Mi viaje desde mi primera donación hasta convertirme en embajador ECO CANJE.",
     likes: 156,
     liked: false,
-    image: "/images/story1.jpg",
+    image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09",
   },
   {
     id: 2,
@@ -81,7 +83,7 @@ const initialStories = [
     description: "La historia de nuestra campaña solidaria que cambió vidas.",
     likes: 234,
     liked: false,
-    image: "/images/story2.jpg",
+    image: "https://images.unsplash.com/photo-1593113598332-cd288d649433",
   },
   {
     id: 3,
@@ -90,7 +92,7 @@ const initialStories = [
     description: "Así logramos nuestro objetivo ecológico más ambicioso.",
     likes: 189,
     liked: false,
-    image: "/images/story3.jpg",
+    image: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b",
   },
 ];
 
@@ -105,10 +107,29 @@ export default function CommunityPage() {
   const [events, setEvents] = useState(initialEvents);
   const [stories, setStories] = useState(initialStories);
 
+  const router = useRouter();
+
   const [showModal, setShowModal] = useState(false);
-  const isGuest = true;
   const [newTitle, setNewTitle] = useState("");
 
+  const [user, setUser] = useState(null);
+  const [loadingAuth, setLoadingAuth] = useState(true);
+
+  const isGuest = !user;
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoadingAuth(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+  useEffect(() => {
+    if (!loadingAuth && !user) {
+      router.push("/login");
+    }
+  }, [loadingAuth, user, router]);
   const toggleForumLike = (id) => {
     setForums((prev) =>
       prev.map((f) =>
@@ -172,7 +193,9 @@ export default function CommunityPage() {
     setNewTitle("");
     setShowModal(false);
   };
-
+  if (loadingAuth) {
+    return null;
+  }
   return (
     <div className={styles.page}>
       <main className={styles.container}>
@@ -194,25 +217,96 @@ export default function CommunityPage() {
         {/* STATS */}
         <section className={styles.stats}>
           <div className={styles.statCard}>
-            <div className={styles.statIcon}>👥</div>
+            <div className={styles.statIcon}>
+              <svg viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M16 21V19C16 17.3 14.7 16 13 16H7C5.3 16 4 17.3 4 19V21"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <circle
+                  cx="10"
+                  cy="8"
+                  r="4"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M20 21V19.5C20 18.2 19.2 17 18 16.5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M16 4.5C17.8 5 19 6.4 19 8C19 9.6 17.8 11 16 11.5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
             <h2>1,200+</h2>
             <span>Miembros</span>
           </div>
 
           <div className={styles.statCard}>
-            <div className={styles.statIcon}>💬</div>
+            <div className={styles.statIcon}>
+              <svg viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M21 15C21 16.1 20.1 17 19 17H8L3 21V5C3 3.9 3.9 3 5 3H19C20.1 3 21 3.9 21 5V15Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
             <h2>450+</h2>
             <span>Discusiones</span>
           </div>
 
           <div className={styles.statCard}>
-            <div className={styles.statIcon}>📅</div>
+            <div className={styles.statIcon}>
+              <svg viewBox="0 0 24 24" fill="none">
+                <rect
+                  x="3"
+                  y="5"
+                  width="18"
+                  height="16"
+                  rx="2"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M8 3V7"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M16 3V7"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <path d="M3 10H21" stroke="currentColor" strokeWidth="2" />
+              </svg>
+            </div>
             <h2>28</h2>
             <span>Eventos</span>
           </div>
 
           <div className={styles.statCard}>
-            <div className={styles.statIcon}>💚</div>
+            <div className={styles.statIcon}>
+              <svg viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M12 21S4 15.5 4 9.5C4 6.5 6.5 4 9.5 4C11.2 4 12.6 4.8 13.5 6C14.4 4.8 15.8 4 17.5 4C20.5 4 23 6.5 23 9.5C23 15.5 15 21 15 21H12Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
             <h2>5,600+</h2>
             <span>Impactos</span>
           </div>
@@ -225,7 +319,17 @@ export default function CommunityPage() {
             {/* FORO */}
             <div className={styles.card}>
               <div className={styles.cardHeader}>
-                <h2 className={styles.cardTitle}> Foro de Discusión</h2>
+                <h2 className={styles.cardTitle}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M21 15C21 16.1 20.1 17 19 17H8L3 21V5C3 3.9 3.9 3 5 3H19C20.1 3 21 3.9 21 5V15Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  Foro de Discusión
+                </h2>
 
                 <button
                   className={styles.btnPrimary}
@@ -250,7 +354,20 @@ export default function CommunityPage() {
 
                       <div className={styles.metaRight}>
                         <span className={styles.metaIcon}>
-                          💬 {forum.comments}
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <path
+                              d="M21 15C21 16.1 20.1 17 19 17H8L3 21V5C3 3.9 3.9 3 5 3H19C20.1 3 21 3.9 21 5V15Z"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                          {forum.comments}
                         </span>
 
                         <button
@@ -260,7 +377,20 @@ export default function CommunityPage() {
                           }`}
                           onClick={() => !isGuest && toggleForumLike(forum.id)}
                         >
-                          ❤️ {forum.likes}
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <path
+                              d="M12 21S4 15.5 4 9.5C4 6.5 6.5 4 9.5 4C11.2 4 12.6 4.8 13.5 6C14.4 4.8 15.8 4 17.5 4C20.5 4 23 6.5 23 9.5C23 15.5 15 21 15 21H12Z"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                          {forum.likes}
                         </button>
                       </div>
                     </div>
@@ -271,7 +401,17 @@ export default function CommunityPage() {
 
             {/* HISTORIAS */}
             <div className={styles.card}>
-              <h2 className={styles.cardTitle}> Historias Inspiradoras</h2>
+              <h2 className={styles.cardTitle}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M12 21S4 15.5 4 9.5C4 6.5 6.5 4 9.5 4C11.2 4 12.6 4.8 13.5 6C14.4 4.8 15.8 4 17.5 4C20.5 4 23 6.5 23 9.5C23 15.5 15 21 15 21H12Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                Historias Inspiradoras
+              </h2>
 
               <div className={styles.storiesGrid}>
                 {stories.map((story) => (
@@ -296,10 +436,22 @@ export default function CommunityPage() {
                           disabled={isGuest}
                           className={`${styles.likeBtn} ${
                             story.liked ? styles.liked : ""
-                          }`} 
+                          }`}
                           onClick={() => !isGuest && toggleStoryLike(story.id)}
                         >
-                          ❤️ {story.likes}
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <path
+                              d="M12 21S4 15.5 4 9.5C4 6.5 6.5 4 9.5 4C11.2 4 12.6 4.8 13.5 6C14.4 4.8 15.8 4 17.5 4C20.5 4 23 6.5 23 9.5C23 15.5 15 21 15 21H12Z"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
                         </button>
 
                         <button disabled={isGuest} className={styles.readMore}>
@@ -317,17 +469,144 @@ export default function CommunityPage() {
           <aside className={styles.sidebar}>
             {/* EVENTOS */}
             <div className={styles.card}>
-              <h2 className={styles.cardTitle}> Próximos Eventos</h2>
+              <h2 className={styles.cardTitle}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <rect
+                    x="3"
+                    y="5"
+                    width="18"
+                    height="16"
+                    rx="2"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                  <path
+                    d="M8 3V7"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M16 3V7"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                  <path d="M3 10H21" stroke="currentColor" strokeWidth="2" />
+                </svg>
+                Próximos Eventos
+              </h2>
 
               {events.map((event) => (
                 <div className={styles.eventItem} key={event.id}>
                   <h3 className={styles.eventTitle}>{event.title}</h3>
 
                   <div className={styles.eventDetails}>
-                    <p>📅 {event.date}</p>
-                    <p>⏰ {event.hour}</p>
-                    <p>📍 {event.place}</p>
-                    <p>👤 {event.people} asistirán</p>
+                    <p>
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <rect
+                          x="3"
+                          y="5"
+                          width="18"
+                          height="16"
+                          rx="2"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                        <path
+                          d="M8 3V7"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                        <path
+                          d="M16 3V7"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                        <path
+                          d="M3 10H21"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                      </svg>
+                      {event.date}
+                    </p>
+                    <p>
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="9"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                        <path
+                          d="M12 7V12L15 15"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      {event.hour}
+                    </p>
+                    <p>
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <path
+                          d="M12 21C12 21 19 14.5 19 9.5C19 5.9 15.9 3 12 3C8.1 3 5 5.9 5 9.5C5 14.5 12 21 12 21Z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                        <circle
+                          cx="12"
+                          cy="10"
+                          r="2.5"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                      </svg>
+                      {event.place}
+                    </p>
+                    <p>
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <circle
+                          cx="12"
+                          cy="8"
+                          r="4"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                        <path
+                          d="M4 21C4 17.5 7 15 12 15C17 15 20 17.5 20 21"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      {event.people} asistirán
+                    </p>
                   </div>
 
                   <button
@@ -349,7 +628,39 @@ export default function CommunityPage() {
 
             {/* CONTRIBUTORS */}
             <div className={styles.contributorsCard}>
-              <h2 className={styles.contributorsTitle}> Top Contributors</h2>
+              <h2 className={styles.contributorsTitle}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M8 21H16"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M12 17V21"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M7 4H17V8C17 11.3 14.8 14 12 14C9.2 14 7 11.3 7 8V4Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M7 6H4V8C4 9.6 5.3 11 7 11"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                  <path
+                    d="M17 6H20V8C20 9.6 18.7 11 17 11"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                </svg>
+                Top Contributors
+              </h2>
 
               <div className={styles.contributorsList}>
                 {contributors.map((c) => (

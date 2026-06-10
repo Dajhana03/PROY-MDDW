@@ -1,7 +1,28 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../firebase/auth";
+import { useRouter } from "next/navigation";
 import styles from "./blog.module.css";
 
 export default function Blog() {
-  const isGuest = true;
+  const [user, setUser] = useState(null);
+  const [loadingAuth, setLoadingAuth] = useState(true);
+
+  const isGuest = !user;
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoadingAuth(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  if (loadingAuth) {
+    return null;
+  }
   return (
     <div className={styles.container}>
       <h1 className={styles.titulo}>Blog ECO CANJE</h1>

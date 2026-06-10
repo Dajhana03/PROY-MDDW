@@ -1,22 +1,44 @@
 "use client";
 
 import { useState } from "react";
+import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
+import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
 import { loginUser } from "../authService";
 import styles from "../login/login.module.css";
 
-function Login() {
+function LoginContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const loginWithGoogle = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setErrorMsg("");
+      console.log("Token de Google:", tokenResponse);
+    },
+    onError: () => {
+      setErrorMsg("Hubo un problema al autenticar con Google.");
+    },
+  });
+
+  const responseFacebook = (response) => {
+    setErrorMsg("");
+    if (response.accessToken) {
+    } else {
+      setErrorMsg("Hubo un error al autenticar con Facebook.");
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setErrorMsg("");
+
     try {
       const user = await loginUser(email, password);
       console.log("Usuario: ", user);
-      alert("Succesfull Login");
     } catch (error) {
-      alert("Incorrect Credentials");
+      setErrorMsg("Credenciales incorrectas. Inténtalo de nuevo.");
     }
   };
 
@@ -28,7 +50,11 @@ function Login() {
       </p>
 
       <div className={styles.card}>
-        <button type="button" className={styles.socialBtn}>
+        <button
+          type="button"
+          className={styles.socialBtn}
+          onClick={() => loginWithGoogle()}
+        >
           <img
             src="/svg/google.svg"
             alt="Google"
@@ -37,14 +63,26 @@ function Login() {
           Continuar con Google
         </button>
 
-        <button type="button" className={styles.socialBtn}>
-          <img
-            src="/svg/facebook.svg"
-            alt="Facebook"
-            className={styles.socialIcon}
-          />
-          Continuar con Facebook
-        </button>
+        <FacebookLogin
+          appId={process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}
+          autoLoad={false}
+          fields="name,picture"
+          callback={responseFacebook}
+          render={(renderProps) => (
+            <button
+              type="button"
+              className={styles.socialBtn}
+              onClick={renderProps.onClick}
+            >
+              <img
+                src="/svg/facebook.svg"
+                alt="Facebook"
+                className={styles.socialIcon}
+              />
+              Continuar con Facebook
+            </button>
+          )}
+        />
 
         <div className={styles.divider}>
           <span>O con tu email</span>
@@ -79,6 +117,21 @@ function Login() {
                 required
               />
             </div>
+
+            {errorMsg && (
+              <p
+                style={{
+                  color: "#dc3545",
+                  fontSize: "12px",
+                  marginTop: "6px",
+                  marginBottom: "0px",
+                  textAlign: "left",
+                  fontWeight: "500",
+                }}
+              >
+                {errorMsg}
+              </p>
+            )}
           </div>
 
           <div className={styles.row}>
@@ -110,4 +163,13 @@ function Login() {
   );
 }
 
-export default Login;
+export default function Login() {
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  if (!clientId) return <div>Error de configuración.</div>;
+
+  return (
+    <GoogleOAuthProvider clientId={clientId}>
+      <LoginContent />
+    </GoogleOAuthProvider>
+  );
+}
