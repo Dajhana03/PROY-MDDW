@@ -1,0 +1,326 @@
+.container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: var(--font-sans, sans-serif);
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.liveTag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4caf50;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* Stats */
+.statsRow {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.statCard {
+  flex: 1;
+  min-width: 120px;
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.statCard:hover {
+  border-color: #4caf50;
+}
+
+.statActive {
+  border-color: #4caf50;
+  background: #f1f8e9;
+}
+
+.statNumber {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.statLabel {
+  font-size: 0.8rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Search */
+.searchBar {
+  margin-bottom: 1.2rem;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.searchInput:focus {
+  border-color: #4caf50;
+}
+
+/* Table */
+.tableWrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.table thead tr {
+  background: #f5f5f5;
+}
+
+.table th {
+  padding: 0.9rem 1rem;
+  text-align: left;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #555;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.row {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.row:hover {
+  background: #f9fbe7;
+}
+
+.table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+/* Avatar */
+.userCell {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatarFallback {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #c8e6c9;
+  color: #2e7d32;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+/* Badge */
+.roleBadge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* Select de rol */
+.roleSelect {
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-right: 8px;
+}
+
+/* Botón borrar */
+.deleteBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.deleteBtn:hover {
+  opacity: 1;
+}
+
+.empty {
+  text-align: center;
+  color: #999;
+  padding: 2rem !important;
+}
+
+.loading {
+  text-align: center;
+  color: #888;
+  margin-top: 3rem;
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 340px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+
+.closeBtn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: #888;
+}
+
+.modalAvatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.modalAvatarFallback {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #c8e6c9;
+  color: #2e7d32;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.modal h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.modalEmail {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.modalDetails {
+  width: 100%;
+  background: #f9f9f9;
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  margin-top: 0.4rem;
+}
+
+.modalDetails p {
+  margin: 0.3rem 0;
+  font-size: 0.87rem;
+  color: #444;
+}
+
+.modalDetails code {
+  font-size: 0.75rem;
+  color: #888;
+  word-break: break-all;
+}
+
+.deleteBtnModal {
+  margin-top: 0.5rem;
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+  border-radius: 8px;
+  padding: 8px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.deleteBtnModal:hover {
+  background: #ffcdd2;
+}
