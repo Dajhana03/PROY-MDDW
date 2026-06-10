@@ -15,12 +15,7 @@
 
 :global(body) {
   font-family: Inter, sans-serif;
-  background: linear-gradient(
-    135deg,
-    #f7fdf9,
-    #effcf5,
-    #f4fff8
-  );
+  background: linear-gradient(135deg, #f7fdf9, #effcf5, #f4fff8);
 }
 
 .mainBg {
@@ -55,8 +50,7 @@
   background: white;
   border-radius: 24px;
   padding: 35px;
-  box-shadow:
-    0 10px 40px rgba(0,0,0,0.08);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
   border: 1px solid #eef2f7;
 }
 
@@ -72,7 +66,7 @@
   font-size: 14px;
 }
 
-.formInput,
+form .formInput,
 .formTextarea {
   width: 100%;
   border: 1.5px solid #e5e7eb;
@@ -92,8 +86,7 @@
 .formInput:focus,
 .formTextarea:focus {
   border-color: var(--green-primary);
-  box-shadow:
-    0 0 0 4px rgba(16,185,129,.1);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
 }
 
 .donationTypes {
@@ -118,11 +111,7 @@
 }
 
 .active {
-  background: linear-gradient(
-    135deg,
-    var(--green-primary),
-    var(--green-dark)
-  );
+  background: linear-gradient(135deg, var(--green-primary), var(--green-dark));
 
   color: white;
   border-color: transparent;
@@ -189,7 +178,7 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: rgba(0,0,0,.6);
+  background: rgba(0, 0, 0, 0.6);
   color: white;
   cursor: pointer;
 }
@@ -224,12 +213,7 @@
 }
 
 .btnPublish {
-  background: linear-gradient(
-    135deg,
-    var(--green-primary),
-    var(--green-dark)
-  );
-
+  background: linear-gradient(135deg, var(--green-primary), var(--green-dark));
   color: white;
 }
 
@@ -283,26 +267,14 @@
 .guestWarning {
   margin-top: 16px;
   display: inline-block;
-
-  background: linear-gradient(
-    135deg,
-    #ecfdf5,
-    #d1fae5
-  );
-
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
   color: #5f6b66;
-
   padding: 12px 20px;
-
   border-radius: 999px;
-
   font-size: 14px;
   font-weight: 400;
-
   border: 1px solid #a7f3d0;
-
-  box-shadow:
-    0 4px 14px rgba(16,185,129,0.08);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.08);
 }
 
 .typeBtn:disabled,
@@ -341,4 +313,55 @@ select:disabled {
   font-size: 22px;
   font-weight: 400;
   color: #5f6b66;
+}
+
+.mapHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.mapHeader .formLabel {
+  margin-bottom: 0;
+}
+
+.btnLocation {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #0070f3;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.locationText {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 8px;
+  font-style: italic;
+}
+
+.mapError {
+  color: red;
+}
+
+.mapLoading {
+  width: 100%;
+  height: 220px;
+  background-color: #f0f0f0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+}
+
+.mapInstance {
+  width: 100%;
+  height: 220px;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
