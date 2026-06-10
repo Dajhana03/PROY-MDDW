@@ -1,40 +1,43 @@
 "use client";
 
 import { useState } from "react";
-import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
-import { loginUser } from "../authService";
+import Link from "next/link";
 import { auth } from "../../firebase/auth";
-import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
-import styles from "../login/login.module.css";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { loginUser } from "../authService";
+import styles from "./login.module.css";
 
-function LoginContent() {
+export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const loginWithGoogle = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      setErrorMsg("");
-      try {
-        const credential = GoogleAuthProvider.credential(
-          null,
-          tokenResponse.access_token,
-        );
+  const handleGoogleLogin = async () => {
+    setErrorMsg("");
+    setIsLoading(true);
 
-        const result = await signInWithCredential(auth, credential);
+    try {
+      const provider = new GoogleAuthProvider();
 
-        const user = result.user;
-        console.log("Usuario autenticado en Firebase:", user);
-      } catch (error) {
-        console.error("Error al autenticar con Firebase:", error);
-        setErrorMsg("Hubo un problema al sincronizar tu cuenta con Firebase.");
+      provider.setCustomParameters({ prompt: "select_account" });
+
+      const result = await signInWithPopup(auth, provider);
+
+      const user = result.user;
+      console.log("¡Usuario autenticado con éxito en Firebase!", user);
+    } catch (error) {
+      console.error("Error en Google Sign-In con Firebase:", error);
+      if (error.code === "auth/popup-closed-by-user") {
+        setErrorMsg("El proceso de inicio de sesión fue cancelado.");
+      } else {
+        setErrorMsg("Hubo un error al conectar con Google mediante Firebase.");
       }
-    },
-    onError: () => {
-      setErrorMsg("Hubo un problema al autenticar con Google.");
-    },
-  });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -42,7 +45,7 @@ function LoginContent() {
 
     try {
       const user = await loginUser(email, password);
-      console.log("Usuario: ", user);
+      console.log("Usuario tradicional: ", user);
     } catch (error) {
       setErrorMsg("Credenciales incorrectas. Inténtalo de nuevo.");
     }
@@ -56,17 +59,19 @@ function LoginContent() {
       </p>
 
       <div className={styles.card}>
+        {/* BOTÓN SIMPLIFICADO QUE LLAMA DIRECTO A FIREBASE */}
         <button
           type="button"
           className={styles.socialBtn}
-          onClick={() => loginWithGoogle()}
+          onClick={handleGoogleLogin}
+          disabled={isLoading}
         >
           <img
             src="/svg/google.svg"
             alt="Google"
             className={styles.socialIcon}
           />
-          Continuar con Google
+          {isLoading ? "Cargando..." : "Continuar con Google"}
         </button>
 
         <div className={styles.divider}>
@@ -128,9 +133,9 @@ function LoginContent() {
               />
               Recordarme
             </label>
-            <a href="/forgotPassword" className={styles.forgot}>
+            <Link href="/forgotPassword" className={styles.forgot}>
               ¿Olvidaste tu contraseña?
-            </a>
+            </Link>
           </div>
 
           <button type="submit" className={styles.btnSubmit}>
@@ -139,22 +144,11 @@ function LoginContent() {
         </form>
 
         <p className={styles.registerLine}>
-          ¿No tienes cuenta? <a href="/register">Regístrate aquí</a>
+          ¿No tienes cuenta? <Link href="/register">Regístrate aquí</Link>
         </p>
       </div>
 
       <p className={styles.ssl}>Conexión segura con encriptación SSL</p>
     </main>
-  );
-}
-
-export default function Login() {
-  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-  if (!clientId) return <div>Error de configuración.</div>;
-
-  return (
-    <GoogleOAuthProvider clientId={clientId}>
-      <LoginContent />
-    </GoogleOAuthProvider>
   );
 }
