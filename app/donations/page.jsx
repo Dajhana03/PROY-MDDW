@@ -1,11 +1,8 @@
 "use client";
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
-
 import styles from "./donations.module.css";
-
 import { db } from "../../firebase/donations";
-
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 
 const IMPACT_BASE = {
@@ -188,13 +185,9 @@ function Toast({ message, onHide }) {
 export default function DonacionesPage() {
   const isGuest = true;
   const [donations, setDonations] = useState([]);
-
   const [currentFilter, setCurrentFilter] = useState("todas");
-
   const [searchQuery, setSearchQuery] = useState("");
-
   const [activeModal, setActiveModal] = useState(null);
-
   const [toastMsg, setToastMsg] = useState("");
 
   /* ============================================
@@ -291,76 +284,70 @@ export default function DonacionesPage() {
         {/* SIDEBAR */}
         <aside className={styles.sidebar}>
           <div className={styles.searchBox}>
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-  >
-    <circle
-      cx="11"
-      cy="11"
-      r="7"
-      stroke="currentColor"
-      strokeWidth="2"
-    />
-    <path
-      d="M20 20L17 17"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-  </svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <circle
+                cx="11"
+                cy="11"
+                r="7"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+              <path
+                d="M20 20L17 17"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
 
-  <input
-    type="text"
-    placeholder="Buscar donaciones..."
-    value={searchQuery}
-    onChange={(e) => setSearchQuery(e.target.value)}
-  />
-</div>
+            <input
+              type="text"
+              placeholder="Buscar donaciones..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
 
           <div className={styles.filterCard}>
             <div className={styles.filterTitle}>
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-  >
-    <path
-      d="M4 6H20"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-    <path
-      d="M7 12H17"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-    <path
-      d="M10 18H14"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-  </svg>
-
-  Filtrar por Tipo
-</div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M4 6H20"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M7 12H17"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M10 18H14"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+              Filtrar por Tipo
+            </div>
 
             <div className={styles.filterOptions}>
-              {["Todas", "Articulos", "Reciclables", "Alimentos"].map((f) => (
+              {[
+                { id: "todas", label: "Todas" },
+                { id: "articulos", label: "Artículos" },
+                { id: "reciclables", label: "Reciclables" },
+                { id: "alimentos", label: "Alimentos" },
+              ].map(({ id, label }) => (
                 <button
-                  key={f}
+                  key={id}
                   className={`${styles.filterBtn} ${
-                    currentFilter === f ? styles.active : ""
+                    currentFilter === id ? styles.active : ""
                   }`}
-                  onClick={() => setCurrentFilter(f)}
+                  onClick={() => setCurrentFilter(id)} // Ahora guarda "articulos" en vez de "Articulos"
                 >
-                  {f}
+                  {label}
                 </button>
               ))}
             </div>
