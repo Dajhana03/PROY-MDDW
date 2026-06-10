@@ -3,7 +3,21 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import styles from "./donations.module.css";
 import { db } from "../../firebase/donations";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import {
+  collection,
+  onSnapshot,
+  query,
+  orderBy,
+  doc,
+  updateDoc,
+  arrayUnion,
+  increment,
+  addDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { auth } from "../../firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
+import Image from "next/image";
 
 const IMPACT_BASE = {
   donaciones: 0,
@@ -21,21 +35,36 @@ const TAG_LABELS = {
    DONATION CARD
 ============================================ */
 function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
-  const { id, type, title, description, likes, liked, solicitado } = donation;
+  const {
+    id,
+    type,
+    title,
+    description,
+    likes,
+    liked,
+    solicitado,
+    comments = [],
+  } = donation;
+  const [showComments, setShowComments] = useState(false);
+  const [commentText, setCommentText] = useState("");
+
+  const handleSubmitComment = (e) => {
+    e.preventDefault();
+    if (!commentText.trim()) return;
+    donation.onCommentAdd?.(id, commentText);
+    setCommentText("");
+  };
 
   return (
     <article className={styles.card}>
       <div className={styles.cardHeader}>
         <div className={styles.cardUser}>
           <div className={styles.avatar}>{title?.charAt(0).toUpperCase()}</div>
-
           <div className={styles.userInfo}>
             <span className={styles.userName}>Usuario ECO</span>
-
             <span className={styles.userTime}>Publicación reciente</span>
           </div>
         </div>
-
         <span className={styles.ptsBadge}>+50 pts</span>
       </div>
 
@@ -43,25 +72,41 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
         <span className={`${styles.cardTag} ${styles[`tag_${type}`]}`}>
           {TAG_LABELS[type]}
         </span>
-
         <h2 className={styles.cardTitle}>{title}</h2>
-
         <p className={styles.cardDesc}>{description}</p>
       </div>
 
       <div className={styles.cardFooter}>
         <div className={styles.cardActions}>
+          {/* BOTÓN DE LIKES */}
           <button
             className={`${styles.actionBtn} ${liked ? styles.liked : ""}`}
             onClick={() => onLike(id)}
           >
-            ❤️ {likes || 0}
+            <Image src="/svg/heart.svg" alt="Like" width={16} height={16} />{" "}
+            {likes || 0}
           </button>
 
+          {/* BOTÓN DE COMENTARIOS (CORREGIDO) */}
+          <button
+            className={`${styles.actionBtn} ${showComments ? styles.activeComments : ""}`}
+            onClick={() => setShowComments(!showComments)}
+          >
+            <Image
+              src="/svg/messageGreen.svg"
+              alt="Comment"
+              width={16}
+              height={16}
+            />{" "}
+            {comments.length}
+          </button>
+
+          {/* BOTÓN DE COMPARTIR */}
           <button
             className={styles.actionBtn}
             onClick={() => onShare(donation)}
           >
+            <Image src="/svg/share.svg" alt="Share" width={16} height={16} />{" "}
             Compartir
           </button>
         </div>
@@ -75,7 +120,6 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
               alert("Debes iniciar sesión para solicitar donaciones");
               return;
             }
-
             onSolicitar(donation);
           }}
           disabled={solicitado || isGuest}
@@ -87,6 +131,46 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
               : "Solicitar"}
         </button>
       </div>
+
+      {/* BLOQUE DE COMENTARIOS COMPLETO */}
+      {showComments && (
+        <div className={styles.commentsBox}>
+          <hr className={styles.divider} />
+
+          <div className={styles.commentsList}>
+            {comments.length === 0 ? (
+              <p className={styles.noComments}>
+                Aún no hay comentarios. ¡Sé el primero!
+              </p>
+            ) : (
+              comments.map((c, index) => (
+                <div key={index} className={styles.commentItem}>
+                  <strong>{c.user}:</strong> <span>{c.text}</span>
+                </div>
+              ))
+            )}
+          </div>
+
+          {!isGuest ? (
+            <form onSubmit={handleSubmitComment} className={styles.commentForm}>
+              <input
+                type="text"
+                placeholder="Escribe un comentario público..."
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                className={styles.commentInput}
+              />
+              <button type="submit" className={styles.commentSubmitBtn}>
+                Enviar
+              </button>
+            </form>
+          ) : (
+            <p className={styles.loginWarning}>
+              Inicia sesión para dejar un comentario.
+            </p>
+          )}
+        </div>
+      )}
     </article>
   );
 }
@@ -183,7 +267,8 @@ function Toast({ message, onHide }) {
    PAGE PRINCIPAL
 ============================================ */
 export default function DonacionesPage() {
-  const isGuest = true;
+  const [user, setUser] = useState(null);
+  const isGuest = !user;
   const [donations, setDonations] = useState([]);
   const [currentFilter, setCurrentFilter] = useState("todas");
   const [searchQuery, setSearchQuery] = useState("");
@@ -193,6 +278,14 @@ export default function DonacionesPage() {
   /* ============================================
      FIREBASE REALTIME
   ============================================ */
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   useEffect(() => {
     const q = query(collection(db, "donations"), orderBy("createdAt", "desc"));
 
@@ -229,19 +322,57 @@ export default function DonacionesPage() {
     });
   }, [donations, currentFilter, searchQuery]);
 
-  const handleLike = useCallback((id) => {
-    setDonations((prev) =>
-      prev.map((d) =>
-        d.id === id
-          ? {
-              ...d,
-              liked: !d.liked,
-              likes: d.liked ? (d.likes || 0) - 1 : (d.likes || 0) + 1,
-            }
-          : d,
-      ),
-    );
-  }, []);
+  const handleLike = useCallback(
+    async (id) => {
+      const donation = donations.find((d) => d.id === id);
+      const donationRef = doc(db, "donations", id);
+
+      setDonations((prev) =>
+        prev.map((d) =>
+          d.id === id
+            ? {
+                ...d,
+                liked: !d.liked,
+                likes: d.liked ? (d.likes || 0) - 1 : (d.likes || 0) + 1,
+              }
+            : d,
+        ),
+      );
+
+      await updateDoc(donationRef, {
+        likes: increment(donation.liked ? -1 : 1),
+      });
+    },
+    [donations],
+  );
+
+  const handleAddComment = useCallback(
+  async (id, text) => {
+    try {
+      const donationRef = doc(db, "donations", id);
+      const currentUserNames = auth.currentUser?.displayName || "Usuario ECO";
+
+      console.log(" Usuario actual:", auth.currentUser);
+      console.log("Donation ID:", id);
+      console.log("Texto:", text);
+
+      await updateDoc(donationRef, {
+        comments: arrayUnion({
+          user: currentUserNames,
+          text: text.trim(),
+          createdAt: new Date().toISOString(),
+        }),
+      });
+
+      console.log("Comentario guardado");
+      showToast("Comentario publicado");
+    } catch (error) {
+      console.error("Error completo:", error.code, error.message);
+      showToast("No se pudo enviar el comentario");
+    }
+  },
+  [showToast],
+);
 
   const handleShare = useCallback(
     (donation) => {
@@ -261,22 +392,39 @@ export default function DonacionesPage() {
   );
 
   const handleConfirmSolicitar = useCallback(
-    (id) => {
-      setDonations((prev) =>
-        prev.map((d) =>
-          d.id === id
-            ? {
-                ...d,
-                solicitado: true,
-              }
-            : d,
-        ),
-      );
+    async (id) => {
+      try {
+        await addDoc(collection(db, "requests"), {
+          donationId: id,
+          userId: user?.uid || "guest",
+          userEmail: user?.email || "",
+          createdAt: serverTimestamp(),
+        });
 
-      showToast("🎉 Solicitud enviada");
+        setDonations((prev) =>
+          prev.map((d) => (d.id === id ? { ...d, solicitado: true } : d)),
+        );
+        showToast("Solicitud enviada");
+      } catch (e) {
+        showToast("Error al enviar solicitud");
+      }
     },
-    [showToast],
+    [user, showToast],
   );
+
+  const migrarComments = async () => {
+  const snapshot = await getDocs(collection(db, "donations"));
+  
+  for (const docSnap of snapshot.docs) {
+    const data = docSnap.data();
+    if (!Array.isArray(data.comments)) {
+      await updateDoc(doc(db, "donations", docSnap.id), {
+        comments: []
+      });
+    }
+  }
+  alert("Migración completada ✅");
+};
 
   return (
     <main className={styles.mainBg}>
@@ -397,7 +545,11 @@ export default function DonacionesPage() {
               {filtered.map((donation) => (
                 <DonationCard
                   key={donation.id}
-                  donation={donation}
+                  donation={{
+                    ...donation,
+                    comments: donation.comments || [],
+                    onCommentAdd: handleAddComment,
+                  }}
                   onSolicitar={setActiveModal}
                   onLike={handleLike}
                   onShare={handleShare}

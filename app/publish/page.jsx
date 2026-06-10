@@ -163,7 +163,7 @@ export default function PublishPage() {
         images: imageUrls,
 
         likes: 0,
-        comments: 0,
+        comments: [],
 
         createdAt: serverTimestamp(),
       });
