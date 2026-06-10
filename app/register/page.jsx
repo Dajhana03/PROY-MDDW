@@ -1,11 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  registerUser,
-  registerWithGoogle,
-  registerWithFacebook,
-} from "../authService";
+import { registerUser, registerWithGoogle } from "../authService";
 import { useRouter } from "next/navigation";
 import styles from "./register.module.css";
 
@@ -34,7 +30,7 @@ function RegisterPage() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    loading(true);
 
     if (!phone || !birthDate || !city || !userType) {
       alert("Completa todos los campos antes de enviar");
@@ -88,20 +84,6 @@ function RegisterPage() {
     }
   };
 
-  const handleFacebookAuth = async () => {
-    setLoading(true);
-    try {
-      const result = await registerWithFacebook();
-      if (result.success) {
-        router.push("/");
-      } else {
-        alert("Error al iniciar sesión con Facebook");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className={styles["register-container"]}>
       <div className={styles["register-card"]}>
@@ -139,20 +121,6 @@ function RegisterPage() {
                   className={styles["social-icon"]}
                 />
                 Registrarse con Google
-              </button>
-
-              <button
-                className={styles["social-btn"]}
-                type="button"
-                onClick={handleFacebookAuth}
-                disabled={loading}
-              >
-                <img
-                  src="/svg/facebook.svg"
-                  alt="Facebook"
-                  className={styles["social-icon"]}
-                />
-                Registrarse con Facebook
               </button>
 
               <div className={styles.divider}>
