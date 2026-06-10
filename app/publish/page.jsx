@@ -68,7 +68,6 @@ export default function PublishPage() {
 
   useEffect(() => {
     if (!isLoaded || !mapContainerRef.current || !window.google) return;
-
     try {
       const map = new window.google.maps.Map(mapContainerRef.current, {
         center: coordinates,
@@ -278,26 +277,24 @@ export default function PublishPage() {
 
   return (
     <main className={styles.mainBg}>
-           {" "}
       <div className={styles.pageHeader}>
-                <h1>Publicar Donación</h1>       {" "}
-        <p>Comparte lo que ya no usas y ayuda a quien lo necesita</p>       {" "}
+        s<h1>Publicar Donación</h1>       
+        <p>Comparte lo que ya no usas y ayuda a quien lo necesita</p>       
         {isGuest && (
           <div className={styles.guestWarning}>
-                        ✨ Regístrate para publicar y compartir donaciones con
-            la comunidad          {" "}
+            ✨ Regístrate para publicar y compartir donaciones con la comunidad 
+               
           </div>
         )}
-             {" "}
+             
       </div>
-           {" "}
+           
       <div className={styles.formCard}>
-                {/* TIPOS */}       {" "}
+        {/* TIPOS */}       
         <div className={styles.formGroup}>
-                    <label className={styles.formLabel}>Tipo de Donación</label>
-                   {" "}
+          <label className={styles.formLabel}>Tipo de Donación</label>         
           <div className={styles.donationTypes}>
-                       {" "}
+                 
             {typeOptions.map((option) => (
               <button
                 key={option.value}
@@ -306,18 +303,15 @@ export default function PublishPage() {
                 onClick={() => setType(option.value)}
                 className={`${styles.typeBtn} ${type === option.value ? styles.active : ""}`}
               >
-                                {option.label}             {" "}
+                {option.label}             
               </button>
             ))}
-                     {" "}
+                 
           </div>
-                 {" "}
         </div>
-                {/* TITULO */}       {" "}
+        {/* TITULO */}       
         <div className={styles.formGroup}>
-                   {" "}
-          <label className={styles.formLabel}>Título de la Donación</label>     
-             {" "}
+          <label className={styles.formLabel}>Título de la Donación</label>
           <input
             type="text"
             disabled={isGuest}
@@ -326,12 +320,10 @@ export default function PublishPage() {
             onChange={(e) => setTitle(e.target.value)}
             className={styles.formInput}
           />
-                 {" "}
         </div>
-                {/* DESCRIPCION */}       {" "}
+        {/* DESCRIPCION */}       
         <div className={styles.formGroup}>
-                    <label className={styles.formLabel}>Descripción</label>     
-             {" "}
+          <label className={styles.formLabel}>Descripción</label>         
           <textarea
             disabled={isGuest}
             placeholder="Describe el estado, cantidad y cualquier detalle importante..."
@@ -339,13 +331,11 @@ export default function PublishPage() {
             onChange={(e) => setDescription(e.target.value)}
             className={styles.formTextarea}
           />
-                 {" "}
+             
         </div>
-                {/* IMAGENES */}       {" "}
+        {/* IMAGENES */}       
         <div className={styles.formGroup}>
-                   {" "}
-          <label className={styles.formLabel}>Imágenes (opcional)</label>       
-           {" "}
+          <label className={styles.formLabel}>Imágenes (opcional)</label>     
           <div
             className={styles.uploadZone}
             onClick={() => fileInputRef.current?.click()}
@@ -355,7 +345,7 @@ export default function PublishPage() {
               if (e.dataTransfer.files) handleFiles(e.dataTransfer.files);
             }}
           >
-                       {" "}
+                   
             <input
               ref={fileInputRef}
               hidden
@@ -365,15 +355,13 @@ export default function PublishPage() {
               accept="image/*"
               onChange={(e) => handleFiles(e.target.files)}
             />
-                        <div className={styles.uploadIcon}>↑</div>           {" "}
-            <p>Arrastra imágenes aquí o haz clic para seleccionar</p>           {" "}
-            <span>PNG, JPG hasta 10MB</span>           {" "}
+            <div className={styles.uploadIcon}>↑</div>           
+            <p>Arrastra imágenes aquí o haz clic para seleccionar</p>           
+            <span>PNG, JPG hasta 10MB</span>           
             <div className={styles.previewGrid}>
-                           {" "}
               {uploadedFiles.map((file) => (
                 <div key={file.id} className={styles.previewImgWrap}>
-                                    <img src={file.src} alt="" />               
-                   {" "}
+                  <img src={file.src} alt="" />                 
                   <button
                     type="button"
                     className={styles.previewRemove}
@@ -384,23 +372,18 @@ export default function PublishPage() {
                       removeImage(file.id);
                     }}
                   >
-                                        ×                  {" "}
+                    ×                  
                   </button>
-                                 {" "}
+                               
                 </div>
               ))}
-                         {" "}
             </div>
-                     {" "}
           </div>
-                 {" "}
         </div>
-                {/* FILAS */}       {" "}
+        {/* FILAS */}       
         <div className={styles.rowGrid}>
-                   {" "}
           <div className={styles.formGroup}>
-                        <label className={styles.formLabel}>Cantidad</label>   
-                   {" "}
+            <label className={styles.formLabel}>Cantidad</label>   
             <input
               type="number"
               disabled={isGuest}
@@ -409,71 +392,64 @@ export default function PublishPage() {
               onChange={(e) => setQuantity(e.target.value)}
               className={styles.formInput}
             />
-                     {" "}
+                 
           </div>
-                   {" "}
+           
           <div className={styles.formGroup}>
-                        <label className={styles.formLabel}>Condición</label>   
-                   {" "}
+            <label className={styles.formLabel}>Condición</label>           
             <select
               disabled={isGuest}
               value={condition}
               onChange={(e) => setCondition(e.target.value)}
               className={styles.formInput}
             >
-                            <option>Nuevo</option>             {" "}
+              <option>Nuevo</option>             
               {type !== "alimentos" && (
                 <>
-                                    <option>Usado</option>                 {" "}
-                  <option>Regular</option>               {" "}
+                  <option>Usado</option>                 
+                  <option>Regular</option>               
                 </>
               )}
-                         {" "}
+               
             </select>
-                     {" "}
           </div>
-                 {" "}
         </div>
-                {/* UBICACION */}       {" "}
+        {/* UBICACION */}       
         <div className={styles.formGroup}>
-                   {" "}
           <div className={styles.mapHeader}>
-                       {" "}
-            <label className={styles.formLabel}>Ubicación de Entrega</label>   
-                   {" "}
+            <label className={styles.formLabel}>Ubicación de Entrega</label>
             <button
               type="button"
               disabled={isGuest || !isLoaded}
               onClick={handleGetLocation}
               className={styles.btnLocation}
             >
-                            Usar mi ubicación actual            {" "}
+              Usar mi ubicación actual            
             </button>
-                     {" "}
+               
           </div>
-                   {" "}
+           
           {location && (
             <p className={styles.locationText}>Seleccionado: {location}</p>
           )}
-                   {" "}
+           
           {loadError && (
             <p className={styles.mapError}>
-                            Error al cargar el mapa interactivo            {" "}
+              Error al cargar el mapa interactivo            
             </p>
           )}
-                   {" "}
+               
           {!isLoaded ? (
             <div className={styles.mapLoading}>
-                            Cargando mapa interactivo...            {" "}
+              Cargando mapa interactivo...            
             </div>
           ) : (
             <div ref={mapContainerRef} className={styles.mapInstance} />
           )}
-                 {" "}
+                 
         </div>
-                {/* BOTONES */}       {" "}
+        {/* BOTONES */}       
         <div className={styles.formActions}>
-                   {" "}
           <button
             type="button"
             disabled={isGuest}
@@ -486,34 +462,28 @@ export default function PublishPage() {
               setToast("Borrador guardado");
             }}
           >
-                        {isGuest ? "Registrarse" : "Guardar Borrador"}       
-             {" "}
+            {isGuest ? "Registrarse" : "Guardar Borrador"}         
           </button>
-                   {" "}
           <button
             type="button"
             disabled={isGuest || loading}
             className={styles.btnPublish}
             onClick={handlePublish}
           >
-                       {" "}
             {loading
               ? "Publicando..."
               : isGuest
                 ? "Crear Cuenta"
                 : "Publicar Donación"}
-                     {" "}
+                     
           </button>
-                 {" "}
         </div>
-               {" "}
         <div className={styles.bottomText}>
-                    Al publicar, aceptas que la información sea visible para la
-          comunidad           universitaria        {" "}
+          Al publicar, aceptas que la información sea visible para la comunidad
+          universitaria        
         </div>
-             {" "}
       </div>
-            {toast && <div className={styles.toast}>{toast}</div>}   {" "}
+      {toast && <div className={styles.toast}>{toast}</div>}   
     </main>
   );
 }
