@@ -3,12 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "./publish.module.css";
 
-import { db, storage } from "../../firebase/donations";
+// FIX: db y storage vienen de archivos separados según tu estructura de /firebase
+import { db } from "../../firebase/db";
+import { storage } from "../../firebase/storage";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase/auth";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const typeOptions = [
   { label: " Artículos", value: "articulos" },
@@ -16,9 +19,14 @@ const typeOptions = [
   { label: " Alimentos", value: "alimentos" },
 ];
 
+const MAX_FILE_SIZE_MB = 10;
+const MAX_IMAGES = 6;
+const MAPS_SCRIPT_ID = "google-maps-script";
+
 export default function PublishPage() {
   const router = useRouter();
   const [user, setUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const mapContainerRef = useRef(null);
@@ -26,6 +34,7 @@ export default function PublishPage() {
   const markerInstanceRef = useRef(null);
   const defaultCenter = { lat: -12.046374, lng: -77.042793 };
 
+  // Carga del script de Google Maps (con guardia para no duplicarlo)
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!apiKey) {
@@ -38,7 +47,15 @@ export default function PublishPage() {
       return;
     }
 
+    const existingScript = document.getElementById(MAPS_SCRIPT_ID);
+    if (existingScript) {
+      existingScript.addEventListener("load", () => setIsLoaded(true));
+      existingScript.addEventListener("error", () => setLoadError(true));
+      return;
+    }
+
     const script = document.createElement("script");
+    script.id = MAPS_SCRIPT_ID;
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&v=weekly`;
     script.async = true;
     script.defer = true;
@@ -48,15 +65,15 @@ export default function PublishPage() {
     document.head.appendChild(script);
   }, []);
 
+  // Auth: ya NO redirige automáticamente. El invitado puede ver el formulario
+  // (en modo lectura) y decide si quiere registrarse.
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      if (!currentUser) {
-        router.push("/login");
-      }
+      setAuthChecked(true);
     });
     return () => unsubscribe();
-  }, [router]);
+  }, []);
 
   const [type, setType] = useState("articulos");
   const [title, setTitle] = useState("");
@@ -65,6 +82,7 @@ export default function PublishPage() {
   const [condition, setCondition] = useState("Nuevo");
   const [quantity, setQuantity] = useState(1);
   const [coordinates, setCoordinates] = useState(defaultCenter);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (!isLoaded || !mapContainerRef.current || !window.google) return;
@@ -83,7 +101,7 @@ export default function PublishPage() {
         draggable: true,
       });
 
-      marker.addListener("dragend", async () => {
+      marker.addListener("dragend", () => {
         const newPos = marker.getPosition();
         const lat = newPos.lat();
         const lng = newPos.lng();
@@ -107,7 +125,9 @@ export default function PublishPage() {
       updateAddressWithGeocoding(coordinates.lat, coordinates.lng);
     } catch (err) {
       console.error("Error al inicializar el mapa:", err);
+      setLoadError(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded]);
 
   const updateAddressWithGeocoding = async (lat, lng) => {
@@ -136,15 +156,19 @@ export default function PublishPage() {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState("");
-  const isGuest = !user;
+  const isGuest = authChecked && !user;
 
   useEffect(() => {
-    const draft = localStorage.getItem("draftDonation");
-    if (draft) {
-      const parsed = JSON.parse(draft);
-      setType(parsed.type || "articulos");
-      setTitle(parsed.title || "");
-      setDescription(parsed.description || "");
+    try {
+      const draft = localStorage.getItem("draftDonation");
+      if (draft) {
+        const parsed = JSON.parse(draft);
+        setType(parsed.type || "articulos");
+        setTitle(parsed.title || "");
+        setDescription(parsed.description || "");
+      }
+    } catch (err) {
+      console.error("No se pudo cargar el borrador:", err);
     }
   }, []);
 
@@ -169,7 +193,7 @@ export default function PublishPage() {
     setToast("Solicitando permisos de ubicación...");
 
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
+      (position) => {
         const { latitude, longitude } = position.coords;
         const newCoords = { lat: latitude, lng: longitude };
 
@@ -196,8 +220,27 @@ export default function PublishPage() {
       setToast("🔒 Regístrate para subir imágenes");
       return;
     }
-    const images = Array.from(files);
-    images.forEach((file) => {
+
+    const incoming = Array.from(files);
+
+    if (uploadedFiles.length + incoming.length > MAX_IMAGES) {
+      setToast(`⚠️ Máximo ${MAX_IMAGES} imágenes por publicación`);
+      return;
+    }
+
+    const validFiles = incoming.filter((file) => {
+      if (!file.type.startsWith("image/")) {
+        setToast("⚠️ Solo se permiten archivos de imagen");
+        return false;
+      }
+      if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+        setToast(`⚠️ "${file.name}" supera los ${MAX_FILE_SIZE_MB}MB`);
+        return false;
+      }
+      return true;
+    });
+
+    validFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         setUploadedFiles((prev) => [
@@ -217,14 +260,32 @@ export default function PublishPage() {
     setUploadedFiles((prev) => prev.filter((img) => img.id !== id));
   };
 
+  const validateForm = () => {
+    const nextErrors = {};
+
+    if (!title.trim()) nextErrors.title = "El título es obligatorio";
+    if (!description.trim())
+      nextErrors.description = "La descripción es obligatoria";
+    if (!location.trim())
+      nextErrors.location = "Selecciona una ubicación en el mapa";
+
+    const qty = Number(quantity);
+    if (!Number.isInteger(qty) || qty < 1) {
+      nextErrors.quantity = "La cantidad debe ser un número entero mayor a 0";
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
   const handlePublish = async () => {
     if (isGuest) {
-      setToast("🔒 Regístrate para poder publicar donaciones");
+      router.push("/register");
       return;
     }
 
-    if (!title.trim() || !description.trim() || !location.trim()) {
-      setToast("⚠️ Completa todos los campos");
+    if (!validateForm()) {
+      setToast("⚠️ Revisa los campos marcados");
       return;
     }
 
@@ -236,7 +297,7 @@ export default function PublishPage() {
         if (!image.file) continue;
         const imageRef = ref(
           storage,
-          `donations/${Date.now()}-${image.file.name}`,
+          `donations/${user.uid}/${Date.now()}-${image.file.name}`,
         );
         await uploadBytes(imageRef, image.file);
         const downloadURL = await getDownloadURL(imageRef);
@@ -245,8 +306,8 @@ export default function PublishPage() {
 
       await addDoc(collection(db, "donations"), {
         type,
-        title,
-        description,
+        title: title.trim(),
+        description: description.trim(),
         location,
         coordinates,
         condition,
@@ -254,6 +315,7 @@ export default function PublishPage() {
         images: imageUrls,
         likes: 0,
         comments: [],
+        ownerId: user.uid,
         createdAt: serverTimestamp(),
       });
 
@@ -266,13 +328,27 @@ export default function PublishPage() {
       setQuantity(1);
       setUploadedFiles([]);
       setType("articulos");
+      setErrors({});
       localStorage.removeItem("draftDonation");
     } catch (error) {
       console.error("ERROR FIREBASE:", error);
-      setToast("Error al publicar");
+      setToast("Error al publicar. Intenta de nuevo");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSaveDraft = () => {
+    if (isGuest) {
+      router.push("/register");
+      return;
+    }
+
+    localStorage.setItem(
+      "draftDonation",
+      JSON.stringify({ type, title, description }),
+    );
+    setToast("Borrador guardado");
   };
 
   return (
@@ -316,7 +392,11 @@ export default function PublishPage() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className={styles.formInput}
+            maxLength={80}
           />
+          {errors.title && (
+            <p className={styles.fieldError}>{errors.title}</p>
+          )}
         </div>
 
         {/* DESCRIPCION */}
@@ -328,7 +408,11 @@ export default function PublishPage() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className={styles.formTextarea}
+            maxLength={500}
           />
+          {errors.description && (
+            <p className={styles.fieldError}>{errors.description}</p>
+          )}
         </div>
 
         {/* IMAGENES */}
@@ -350,11 +434,16 @@ export default function PublishPage() {
               multiple
               type="file"
               accept="image/*"
-              onChange={(e) => handleFiles(e.target.files)}
+              onChange={(e) => {
+                handleFiles(e.target.files);
+                e.target.value = "";
+              }}
             />
             <div className={styles.uploadIcon}>↑</div>
             <p>Arrastra imágenes aquí o haz clic para seleccionar</p>
-            <span>PNG, JPG hasta 10MB</span>
+            <span>
+              PNG, JPG hasta {MAX_FILE_SIZE_MB}MB · máx. {MAX_IMAGES} imágenes
+            </span>
             <div className={styles.previewGrid}>
               {uploadedFiles.map((file) => (
                 <div key={file.id} className={styles.previewImgWrap}>
@@ -385,10 +474,18 @@ export default function PublishPage() {
               type="number"
               disabled={isGuest}
               min="1"
+              step="1"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
+              onBlur={() => {
+                const qty = Math.max(1, Math.round(Number(quantity) || 1));
+                setQuantity(qty);
+              }}
               className={styles.formInput}
             />
+            {errors.quantity && (
+              <p className={styles.fieldError}>{errors.quantity}</p>
+            )}
           </div>
 
           <div className={styles.formGroup}>
@@ -426,17 +523,23 @@ export default function PublishPage() {
           {location && (
             <p className={styles.locationText}>Seleccionado: {location}</p>
           )}
+          {errors.location && (
+            <p className={styles.fieldError}>{errors.location}</p>
+          )}
           {loadError && (
             <p className={styles.mapError}>
-              Error al cargar el mapa interactivo
+              Error al cargar el mapa interactivo. Revisa tu conexión o
+              inténtalo más tarde.
             </p>
           )}
-          {!isLoaded ? (
+          {!isLoaded && !loadError ? (
             <div className={styles.mapLoading}>
               Cargando mapa interactivo...
             </div>
           ) : (
-            <div ref={mapContainerRef} className={styles.mapInstance} />
+            !loadError && (
+              <div ref={mapContainerRef} className={styles.mapInstance} />
+            )
           )}
         </div>
 
@@ -444,22 +547,15 @@ export default function PublishPage() {
         <div className={styles.formActions}>
           <button
             type="button"
-            disabled={isGuest}
             className={styles.btnDraft}
-            onClick={() => {
-              localStorage.setItem(
-                "draftDonation",
-                JSON.stringify({ type, title, description }),
-              );
-              setToast("Borrador guardado");
-            }}
+            onClick={handleSaveDraft}
           >
             {isGuest ? "Registrarse" : "Guardar Borrador"}
           </button>
 
           <button
             type="button"
-            disabled={isGuest || loading}
+            disabled={!isGuest && loading}
             className={styles.btnPublish}
             onClick={handlePublish}
           >
@@ -476,7 +572,11 @@ export default function PublishPage() {
           universitaria
         </div>
       </div>
-      {toast && <div className={styles.toast}>{toast}</div>}
+      {toast && (
+        <div className={styles.toast} role="status" aria-live="polite">
+          {toast}
+        </div>
+      )}
     </main>
   );
 }

@@ -271,3 +271,15 @@
   color: #10b981;
   display: block;
 }
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #10b981;
+  color: white;
+  padding: 14px 24px;
+  border-radius: 999px;
+  font-weight: 700;
+  z-index: 999;
+}
