@@ -17,7 +17,6 @@ import {
 } from "firebase/firestore";
 import { auth } from "../../firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
-import Image from "next/image";
 
 const IMPACT_BASE = {
   donaciones: 0,
@@ -32,19 +31,101 @@ const TAG_LABELS = {
 };
 
 /* ============================================
+   ICONOS SVG INLINE
+============================================ */
+function HeartIcon({ filled }) {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill={filled ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z" />
+    </svg>
+  );
+}
+
+function CommentIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+    </svg>
+  );
+}
+
+function ShareIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <line x1="8.6" y1="10.5" x2="15.4" y2="6.5" />
+      <line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
+    </svg>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+      <path
+        d="M20 20L17 17"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function FilterIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M4 6H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M7 12H17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M10 18H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
+/* ============================================
    DONATION CARD
 ============================================ */
 function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
-  const {
-    id,
-    type,
-    title,
-    description,
-    likes,
-    liked,
-    solicitado,
-    comments = [],
-  } = donation;
+  const { id, type, title, description, likes, liked, solicitado, comments = [] } = donation;
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
 
@@ -69,52 +150,38 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
       </div>
 
       <div className={styles.cardBody}>
-        <span className={`${styles.cardTag} ${styles[`tag_${type}`]}`}>
-          {TAG_LABELS[type]}
-        </span>
+        <span className={`${styles.cardTag} ${styles[`tag_${type}`]}`}>{TAG_LABELS[type]}</span>
         <h2 className={styles.cardTitle}>{title}</h2>
         <p className={styles.cardDesc}>{description}</p>
       </div>
 
       <div className={styles.cardFooter}>
         <div className={styles.cardActions}>
-          {/* BOTÓN DE LIKES */}
           <button
             className={`${styles.actionBtn} ${liked ? styles.liked : ""}`}
             onClick={() => onLike(id)}
+            aria-pressed={!!liked}
+            aria-label="Me gusta"
           >
-            <Image src="/svg/heart.svg" alt="Like" width={16} height={16} />{" "}
-            {likes || 0}
+            <HeartIcon filled={!!liked} /> {likes || 0}
           </button>
 
-          {/* BOTÓN DE COMENTARIOS (CORREGIDO) */}
           <button
             className={`${styles.actionBtn} ${showComments ? styles.activeComments : ""}`}
             onClick={() => setShowComments(!showComments)}
+            aria-expanded={showComments}
+            aria-label="Ver comentarios"
           >
-            <Image
-              src="/svg/messageGreen.svg"
-              alt="Comment"
-              width={16}
-              height={16}
-            />{" "}
-            {comments.length}
+            <CommentIcon /> {comments.length}
           </button>
 
-          {/* BOTÓN DE COMPARTIR */}
-          <button
-            className={styles.actionBtn}
-            onClick={() => onShare(donation)}
-          >
-            <Image src="/svg/share.svg" alt="Share" width={16} height={16} />{" "}
-            Compartir
+          <button className={styles.actionBtn} onClick={() => onShare(donation)} aria-label="Compartir">
+            <ShareIcon /> Compartir
           </button>
         </div>
 
         <button
-          className={`${styles.btnSolicitar} ${
-            solicitado || isGuest ? styles.solicitado : ""
-          }`}
+          className={`${styles.btnSolicitar} ${solicitado || isGuest ? styles.solicitado : ""}`}
           onClick={() => {
             if (isGuest) {
               alert("Debes iniciar sesión para solicitar donaciones");
@@ -124,24 +191,17 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
           }}
           disabled={solicitado || isGuest}
         >
-          {isGuest
-            ? "Inicia sesión"
-            : solicitado
-              ? "✓ Solicitado"
-              : "Solicitar"}
+          {isGuest ? "Inicia sesión" : solicitado ? "✓ Solicitado" : "Solicitar"}
         </button>
       </div>
 
-      {/* BLOQUE DE COMENTARIOS COMPLETO */}
       {showComments && (
         <div className={styles.commentsBox}>
           <hr className={styles.divider} />
 
           <div className={styles.commentsList}>
             {comments.length === 0 ? (
-              <p className={styles.noComments}>
-                Aún no hay comentarios. ¡Sé el primero!
-              </p>
+              <p className={styles.noComments}>Aún no hay comentarios. ¡Sé el primero!</p>
             ) : (
               comments.map((c, index) => (
                 <div key={index} className={styles.commentItem}>
@@ -160,14 +220,10 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
                 onChange={(e) => setCommentText(e.target.value)}
                 className={styles.commentInput}
               />
-              <button type="submit" className={styles.commentSubmitBtn}>
-                Enviar
-              </button>
+              <button type="submit" className={styles.commentSubmitBtn}>Enviar</button>
             </form>
           ) : (
-            <p className={styles.loginWarning}>
-              Inicia sesión para dejar un comentario.
-            </p>
+            <p className={styles.loginWarning}>Inicia sesión para dejar un comentario.</p>
           )}
         </div>
       )}
@@ -180,23 +236,25 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
 ============================================ */
 function SolicitarModal({ donation, onClose, onConfirm }) {
   const textareaRef = useRef(null);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     if (donation) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "";
-
     return () => {
       document.body.style.overflow = "";
     };
   }, [donation]);
 
   useEffect(() => {
+    if (donation) setMessage("");
+  }, [donation]);
+
+  useEffect(() => {
     const onKey = (e) => {
       if (e.key === "Escape") onClose();
     };
-
     document.addEventListener("keydown", onKey);
-
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
@@ -212,9 +270,8 @@ function SolicitarModal({ donation, onClose, onConfirm }) {
       <div className={styles.modalCard}>
         <div className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>Solicitar: {donation.title}</h2>
-
-          <button className={styles.closeBtn} onClick={onClose}>
-            ✕
+          <button className={styles.closeBtn} onClick={onClose} aria-label="Cerrar">
+            <CloseIcon />
           </button>
         </div>
 
@@ -227,12 +284,14 @@ function SolicitarModal({ donation, onClose, onConfirm }) {
             ref={textareaRef}
             className={styles.modalTextarea}
             placeholder="Ej: Hola, me gustaría solicitar esta donación..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
           />
 
           <button
             className={styles.confirmBtn}
             onClick={() => {
-              onConfirm(donation.id);
+              onConfirm(donation.id, message.trim());
               onClose();
             }}
           >
@@ -250,17 +309,11 @@ function SolicitarModal({ donation, onClose, onConfirm }) {
 function Toast({ message, onHide }) {
   useEffect(() => {
     if (!message) return;
-
     const t = setTimeout(onHide, 3000);
-
     return () => clearTimeout(t);
   }, [message, onHide]);
 
-  return (
-    <div className={`${styles.toast} ${message ? styles.toastShow : ""}`}>
-      {message}
-    </div>
-  );
+  return <div className={`${styles.toast} ${message ? styles.toastShow : ""}`}>{message}</div>;
 }
 
 /* ============================================
@@ -274,31 +327,32 @@ export default function DonacionesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeModal, setActiveModal] = useState(null);
   const [toastMsg, setToastMsg] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  /* ============================================
-     FIREBASE REALTIME
-  ============================================ */
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
-
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
     const q = query(collection(db, "donations"), orderBy("createdAt", "desc"));
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        liked: false,
-        solicitado: false,
-      }));
-
-      setDonations(data);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          liked: false,
+          solicitado: false,
+        }));
+        setDonations(data);
+        setLoading(false);
+      },
+      () => setLoading(false),
+    );
 
     return () => unsubscribe();
   }, []);
@@ -309,101 +363,93 @@ export default function DonacionesPage() {
 
   const filtered = useMemo(() => {
     const q = searchQuery.toLowerCase();
-
     return donations.filter((d) => {
       const matchFilter = currentFilter === "todas" || d.type === currentFilter;
-
       const matchSearch =
-        !q ||
-        d.title?.toLowerCase().includes(q) ||
-        d.description?.toLowerCase().includes(q);
-
+        !q || d.title?.toLowerCase().includes(q) || d.description?.toLowerCase().includes(q);
       return matchFilter && matchSearch;
     });
   }, [donations, currentFilter, searchQuery]);
 
   const handleLike = useCallback(
     async (id) => {
+      if (isGuest) {
+        showToast("Inicia sesión para dar like");
+        return;
+      }
+
       const donation = donations.find((d) => d.id === id);
+      if (!donation) return;
+
       const donationRef = doc(db, "donations", id);
 
       setDonations((prev) =>
         prev.map((d) =>
           d.id === id
-            ? {
-                ...d,
-                liked: !d.liked,
-                likes: d.liked ? (d.likes || 0) - 1 : (d.likes || 0) + 1,
-              }
+            ? { ...d, liked: !d.liked, likes: d.liked ? (d.likes || 0) - 1 : (d.likes || 0) + 1 }
             : d,
         ),
       );
 
-      await updateDoc(donationRef, {
-        likes: increment(donation.liked ? -1 : 1),
-      });
+      try {
+        await updateDoc(donationRef, { likes: increment(donation.liked ? -1 : 1) });
+      } catch (e) {
+        setDonations((prev) =>
+          prev.map((d) => (d.id === id ? { ...d, liked: donation.liked, likes: donation.likes } : d)),
+        );
+        showToast("No se pudo actualizar el like");
+      }
     },
-    [donations],
+    [donations, isGuest, showToast],
   );
 
   const handleAddComment = useCallback(
-  async (id, text) => {
-    try {
-      const donationRef = doc(db, "donations", id);
-      const currentUserNames = auth.currentUser?.displayName || "Usuario ECO";
+    async (id, text) => {
+      try {
+        const donationRef = doc(db, "donations", id);
+        const currentUserName = auth.currentUser?.displayName || "Usuario ECO";
 
-      console.log(" Usuario actual:", auth.currentUser);
-      console.log("Donation ID:", id);
-      console.log("Texto:", text);
+        await updateDoc(donationRef, {
+          comments: arrayUnion({
+            user: currentUserName,
+            text: text.trim(),
+            createdAt: new Date().toISOString(),
+          }),
+        });
 
-      await updateDoc(donationRef, {
-        comments: arrayUnion({
-          user: currentUserNames,
-          text: text.trim(),
-          createdAt: new Date().toISOString(),
-        }),
-      });
-
-      console.log("Comentario guardado");
-      showToast("Comentario publicado");
-    } catch (error) {
-      console.error("Error completo:", error.code, error.message);
-      showToast("No se pudo enviar el comentario");
-    }
-  },
-  [showToast],
-);
+        showToast("Comentario publicado");
+      } catch (error) {
+        showToast("No se pudo enviar el comentario");
+      }
+    },
+    [showToast],
+  );
 
   const handleShare = useCallback(
     (donation) => {
       if (navigator.share) {
-        navigator.share({
-          title: donation.title,
-          text: donation.description,
-          url: window.location.href,
-        });
+        navigator
+          .share({ title: donation.title, text: donation.description, url: window.location.href })
+          .catch(() => {});
       } else {
-        navigator.clipboard
-          .writeText(window.location.href)
-          .then(() => showToast("🔗 Enlace copiado"));
+        navigator.clipboard.writeText(window.location.href).then(() => showToast("Enlace copiado"));
       }
     },
     [showToast],
   );
 
   const handleConfirmSolicitar = useCallback(
-    async (id) => {
+    async (id, mensaje) => {
       try {
         await addDoc(collection(db, "requests"), {
           donationId: id,
           userId: user?.uid || "guest",
           userEmail: user?.email || "",
+          mensaje: mensaje || "",
           createdAt: serverTimestamp(),
         });
 
-        setDonations((prev) =>
-          prev.map((d) => (d.id === id ? { ...d, solicitado: true } : d)),
-        );
+        setDonations((prev) => prev.map((d) => (d.id === id ? { ...d, solicitado: true } : d)));
         showToast("Solicitud enviada");
       } catch (e) {
         showToast("Error al enviar solicitud");
@@ -412,42 +458,12 @@ export default function DonacionesPage() {
     [user, showToast],
   );
 
-  const migrarComments = async () => {
-  const snapshot = await getDocs(collection(db, "donations"));
-  
-  for (const docSnap of snapshot.docs) {
-    const data = docSnap.data();
-    if (!Array.isArray(data.comments)) {
-      await updateDoc(doc(db, "donations", docSnap.id), {
-        comments: []
-      });
-    }
-  }
-  alert("Migración completada ✅");
-};
-
   return (
     <main className={styles.mainBg}>
       <div className={styles.layout}>
-        {/* SIDEBAR */}
         <aside className={styles.sidebar}>
           <div className={styles.searchBox}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <circle
-                cx="11"
-                cy="11"
-                r="7"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-              <path
-                d="M20 20L17 17"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-
+            <SearchIcon />
             <input
               type="text"
               placeholder="Buscar donaciones..."
@@ -458,26 +474,7 @@ export default function DonacionesPage() {
 
           <div className={styles.filterCard}>
             <div className={styles.filterTitle}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M4 6H20"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M7 12H17"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M10 18H14"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
+              <FilterIcon />
               Filtrar por Tipo
             </div>
 
@@ -490,10 +487,8 @@ export default function DonacionesPage() {
               ].map(({ id, label }) => (
                 <button
                   key={id}
-                  className={`${styles.filterBtn} ${
-                    currentFilter === id ? styles.active : ""
-                  }`}
-                  onClick={() => setCurrentFilter(id)} // Ahora guarda "articulos" en vez de "Articulos"
+                  className={`${styles.filterBtn} ${currentFilter === id ? styles.active : ""}`}
+                  onClick={() => setCurrentFilter(id)}
                 >
                   {label}
                 </button>
@@ -507,36 +502,33 @@ export default function DonacionesPage() {
             <div className={styles.impactRows}>
               <div className={styles.impactRow}>
                 <span className={styles.impactLabel}>Donaciones:</span>
-
-                <span className={styles.impactValue}>
-                  {IMPACT_BASE.donaciones}
-                </span>
+                <span className={styles.impactValue}>{IMPACT_BASE.donaciones}</span>
               </div>
 
               <div className={styles.impactRow}>
                 <span className={styles.impactLabel}>Puntos:</span>
-
                 <span className={styles.impactValue}>{IMPACT_BASE.puntos}</span>
               </div>
 
               <div className={styles.impactRow}>
                 <span className={styles.impactLabel}>Nivel:</span>
-
                 <span className={styles.impactNivel}>{IMPACT_BASE.nivel}</span>
               </div>
             </div>
           </div>
         </aside>
 
-        {/* FEED */}
         <section className={styles.feed}>
           <div className={styles.feedHeader}>
             <h1>Feed de Donaciones</h1>
-
             <p>Descubre y solicita donaciones de la comunidad universitaria</p>
           </div>
 
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div className={styles.emptyState}>
+              <p>Cargando donaciones...</p>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className={styles.emptyState}>
               <p>No hay donaciones publicadas.</p>
             </div>
@@ -545,11 +537,7 @@ export default function DonacionesPage() {
               {filtered.map((donation) => (
                 <DonationCard
                   key={donation.id}
-                  donation={{
-                    ...donation,
-                    comments: donation.comments || [],
-                    onCommentAdd: handleAddComment,
-                  }}
+                  donation={{ ...donation, comments: donation.comments || [], onCommentAdd: handleAddComment }}
                   onSolicitar={setActiveModal}
                   onLike={handleLike}
                   onShare={handleShare}
@@ -561,11 +549,7 @@ export default function DonacionesPage() {
         </section>
       </div>
 
-      <SolicitarModal
-        donation={activeModal}
-        onClose={() => setActiveModal(null)}
-        onConfirm={handleConfirmSolicitar}
-      />
+      <SolicitarModal donation={activeModal} onClose={() => setActiveModal(null)} onConfirm={handleConfirmSolicitar} />
 
       <Toast message={toastMsg} onHide={() => setToastMsg("")} />
     </main>

@@ -6,12 +6,34 @@ import { useCounter } from "../../hooks/useCounter";
 import styles from "./benefits.module.css";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase/auth";
-const BENEFIT_STATS = [
-  { icon: "fa-gift", value: "850", label: "Puntos Disponibles" },
-  { icon: "fa-star", value: "12", label: "Beneficios Canjeados" },
-  { icon: "fa-wallet", value: "s/2,500", label: "Ahorro Total" },
-];
+import { db } from "../../firebase/db";
+import {
+  doc,
+  onSnapshot,
+  collection,
+  query,
+  where,
+  runTransaction,
+} from "firebase/firestore";
+import { useRouter } from "next/navigation";
 
+/*
+ * ESQUEMA ASUMIDO EN FIRESTORE (ajusta si el tuyo es distinto):
+ *
+ * users/{uid}
+ *   - points: number   -> puntos disponibles del usuario
+ *
+ * redemptions/{autoId}
+ *   - userId: string
+ *   - benefitId: string
+ *   - benefitTitle: string
+ *   - pointsCost: number
+ *   - valueSoles: number
+ *   - createdAt: Timestamp
+ */
+
+// pointsCost y valueSoles definen el costo real de cada canje.
+// valueSoles se usa solo para calcular "Ahorro Total" en la barra de stats.
 const BENEFITS = [
   {
     id: "cafe",
@@ -19,7 +41,8 @@ const BENEFITS = [
     icon: "/svg/cup.svg",
     title: "Café Gratis",
     desc: "Obtén un café gratis en la cafetería del campus.",
-    pts: "50 pts",
+    pointsCost: 50,
+    valueSoles: 5,
   },
   {
     id: "libro",
@@ -27,7 +50,8 @@ const BENEFITS = [
     icon: "/svg/book.svg",
     title: "Descuento en Librería",
     desc: "20% de descuento en material académico.",
-    pts: "100 pts",
+    pointsCost: 100,
+    valueSoles: 15,
   },
   {
     id: "comida",
@@ -35,7 +59,8 @@ const BENEFITS = [
     icon: "/svg/utensils.svg",
     title: "Vale de Comida",
     desc: "Vale de S/20 para el comedor universitario.",
-    pts: "150 pts",
+    pointsCost: 150,
+    valueSoles: 20,
   },
   {
     id: "tienda",
@@ -43,7 +68,8 @@ const BENEFITS = [
     icon: "/svg/bag.svg",
     title: "Descuento Tiendas",
     desc: "15% en comercios afiliados.",
-    pts: "75 pts",
+    pointsCost: 75,
+    valueSoles: 10,
   },
   {
     id: "eventos",
@@ -51,15 +77,17 @@ const BENEFITS = [
     icon: "/svg/ticket.svg",
     title: "Entradas a Eventos",
     desc: "Acceso gratis a eventos culturales y deportivos.",
-    pts: "200 pts",
+    pointsCost: 200,
+    valueSoles: 30,
   },
   {
     id: "premium",
     iconCls: styles.iconGold,
     icon: "/svg/star3.svg",
     title: "Membresía Premium",
-    desc: "Befa-bookneficios premium y acceso exclusivo.",
-    pts: "500 pts",
+    desc: "Beneficios premium y acceso exclusivo.",
+    pointsCost: 500,
+    valueSoles: 60,
     disabled: true,
   },
 ];
@@ -85,27 +113,154 @@ const HOW_STEPS = [
 export default function BenefitsPage() {
   const pageRef = useReveal();
   const statsRef = useCounter();
-  const [btnStates, setBtnStates] = useState({});
-  const [user, setUser] = useState(null);
+  const router = useRouter();
 
+  const [user, setUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [userPoints, setUserPoints] = useState(0);
+  const [redemptionCount, setRedemptionCount] = useState(0);
+  const [totalSavings, setTotalSavings] = useState(0);
+
+  const [processingId, setProcessingId] = useState(null); // id del beneficio en canje
+  const [justRedeemed, setJustRedeemed] = useState({}); // feedback visual temporal
+  const [toast, setToast] = useState("");
+
+  const isGuest = authChecked && !user;
+
+  // Auth
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      setAuthChecked(true);
     });
-
     return () => unsubscribe();
   }, []);
-  const isGuest = !user;
 
-  const handleCanjear = (id) => {
-    if (isGuest) return;
+  // Puntos del usuario en tiempo real
+  useEffect(() => {
+    if (!user) {
+      setUserPoints(0);
+      return;
+    }
+    const userRef = doc(db, "users", user.uid);
+    const unsubscribe = onSnapshot(
+      userRef,
+      (snap) => {
+        setUserPoints(snap.exists() ? snap.data().points || 0 : 0);
+      },
+      (err) => {
+        console.error("Error leyendo puntos:", err);
+        setToast("No se pudieron cargar tus puntos");
+      },
+    );
+    return () => unsubscribe();
+  }, [user]);
 
-    setBtnStates((s) => ({ ...s, [id]: "canjeado" }));
+  // Historial de canjes en tiempo real -> conteo y ahorro total
+  useEffect(() => {
+    if (!user) {
+      setRedemptionCount(0);
+      setTotalSavings(0);
+      return;
+    }
+    const q = query(
+      collection(db, "redemptions"),
+      where("userId", "==", user.uid),
+    );
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => {
+        setRedemptionCount(snap.size);
+        const total = snap.docs.reduce(
+          (sum, d) => sum + (d.data().valueSoles || 0),
+          0,
+        );
+        setTotalSavings(total);
+      },
+      (err) => {
+        console.error("Error leyendo canjes:", err);
+      },
+    );
+    return () => unsubscribe();
+  }, [user]);
 
-    setTimeout(() => {
-      setBtnStates((s) => ({ ...s, [id]: "" }));
-    }, 2200);
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(""), 2500);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
+  const handleCanjear = async (benefit) => {
+    if (isGuest) {
+      router.push("/register");
+      return;
+    }
+    if (benefit.disabled || processingId) return;
+
+    if (userPoints < benefit.pointsCost) {
+      setToast(
+        `⚠️ Te faltan ${benefit.pointsCost - userPoints} puntos para este beneficio`,
+      );
+      return;
+    }
+
+    setProcessingId(benefit.id);
+
+    try {
+      const userRef = doc(db, "users", user.uid);
+      const redemptionRef = doc(collection(db, "redemptions"));
+
+      await runTransaction(db, async (transaction) => {
+        const userSnap = await transaction.get(userRef);
+        const currentPoints = userSnap.exists()
+          ? userSnap.data().points || 0
+          : 0;
+
+        if (currentPoints < benefit.pointsCost) {
+          throw new Error("INSUFFICIENT_POINTS");
+        }
+
+        transaction.update(userRef, {
+          points: currentPoints - benefit.pointsCost,
+        });
+
+        transaction.set(redemptionRef, {
+          userId: user.uid,
+          benefitId: benefit.id,
+          benefitTitle: benefit.title,
+          pointsCost: benefit.pointsCost,
+          valueSoles: benefit.valueSoles,
+          createdAt: new Date(),
+        });
+      });
+
+      setJustRedeemed((s) => ({ ...s, [benefit.id]: true }));
+      setToast(`🎉 Canjeaste "${benefit.title}"`);
+
+      setTimeout(() => {
+        setJustRedeemed((s) => ({ ...s, [benefit.id]: false }));
+      }, 2200);
+    } catch (err) {
+      if (err.message === "INSUFFICIENT_POINTS") {
+        setToast("⚠️ No tienes suficientes puntos");
+      } else {
+        console.error("Error al canjear:", err);
+        setToast("Error al canjear. Intenta de nuevo");
+      }
+    } finally {
+      setProcessingId(null);
+    }
   };
+
+  const BENEFIT_STATS = [
+    { icon: "fa-gift", value: userPoints, label: "Puntos Disponibles" },
+    { icon: "fa-star", value: redemptionCount, label: "Beneficios Canjeados" },
+    {
+      icon: "fa-wallet",
+      value: `s/${totalSavings}`,
+      label: "Ahorro Total",
+    },
+  ];
 
   return (
     <div ref={pageRef}>
@@ -141,59 +296,57 @@ export default function BenefitsPage() {
 
           {/* Benefit cards */}
           <div className={styles.benefitsGrid}>
-            {BENEFITS.map(
-              ({ id, iconCls, icon, title, desc, pts, disabled }) => (
+            {BENEFITS.map((benefit) => {
+              const { id, iconCls, icon, title, desc, pointsCost, disabled } =
+                benefit;
+              const isProcessing = processingId === id;
+              const isRedeemed = justRedeemed[id];
+              const notEnoughPoints = !isGuest && userPoints < pointsCost;
+
+              return (
                 <div
                   key={id}
                   className={`benefit-card ${styles.benefitCard} ${disabled ? styles.disabled : ""}`}
                 >
                   <div className={`${styles.benefitCardIcon} ${iconCls}`}>
-                    {icon.startsWith("/") || icon.endsWith(".svg") ? (
-                      <img
-                        src={icon}
-                        alt={title}
-                        style={{
-                          width: "24px",
-                          height: "24px",
-                          objectFit: "contain",
-                        }}
-                      />
-                    ) : (
-                      <i className={`fa-solid ${icon}`} />
-                    )}
+                    <img
+                      src={icon}
+                      alt={title}
+                      style={{
+                        width: "24px",
+                        height: "24px",
+                        objectFit: "contain",
+                      }}
+                    />
                   </div>
                   <h3>{title}</h3>
                   <p>{desc}</p>
                   <div className={styles.benefitFooter}>
-                    <span>{pts}</span>
+                    <span>{pointsCost} pts</span>
                     <button
-                      className={`${styles.canjearBtn} ${btnStates[id] === "canjeado" ? styles.canjeado : ""}`}
+                      className={`${styles.canjearBtn} ${isRedeemed ? styles.canjeado : ""}`}
                       disabled={
-                        isGuest || disabled || btnStates[id] === "canjeado"
+                        !isGuest &&
+                        (disabled || isProcessing || notEnoughPoints)
                       }
-                      onClick={() => {
-                        if (isGuest) {
-                          window.location.href = "/register";
-                          return;
-                        }
-
-                        if (!disabled) {
-                          handleCanjear(id);
-                        }
-                      }}
+                      onClick={() => handleCanjear(benefit)}
                     >
                       {isGuest
                         ? "Registrarse"
                         : disabled
                           ? "Bloqueado"
-                          : btnStates[id] === "canjeado"
-                            ? "✓ Canjeado"
-                            : "Canjear"}
+                          : isProcessing
+                            ? "Canjeando..."
+                            : isRedeemed
+                              ? "✓ Canjeado"
+                              : notEnoughPoints
+                                ? "Puntos insuficientes"
+                                : "Canjear"}
                     </button>
                   </div>
                 </div>
-              ),
-            )}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -272,6 +425,12 @@ export default function BenefitsPage() {
           </div>
         </div>
       </section>
+
+      {toast && (
+        <div className={styles.toast} role="status" aria-live="polite">
+          {toast}
+        </div>
+      )}
     </div>
   );
 }
