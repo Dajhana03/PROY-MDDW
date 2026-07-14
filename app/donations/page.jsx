@@ -71,10 +71,30 @@ function MapPinIcon() {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      style={{ marginRight: "4px", verticalAlign: "middle", color: "#666" }}
+      style={{ marginRight: "4px", verticalAlign: "middle", color: "#10b981" }}
     >
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
       <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+
+function ExternalLinkIcon() {
+  return (
+    <svg
+      width="12"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ marginLeft: "4px", verticalAlign: "middle" }}
+    >
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
     </svg>
   );
 }
@@ -163,7 +183,7 @@ function CloseIcon() {
 }
 
 /* ============================================
-   DONATION CARD (CON VISUALIZACIÓN DE UBICACIÓN)
+   DONATION CARD
 ============================================ */
 function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
   const { 
@@ -171,7 +191,8 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
     type, 
     title, 
     description, 
-    location, // Obtenemos el campo location de la donación
+    location, 
+    coordinates, // Extraemos las coordenadas guardadas desde el mapa
     likes, 
     liked, 
     solicitado, 
@@ -193,6 +214,11 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
 
   const displayName = ownerName || "Usuario ECO";
 
+  // Genera la URL dinámica para abrir la ubicación en Google Maps
+  const mapsUrl = coordinates?.lat && coordinates?.lng
+    ? `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location || "")}`;
+
   return (
     <article className={styles.card}>
       <div className={styles.cardHeader}>
@@ -212,11 +238,37 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
         <h2 className={styles.cardTitle}>{title}</h2>
         <p className={styles.cardDesc}>{description}</p>
 
-        {/* NUEVO: Muestra la ubicación de entrega debajo de la descripción */}
+        {/* CONTENEDOR DE UBICACIÓN ACTUALIZADO CON BOTÓN EN LÍNEA */}
         {location && (
-          <div className={styles.locationContainer} style={{ marginTop: "8px", fontSize: "0.85rem", color: "#555", display: "flex", alignItems: "center" }}>
-            <MapPinIcon />
-            <span><strong>Entrega:</strong> {location}</span>
+          <div className={styles.locationContainer} style={{ marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
+            <div style={{ display: "flex", alignItems: "center", flex: "1" }}>
+              <MapPinIcon />
+              <span style={{ fontSize: "0.85rem", color: "#4b5563" }}>
+                <strong>Entrega:</strong> {location}
+              </span>
+            </div>
+            
+            {/* Botón interactivo para ver en Google Maps */}
+            <a
+              href={mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.btnVerMapa}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                backgroundColor: "#e0f2fe",
+                color: "#0369a1",
+                padding: "4px 10px",
+                borderRadius: "6px",
+                fontSize: "0.75rem",
+                fontWeight: "600",
+                textDecoration: "none",
+                transition: "background-color 0.2s"
+              }}
+            >
+              Ver mapa <ExternalLinkIcon />
+            </a>
           </div>
         )}
 
@@ -568,8 +620,7 @@ export default function DonacionesPage() {
               ].map(({ id, label }) => (
                 <button
                   key={id}
-                  className={`${styles.filterBtn} ${currentFilter === id ?
-                    styles.active : ""}`}
+                  className={`${styles.filterBtn} ${currentFilter === id ? styles.active : ""}`}
                   onClick={() => setCurrentFilter(id)}
                 >
                   {label}
