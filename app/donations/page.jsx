@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import styles from "./donations.module.css";
-import { db } from "../../firebase/client"; // Importación correcta desde tu archivo page.txt
+import { db } from "../../firebase/client";
 import {
   collection,
   onSnapshot,
@@ -18,6 +18,7 @@ import {
 } from "firebase/firestore";
 import { auth } from "../../firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
+import { useRouter } from "next/navigation";
 
 const IMPACT_BASE = {
   donaciones: 0,
@@ -159,7 +160,12 @@ function SearchIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
       <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
-      <path d="M20 20L17 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M20 20L17 17"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -167,16 +173,39 @@ function SearchIcon() {
 function FilterIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <path d="M4 6H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M7 12H17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M10 18H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M4 6H20"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M7 12H17"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M10 18H14"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
 
 function CloseIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    >
       <line x1="18" y1="6" x2="6" y2="18" />
       <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
@@ -186,7 +215,14 @@ function CloseIcon() {
 /* ============================================
    DONATION CARD
 ============================================ */
-function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest, onImageClick }) {
+function DonationCard({
+  donation,
+  onSolicitar,
+  onLike,
+  onShare,
+  isGuest,
+  onImageClick,
+}) {
   const {
     id,
     type,
@@ -203,6 +239,7 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest, onImage
     createdAt,
   } = donation;
 
+  const router = useRouter();
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
 
@@ -215,9 +252,10 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest, onImage
 
   const displayName = ownerName || "Usuario ECO";
 
-  const mapsUrl = coordinates?.lat && coordinates?.lng
-    ? `http://maps.google.com/?q=${coordinates.lat},${coordinates.lng}`
-    : `http://maps.google.com/?q=${encodeURIComponent(location || "")}`;
+  const mapsUrl =
+    coordinates?.lat && coordinates?.lng
+      ? `http://maps.google.com/?q=${coordinates.lat},${coordinates.lng}`
+      : `http://maps.google.com/?q=${encodeURIComponent(location || "")}`;
 
   return (
     <article className={styles.card}>
@@ -334,12 +372,12 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest, onImage
           className={`${styles.btnSolicitar} ${solicitado || isGuest ? styles.solicitado : ""}`}
           onClick={() => {
             if (isGuest) {
-              alert("Debes iniciar sesión para solicitar donaciones");
+              router.push("/login");
               return;
             }
             onSolicitar(donation);
           }}
-          disabled={solicitado || isGuest}
+          disabled={solicitado}
         >
           {isGuest
             ? "Inicia sesión"
@@ -492,17 +530,17 @@ function ImageLightbox({ imageUrl, onClose }) {
         backgroundColor: "rgba(0, 0, 0, 0.95)",
       }}
     >
-      <div 
+      <div
         style={{
           position: "relative",
           maxWidth: "90%",
           maxHeight: "90%",
           display: "flex",
           justifyContent: "center",
-          alignItems: "center"
+          alignItems: "center",
         }}
       >
-        <button 
+        <button
           onClick={onClose}
           style={{
             position: "absolute",
@@ -515,7 +553,7 @@ function ImageLightbox({ imageUrl, onClose }) {
             fontSize: "1.5rem",
             display: "flex",
             alignItems: "center",
-            gap: "5px"
+            gap: "5px",
           }}
         >
           <CloseIcon />
@@ -528,7 +566,7 @@ function ImageLightbox({ imageUrl, onClose }) {
             maxHeight: "80vh",
             borderRadius: "8px",
             boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
-            objectFit: "contain"
+            objectFit: "contain",
           }}
         />
       </div>
@@ -563,7 +601,7 @@ export default function DonacionesPage() {
   const [currentFilter, setCurrentFilter] = useState("todas");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeModal, setActiveModal] = useState(null);
-  const [activeImage, setActiveImage] = useState(null); // Añadido estado para Lightbox
+  const [activeImage, setActiveImage] = useState(null);
   const [toastMsg, setToastMsg] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -810,7 +848,7 @@ export default function DonacionesPage() {
                   onLike={handleLike}
                   onShare={handleShare}
                   isGuest={isGuest}
-                  onImageClick={setActiveImage} // Vinculado correctamente
+                  onImageClick={setActiveImage}
                 />
               ))}
             </div>
@@ -824,8 +862,10 @@ export default function DonacionesPage() {
         onConfirm={handleConfirmSolicitar}
       />
 
-      {/* Modal de Previsualización de Imagen Grande (Lightbox) */}
-      <ImageLightbox imageUrl={activeImage} onClose={() => setActiveImage(null)} />
+      <ImageLightbox
+        imageUrl={activeImage}
+        onClose={() => setActiveImage(null)}
+      />
 
       <Toast message={toastMsg} onHide={() => setToastMsg("")} />
     </main>
