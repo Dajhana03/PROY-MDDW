@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import styles from "./donations.module.css";
-import { db } from "../../firebase/donations";
+import { db } from "../../firebase/client";
 import {
   collection,
   onSnapshot,
@@ -11,6 +11,7 @@ import {
   doc,
   updateDoc,
   arrayUnion,
+  arrayRemove,
   increment,
   addDoc,
   serverTimestamp,
@@ -105,16 +106,39 @@ function SearchIcon() {
 function FilterIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <path d="M4 6H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M7 12H17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M10 18H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M4 6H20"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M7 12H17"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M10 18H14"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
 
 function CloseIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    >
       <line x1="18" y1="6" x2="6" y2="18" />
       <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
@@ -125,7 +149,17 @@ function CloseIcon() {
    DONATION CARD
 ============================================ */
 function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
-  const { id, type, title, description, likes, liked, solicitado, comments = [] } = donation;
+  const {
+    id,
+    type,
+    title,
+    description,
+    likes,
+    liked,
+    solicitado,
+    comments = [],
+  } = donation;
+  console.log(`Donación ${id} - Estado Liked: ${liked}`);
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
 
@@ -150,7 +184,9 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
       </div>
 
       <div className={styles.cardBody}>
-        <span className={`${styles.cardTag} ${styles[`tag_${type}`]}`}>{TAG_LABELS[type]}</span>
+        <span className={`${styles.cardTag} ${styles[`tag_${type}`]}`}>
+          {TAG_LABELS[type]}
+        </span>
         <h2 className={styles.cardTitle}>{title}</h2>
         <p className={styles.cardDesc}>{description}</p>
       </div>
@@ -175,7 +211,11 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
             <CommentIcon /> {comments.length}
           </button>
 
-          <button className={styles.actionBtn} onClick={() => onShare(donation)} aria-label="Compartir">
+          <button
+            className={styles.actionBtn}
+            onClick={() => onShare(donation)}
+            aria-label="Compartir"
+          >
             <ShareIcon /> Compartir
           </button>
         </div>
@@ -191,7 +231,11 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
           }}
           disabled={solicitado || isGuest}
         >
-          {isGuest ? "Inicia sesión" : solicitado ? "✓ Solicitado" : "Solicitar"}
+          {isGuest
+            ? "Inicia sesión"
+            : solicitado
+              ? "✓ Solicitado"
+              : "Solicitar"}
         </button>
       </div>
 
@@ -201,7 +245,9 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
 
           <div className={styles.commentsList}>
             {comments.length === 0 ? (
-              <p className={styles.noComments}>Aún no hay comentarios. ¡Sé el primero!</p>
+              <p className={styles.noComments}>
+                Aún no hay comentarios. ¡Sé el primero!
+              </p>
             ) : (
               comments.map((c, index) => (
                 <div key={index} className={styles.commentItem}>
@@ -220,10 +266,14 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
                 onChange={(e) => setCommentText(e.target.value)}
                 className={styles.commentInput}
               />
-              <button type="submit" className={styles.commentSubmitBtn}>Enviar</button>
+              <button type="submit" className={styles.commentSubmitBtn}>
+                Enviar
+              </button>
             </form>
           ) : (
-            <p className={styles.loginWarning}>Inicia sesión para dejar un comentario.</p>
+            <p className={styles.loginWarning}>
+              Inicia sesión para dejar un comentario.
+            </p>
           )}
         </div>
       )}
@@ -270,7 +320,11 @@ function SolicitarModal({ donation, onClose, onConfirm }) {
       <div className={styles.modalCard}>
         <div className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>Solicitar: {donation.title}</h2>
-          <button className={styles.closeBtn} onClick={onClose} aria-label="Cerrar">
+          <button
+            className={styles.closeBtn}
+            onClick={onClose}
+            aria-label="Cerrar"
+          >
             <CloseIcon />
           </button>
         </div>
@@ -313,7 +367,11 @@ function Toast({ message, onHide }) {
     return () => clearTimeout(t);
   }, [message, onHide]);
 
-  return <div className={`${styles.toast} ${message ? styles.toastShow : ""}`}>{message}</div>;
+  return (
+    <div className={`${styles.toast} ${message ? styles.toastShow : ""}`}>
+      {message}
+    </div>
+  );
 }
 
 /* ============================================
@@ -339,23 +397,28 @@ export default function DonacionesPage() {
   useEffect(() => {
     const q = query(collection(db, "donations"), orderBy("createdAt", "desc"));
 
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const data = snapshot.docs.map((doc) => ({
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map((doc) => {
+        const d = doc.data();
+        const likedBy = d.likedBy || [];
+        const isLiked = auth.currentUser
+          ? likedBy.includes(auth.currentUser.uid)
+          : false;
+
+        return {
           id: doc.id,
-          ...doc.data(),
-          liked: false,
-          solicitado: false,
-        }));
-        setDonations(data);
-        setLoading(false);
-      },
-      () => setLoading(false),
-    );
+          ...d,
+          liked: isLiked,
+          likes: d.likes || 0,
+          comments: d.comments || [],
+        };
+      });
+      setDonations(data);
+      setLoading(false);
+    });
 
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   const showToast = useCallback((msg) => {
     setToastMsg(msg);
@@ -366,7 +429,9 @@ export default function DonacionesPage() {
     return donations.filter((d) => {
       const matchFilter = currentFilter === "todas" || d.type === currentFilter;
       const matchSearch =
-        !q || d.title?.toLowerCase().includes(q) || d.description?.toLowerCase().includes(q);
+        !q ||
+        d.title?.toLowerCase().includes(q) ||
+        d.description?.toLowerCase().includes(q);
       return matchFilter && matchSearch;
     });
   }, [donations, currentFilter, searchQuery]);
@@ -381,23 +446,32 @@ export default function DonacionesPage() {
       const donation = donations.find((d) => d.id === id);
       if (!donation) return;
 
-      const donationRef = doc(db, "donations", id);
+      const userId = auth.currentUser.uid;
+      const isCurrentlyLiked = donation.liked;
 
       setDonations((prev) =>
         prev.map((d) =>
           d.id === id
-            ? { ...d, liked: !d.liked, likes: d.liked ? (d.likes || 0) - 1 : (d.likes || 0) + 1 }
+            ? {
+                ...d,
+                liked: !isCurrentlyLiked,
+                likes: isCurrentlyLiked
+                  ? Math.max(0, d.likes - 1)
+                  : d.likes + 1,
+              }
             : d,
         ),
       );
 
       try {
-        await updateDoc(donationRef, { likes: increment(donation.liked ? -1 : 1) });
+        const donationRef = doc(db, "donations", id);
+        await updateDoc(donationRef, {
+          likes: increment(isCurrentlyLiked ? -1 : 1),
+          likedBy: isCurrentlyLiked ? arrayRemove(userId) : arrayUnion(userId),
+        });
       } catch (e) {
-        setDonations((prev) =>
-          prev.map((d) => (d.id === id ? { ...d, liked: donation.liked, likes: donation.likes } : d)),
-        );
-        showToast("No se pudo actualizar el like");
+        setDonations((prev) => prev.map((d) => (d.id === id ? donation : d)));
+        showToast("Error al procesar el like");
       }
     },
     [donations, isGuest, showToast],
@@ -429,10 +503,16 @@ export default function DonacionesPage() {
     (donation) => {
       if (navigator.share) {
         navigator
-          .share({ title: donation.title, text: donation.description, url: window.location.href })
+          .share({
+            title: donation.title,
+            text: donation.description,
+            url: window.location.href,
+          })
           .catch(() => {});
       } else {
-        navigator.clipboard.writeText(window.location.href).then(() => showToast("Enlace copiado"));
+        navigator.clipboard
+          .writeText(window.location.href)
+          .then(() => showToast("Enlace copiado"));
       }
     },
     [showToast],
@@ -449,7 +529,9 @@ export default function DonacionesPage() {
           createdAt: serverTimestamp(),
         });
 
-        setDonations((prev) => prev.map((d) => (d.id === id ? { ...d, solicitado: true } : d)));
+        setDonations((prev) =>
+          prev.map((d) => (d.id === id ? { ...d, solicitado: true } : d)),
+        );
         showToast("Solicitud enviada");
       } catch (e) {
         showToast("Error al enviar solicitud");
@@ -502,7 +584,9 @@ export default function DonacionesPage() {
             <div className={styles.impactRows}>
               <div className={styles.impactRow}>
                 <span className={styles.impactLabel}>Donaciones:</span>
-                <span className={styles.impactValue}>{IMPACT_BASE.donaciones}</span>
+                <span className={styles.impactValue}>
+                  {IMPACT_BASE.donaciones}
+                </span>
               </div>
 
               <div className={styles.impactRow}>
@@ -537,7 +621,11 @@ export default function DonacionesPage() {
               {filtered.map((donation) => (
                 <DonationCard
                   key={donation.id}
-                  donation={{ ...donation, comments: donation.comments || [], onCommentAdd: handleAddComment }}
+                  donation={{
+                    ...donation,
+                    comments: donation.comments || [],
+                    onCommentAdd: handleAddComment,
+                  }}
                   onSolicitar={setActiveModal}
                   onLike={handleLike}
                   onShare={handleShare}
@@ -549,7 +637,11 @@ export default function DonacionesPage() {
         </section>
       </div>
 
-      <SolicitarModal donation={activeModal} onClose={() => setActiveModal(null)} onConfirm={handleConfirmSolicitar} />
+      <SolicitarModal
+        donation={activeModal}
+        onClose={() => setActiveModal(null)}
+        onConfirm={handleConfirmSolicitar}
+      />
 
       <Toast message={toastMsg} onHide={() => setToastMsg("")} />
     </main>
