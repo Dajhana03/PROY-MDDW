@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import styles from "./donations.module.css";
-import { db } from "../../firebase/donations";
+import { db } from "../../firebase/client";
 import {
   collection,
   onSnapshot,
@@ -11,6 +11,7 @@ import {
   doc,
   updateDoc,
   arrayUnion,
+  arrayRemove,
   increment,
   addDoc,
   serverTimestamp,
@@ -116,6 +117,7 @@ function HeartIcon({ filled }) {
   );
 }
 
+// Iconos restantes para UI
 function CommentIcon() {
   return (
     <svg
@@ -158,7 +160,12 @@ function SearchIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
       <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
-      <path d="M20 20L17 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M20 20L17 17"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -166,16 +173,39 @@ function SearchIcon() {
 function FilterIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <path d="M4 6H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M7 12H17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <path d="M10 18H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M4 6H20"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M7 12H17"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M10 18H14"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
 
 function CloseIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    >
       <line x1="18" y1="6" x2="6" y2="18" />
       <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
@@ -183,23 +213,24 @@ function CloseIcon() {
 }
 
 /* ============================================
-   DONATION CARD
+   DONATION CARD (CON ONIMAGECLICK RECTIFICADO)
 ============================================ */
-function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest, onImageClick }) {
-  const { 
-    id, 
-    type, 
-    title, 
-    description, 
-    location, 
-    coordinates, 
-    likes, 
-    liked, 
-    solicitado, 
-    comments = [], 
+
+function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
+  const {
+    id,
+    type,
+    title,
+    description,
+    location,
+    coordinates, // Extraemos las coordenadas guardadas desde el mapa
+    likes,
+    liked,
+    solicitado,
+    comments = [],
     images = [],
     ownerName,
-    createdAt 
+    createdAt,
   } = donation;
 
   const [showComments, setShowComments] = useState(false);
@@ -215,32 +246,47 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest, onImage
   const displayName = ownerName || "Usuario ECO";
 
   // Genera la URL dinámica para abrir la ubicación en Google Maps
-  const mapsUrl = coordinates?.lat && coordinates?.lng
-    ? `https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}`
-    : `https://www.google.com/maps?q=${encodeURIComponent(location || "")}`;
+  const mapsUrl =
+    coordinates?.lat && coordinates?.lng
+      ? `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location || "")}`;
 
   return (
     <article className={styles.card}>
       <div className={styles.cardHeader}>
         <div className={styles.cardUser}>
-          <div className={styles.avatar}>{displayName.charAt(0).toUpperCase()}</div>
+          <div className={styles.avatar}>
+            {displayName.charAt(0).toUpperCase()}
+          </div>
           <div className={styles.userInfo}>
             <span className={styles.userName}>{displayName}</span>
-            <span className={styles.userTime}>{formatDate(createdAt)}</span> 
+            <span className={styles.userTime}>{formatDate(createdAt)}</span>
           </div>
         </div>
-   
+
         <span className={styles.ptsBadge}>+50 pts</span>
       </div>
 
       <div className={styles.cardBody}>
-        <span className={`${styles.cardTag} ${styles[`tag_${type}`]}`}>{TAG_LABELS[type]}</span>
+        <span className={`${styles.cardTag} ${styles[`tag_${type}`]}`}>
+          {TAG_LABELS[type]}
+        </span>
         <h2 className={styles.cardTitle}>{title}</h2>
         <p className={styles.cardDesc}>{description}</p>
 
-        {/* CONTENEDOR DE UBICACIÓN */}
+        {/* CONTENEDOR DE UBICACIÓN ACTUALIZADO CON BOTÓN EN LÍNEA */}
         {location && (
-          <div className={styles.locationContainer} style={{ marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
+          <div
+            className={styles.locationContainer}
+            style={{
+              marginTop: "10px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "10px",
+            }}
+          >
             <div style={{ display: "flex", alignItems: "center", flex: "1" }}>
               <MapPinIcon />
               <span style={{ fontSize: "0.85rem", color: "#4b5563" }}>
@@ -248,6 +294,8 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest, onImage
               </span>
             </div>
             
+
+            {/* Botón interactivo para ver en Google Maps */}
             <a
               href={mapsUrl}
               target="_blank"
@@ -263,7 +311,7 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest, onImage
                 fontSize: "0.75rem",
                 fontWeight: "600",
                 textDecoration: "none",
-                transition: "background-color 0.2s"
+                transition: "background-color 0.2s",
               }}
             >
               Ver mapa <ExternalLinkIcon />
@@ -271,7 +319,7 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest, onImage
           </div>
         )}
 
-        {/* Renderizado de imágenes interactivo al hacer clic */}
+        {/* Renderizado de imágenes */}
         {images && images.length > 0 && (
           <div className={styles.cardImagesContainer}>
             {images.map((url, idx) => (
@@ -280,8 +328,6 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest, onImage
                 src={url}
                 alt={`Imagen ${idx + 1} de ${title}`}
                 className={styles.cardImage}
-                style={{ cursor: "zoom-in" }} // El cursor cambia a lupa para indicar interactividad
-                onClick={() => onImageClick(url)} // Llama a la función del modal visor
                 loading="lazy"
               />
             ))}
@@ -309,7 +355,11 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest, onImage
             <CommentIcon /> {comments.length}
           </button>
 
-          <button className={styles.actionBtn} onClick={() => onShare(donation)} aria-label="Compartir">
+          <button
+            className={styles.actionBtn}
+            onClick={() => onShare(donation)}
+            aria-label="Compartir"
+          >
             <ShareIcon /> Compartir
           </button>
         </div>
@@ -325,7 +375,11 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest, onImage
           }}
           disabled={solicitado || isGuest}
         >
-          {isGuest ? "Inicia sesión" : solicitado ? "✓ Solicitado" : "Solicitar"}
+          {isGuest
+            ? "Inicia sesión"
+            : solicitado
+              ? "✓ Solicitado"
+              : "Solicitar"}
         </button>
       </div>
 
@@ -335,7 +389,9 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest, onImage
 
           <div className={styles.commentsList}>
             {comments.length === 0 ? (
-              <p className={styles.noComments}>Aún no hay comentarios. ¡Sé el primero!</p>
+              <p className={styles.noComments}>
+                Aún no hay comentarios. ¡Sé el primero!
+              </p>
             ) : (
               comments.map((c, index) => (
                 <div key={index} className={styles.commentItem}>
@@ -354,83 +410,18 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest, onImage
                 onChange={(e) => setCommentText(e.target.value)}
                 className={styles.commentInput}
               />
-              <button type="submit" className={styles.commentSubmitBtn}>Enviar</button>
+              <button type="submit" className={styles.commentSubmitBtn}>
+                Enviar
+              </button>
             </form>
           ) : (
-            <p className={styles.loginWarning}>Inicia sesión para dejar un comentario.</p>
+            <p className={styles.loginWarning}>
+              Inicia sesión para dejar un comentario.
+            </p>
           )}
         </div>
       )}
     </article>
-  );
-}
-
-/* ============================================
-   NUEVO: MODAL VISOR DE IMÁGENES (LIGHTBOX)
-============================================ */
-function ImageLightbox({ imageUrl, onClose }) {
-  useEffect(() => {
-    if (imageUrl) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [imageUrl]);
-
-  if (!imageUrl) return null;
-
-  return (
-    <div
-      className={styles.overlay}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-      style={{
-        zIndex: 1100, // Por encima del modal de solicitar
-        backgroundColor: "rgba(0, 0, 0, 0.95)", // Fondo mucho más oscuro
-      }}
-    >
-      <div 
-        style={{
-          position: "relative",
-          maxWidth: "90%",
-          maxHeight: "90%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center"
-        }}
-      >
-        <button 
-          onClick={onClose}
-          style={{
-            position: "absolute",
-            top: "-40px",
-            right: "0px",
-            background: "transparent",
-            border: "none",
-            color: "#ffffff",
-            cursor: "pointer",
-            fontSize: "1.5rem",
-            display: "flex",
-            alignItems: "center",
-            gap: "5px"
-          }}
-        >
-           <CloseIcon />
-        </button>
-        <img
-          src={imageUrl}
-          alt="Vista ampliada"
-          style={{
-            maxWidth: "100%",
-            maxHeight: "80vh",
-            borderRadius: "8px",
-            boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
-            objectFit: "contain"
-          }}
-        />
-      </div>
-    </div>
   );
 }
 
@@ -473,7 +464,11 @@ function SolicitarModal({ donation, onClose, onConfirm }) {
       <div className={styles.modalCard}>
         <div className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>Solicitar: {donation.title}</h2>
-          <button className={styles.closeBtn} onClick={onClose} aria-label="Cerrar">
+          <button
+            className={styles.closeBtn}
+            onClick={onClose}
+            aria-label="Cerrar"
+          >
             <CloseIcon />
           </button>
         </div>
@@ -516,7 +511,11 @@ function Toast({ message, onHide }) {
     return () => clearTimeout(t);
   }, [message, onHide]);
 
-  return <div className={`${styles.toast} ${message ? styles.toastShow : ""}`}>{message}</div>;
+  return (
+    <div className={`${styles.toast} ${message ? styles.toastShow : ""}`}>
+      {message}
+    </div>
+  );
 }
 
 /* ============================================
@@ -529,7 +528,6 @@ export default function DonacionesPage() {
   const [currentFilter, setCurrentFilter] = useState("todas");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeModal, setActiveModal] = useState(null);
-  const [activeImage, setActiveImage] = useState(null); // NUEVO: Guarda la URL de la imagen abierta
   const [toastMsg, setToastMsg] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -543,23 +541,28 @@ export default function DonacionesPage() {
   useEffect(() => {
     const q = query(collection(db, "donations"), orderBy("createdAt", "desc"));
 
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const data = snapshot.docs.map((doc) => ({
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map((doc) => {
+        const d = doc.data();
+        const likedBy = d.likedBy || [];
+        const isLiked = auth.currentUser
+          ? likedBy.includes(auth.currentUser.uid)
+          : false;
+
+        return {
           id: doc.id,
-          ...doc.data(),
-          liked: false,
-          solicitado: false,
-        }));
-        setDonations(data);
-        setLoading(false);
-      },
-      () => setLoading(false),
-    );
+          ...d,
+          liked: isLiked,
+          likes: d.likes || 0,
+          comments: d.comments || [],
+        };
+      });
+      setDonations(data);
+      setLoading(false);
+    });
 
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   const showToast = useCallback((msg) => {
     setToastMsg(msg);
@@ -570,7 +573,9 @@ export default function DonacionesPage() {
     return donations.filter((d) => {
       const matchFilter = currentFilter === "todas" || d.type === currentFilter;
       const matchSearch =
-        !q || d.title?.toLowerCase().includes(q) || d.description?.toLowerCase().includes(q);
+        !q ||
+        d.title?.toLowerCase().includes(q) ||
+        d.description?.toLowerCase().includes(q);
       return matchFilter && matchSearch;
     });
   }, [donations, currentFilter, searchQuery]);
@@ -585,23 +590,32 @@ export default function DonacionesPage() {
       const donation = donations.find((d) => d.id === id);
       if (!donation) return;
 
-      const donationRef = doc(db, "donations", id);
+      const userId = auth.currentUser.uid;
+      const isCurrentlyLiked = donation.liked;
 
       setDonations((prev) =>
         prev.map((d) =>
           d.id === id
-            ? { ...d, liked: !d.liked, likes: d.liked ? (d.likes || 0) - 1 : (d.likes || 0) + 1 }
+            ? {
+                ...d,
+                liked: !isCurrentlyLiked,
+                likes: isCurrentlyLiked
+                  ? Math.max(0, d.likes - 1)
+                  : d.likes + 1,
+              }
             : d,
         ),
       );
 
       try {
-        await updateDoc(donationRef, { likes: increment(donation.liked ? -1 : 1) });
+        const donationRef = doc(db, "donations", id);
+        await updateDoc(donationRef, {
+          likes: increment(isCurrentlyLiked ? -1 : 1),
+          likedBy: isCurrentlyLiked ? arrayRemove(userId) : arrayUnion(userId),
+        });
       } catch (e) {
-        setDonations((prev) =>
-          prev.map((d) => (d.id === id ? { ...d, liked: donation.liked, likes: donation.likes } : d)),
-        );
-        showToast("No se pudo actualizar el like");
+        setDonations((prev) => prev.map((d) => (d.id === id ? donation : d)));
+        showToast("Error al procesar el like");
       }
     },
     [donations, isGuest, showToast],
@@ -633,10 +647,16 @@ export default function DonacionesPage() {
     (donation) => {
       if (navigator.share) {
         navigator
-          .share({ title: donation.title, text: donation.description, url: window.location.href })
+          .share({
+            title: donation.title,
+            text: donation.description,
+            url: window.location.href,
+          })
           .catch(() => {});
       } else {
-        navigator.clipboard.writeText(window.location.href).then(() => showToast("Enlace copiado"));
+        navigator.clipboard
+          .writeText(window.location.href)
+          .then(() => showToast("Enlace copiado"));
       }
     },
     [showToast],
@@ -653,7 +673,9 @@ export default function DonacionesPage() {
           createdAt: serverTimestamp(),
         });
 
-        setDonations((prev) => prev.map((d) => (d.id === id ? { ...d, solicitado: true } : d)));
+        setDonations((prev) =>
+          prev.map((d) => (d.id === id ? { ...d, solicitado: true } : d)),
+        );
         showToast("Solicitud enviada");
       } catch (e) {
         showToast("Error al enviar solicitud");
@@ -706,7 +728,9 @@ export default function DonacionesPage() {
             <div className={styles.impactRows}>
               <div className={styles.impactRow}>
                 <span className={styles.impactLabel}>Donaciones:</span>
-                <span className={styles.impactValue}>{IMPACT_BASE.donaciones}</span>
+                <span className={styles.impactValue}>
+                  {IMPACT_BASE.donaciones}
+                </span>
               </div>
 
               <div className={styles.impactRow}>
@@ -741,12 +765,15 @@ export default function DonacionesPage() {
               {filtered.map((donation) => (
                 <DonationCard
                   key={donation.id}
-                  donation={{ ...donation, comments: donation.comments || [], onCommentAdd: handleAddComment }}
+                  donation={{
+                    ...donation,
+                    comments: donation.comments || [],
+                    onCommentAdd: handleAddComment,
+                  }}
                   onSolicitar={setActiveModal}
                   onLike={handleLike}
                   onShare={handleShare}
                   isGuest={isGuest}
-                  onImageClick={setActiveImage} // Pasamos la función que abre el visor
                 />
               ))}
             </div>
@@ -754,6 +781,11 @@ export default function DonacionesPage() {
         </section>
       </div>
 
+      <SolicitarModal
+        donation={activeModal}
+        onClose={() => setActiveModal(null)}
+        onConfirm={handleConfirmSolicitar}
+      />
       {/* Modal de Solicitud */}
       <SolicitarModal donation={activeModal} onClose={() => setActiveModal(null)} onConfirm={handleConfirmSolicitar} />
 
