@@ -32,8 +32,74 @@ const TAG_LABELS = {
 };
 
 /* ============================================
+   FUNCIÓN AUXILIAR PARA FORMATEAR LA FECHA
+============================================ */
+const formatDate = (createdAt) => {
+  if (!createdAt) return "Publicando...";
+
+  let date;
+  if (typeof createdAt.toDate === "function") {
+    date = createdAt.toDate();
+  } else if (createdAt instanceof Date) {
+    date = createdAt;
+  } else {
+    date = new Date(createdAt);
+  }
+
+  if (isNaN(date.getTime())) return "Hace un momento";
+
+  return date.toLocaleString("es-PE", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
+/* ============================================
    ICONOS SVG INLINE
 ============================================ */
+function MapPinIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ marginRight: "4px", verticalAlign: "middle", color: "#10b981" }}
+    >
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+
+function ExternalLinkIcon() {
+  return (
+    <svg
+      width="12"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ marginLeft: "4px", verticalAlign: "middle" }}
+    >
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
+    </svg>
+  );
+}
+
 function HeartIcon({ filled }) {
   return (
     <svg
@@ -154,12 +220,17 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
     type,
     title,
     description,
+    location,
+    coordinates, // Extraemos las coordenadas guardadas desde el mapa
     likes,
     liked,
     solicitado,
     comments = [],
+    images = [],
+    ownerName,
+    createdAt,
   } = donation;
-  console.log(`Donación ${id} - Estado Liked: ${liked}`);
+
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
 
@@ -170,16 +241,27 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
     setCommentText("");
   };
 
+  const displayName = ownerName || "Usuario ECO";
+
+  // Genera la URL dinámica para abrir la ubicación en Google Maps
+  const mapsUrl =
+    coordinates?.lat && coordinates?.lng
+      ? `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location || "")}`;
+
   return (
     <article className={styles.card}>
       <div className={styles.cardHeader}>
         <div className={styles.cardUser}>
-          <div className={styles.avatar}>{title?.charAt(0).toUpperCase()}</div>
+          <div className={styles.avatar}>
+            {displayName.charAt(0).toUpperCase()}
+          </div>
           <div className={styles.userInfo}>
-            <span className={styles.userName}>Usuario ECO</span>
-            <span className={styles.userTime}>Publicación reciente</span>
+            <span className={styles.userName}>{displayName}</span>
+            <span className={styles.userTime}>{formatDate(createdAt)}</span>
           </div>
         </div>
+
         <span className={styles.ptsBadge}>+50 pts</span>
       </div>
 
@@ -189,6 +271,65 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
         </span>
         <h2 className={styles.cardTitle}>{title}</h2>
         <p className={styles.cardDesc}>{description}</p>
+
+        {/* CONTENEDOR DE UBICACIÓN ACTUALIZADO CON BOTÓN EN LÍNEA */}
+        {location && (
+          <div
+            className={styles.locationContainer}
+            style={{
+              marginTop: "10px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "10px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", flex: "1" }}>
+              <MapPinIcon />
+              <span style={{ fontSize: "0.85rem", color: "#4b5563" }}>
+                <strong>Entrega:</strong> {location}
+              </span>
+            </div>
+
+            {/* Botón interactivo para ver en Google Maps */}
+            <a
+              href={mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.btnVerMapa}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                backgroundColor: "#e0f2fe",
+                color: "#0369a1",
+                padding: "4px 10px",
+                borderRadius: "6px",
+                fontSize: "0.75rem",
+                fontWeight: "600",
+                textDecoration: "none",
+                transition: "background-color 0.2s",
+              }}
+            >
+              Ver mapa <ExternalLinkIcon />
+            </a>
+          </div>
+        )}
+
+        {/* Renderizado de imágenes */}
+        {images && images.length > 0 && (
+          <div className={styles.cardImagesContainer}>
+            {images.map((url, idx) => (
+              <img
+                key={idx}
+                src={url}
+                alt={`Imagen ${idx + 1} de ${title}`}
+                className={styles.cardImage}
+                loading="lazy"
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <div className={styles.cardFooter}>
@@ -282,7 +423,7 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
 }
 
 /* ============================================
-   MODAL
+   MODAL DE SOLICITUD
 ============================================ */
 function SolicitarModal({ donation, onClose, onConfirm }) {
   const textareaRef = useRef(null);
@@ -358,7 +499,7 @@ function SolicitarModal({ donation, onClose, onConfirm }) {
 }
 
 /* ============================================
-   TOAST
+   TOAST NOTIFICATION
 ============================================ */
 function Toast({ message, onHide }) {
   useEffect(() => {
@@ -375,7 +516,7 @@ function Toast({ message, onHide }) {
 }
 
 /* ============================================
-   PAGE PRINCIPAL
+   PÁGINA PRINCIPAL
 ============================================ */
 export default function DonacionesPage() {
   const [user, setUser] = useState(null);
