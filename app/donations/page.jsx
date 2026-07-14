@@ -220,6 +220,17 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
     type,
     title,
     description,
+    likes,
+    liked,
+    solicitado,
+    comments = [],
+  } = donation;
+  console.log(`Donación ${id} - Estado Liked: ${liked}`);
+  const {
+    id,
+    type,
+    title,
+    description,
     location,
     coordinates, // Extraemos las coordenadas guardadas desde el mapa
     likes,
