@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import styles from "./community.module.css";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../../firebase/auth";
-import { db } from "../../firebase/db";
+import { auth } from "../../firebase/auth"; // Asegúrate de que la ruta sea correcta [cite: 6]
+import { db } from "../../firebase/db"; // Asegúrate de que la ruta sea correcta [cite: 6]
 import {
   collection,
   query,
@@ -17,37 +17,221 @@ import {
   arrayUnion,
   arrayRemove,
   serverTimestamp,
+  increment,
 } from "firebase/firestore";
 
-/*
- * ESQUEMA ASUMIDO EN FIRESTORE (ajusta si el tuyo es distinto):
- *
- * forumPosts/{autoId}
- *   - title: string
- *   - authorId: string
- *   - authorName: string
- *   - createdAt: Timestamp
- *   - likes: string[]        -> uids que dieron like (evita likes duplicados)
- *   - commentsCount: number
- *
- * events/{autoId}
- *   - title, date, hour, place: string
- *   - attendees: string[]    -> uids que confirmaron asistencia
- *
- * stories/{autoId}
- *   - title, author, description, image: string
- *   - likes: string[]
- *
- * users/{uid}
- *   - points: number         -> ya usado en /benefits
- *   - displayName: string    -> opcional, si no existe se usa "Usuario"
- *
- * Estas colecciones empiezan VACÍAS. "events" y "stories" no tienen UI de
- * creación en esta página (son contenido curado/admin), así que debes
- * cargar algunos documentos manualmente desde la consola de Firebase para
- * verlos aquí. Te dejo ejemplos abajo en las notas.
- */
+const IMPACT_BASE = {
+  donaciones: 0,
+  puntos: 0,
+  nivel: "Nuevo",
+};
 
+/* ============================================
+   ICONOS SVG AUXILIARES
+============================================ */
+function CloseIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
+/* ============================================
+   MODAL DETALLE DE DISCUSIÓN (FORO)
+============================================ */
+function DiscussionModal({ discussion, onClose, user, isGuest, setToast }) {
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  // Escuchar comentarios en tiempo real para esta discusión específica
+  useEffect(() => {
+    if (!discussion) return;
+    const commentsRef = collection(db, "forumPosts", discussion.id, "comments");
+    const q = query(commentsRef, orderBy("createdAt", "asc"));
+
+    const unsubscribe = onSnapshot(q, (snap) => {
+      setComments(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    });
+    return () => unsubscribe();
+  }, [discussion]);
+
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (isGuest || !newComment.trim() || submitting) return;
+
+    setSubmitting(true);
+    try {
+      const commentsRef = collection(db, "forumPosts", discussion.id, "comments");
+      
+      // 1. Añadimos el comentario a la subcolección
+      await addDoc(commentsRef, {
+        text: newComment.trim(),
+        authorId: user.uid,
+        authorName: user.displayName || user.email?.split("@")[0] || "Usuario",
+        createdAt: serverTimestamp(),
+      });
+
+      // 2. Incrementamos el contador commentsCount en el documento principal
+      const postRef = doc(db, "forumPosts", discussion.id);
+      await updateDoc(postRef, {
+        commentsCount: increment(1)
+      });
+
+      setNewComment("");
+      setToast("Comentario añadido");
+    } catch (err) {
+      console.error("Error al añadir comentario:", err);
+      setToast("No se pudo publicar el comentario");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (!discussion) return null;
+
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{ maxWidth: "600px" }}>
+        <div className={styles.modalHeader}>
+          <h2>Discusión: {discussion.title}</h2>
+          <button className={styles.closeBtn} onClick={onClose}>✕</button>
+        </div>
+
+        <div style={{ padding: "15px 0" }}>
+          <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}>
+            Iniciada por <strong>{discussion.authorName}</strong>
+          </p>
+
+          <hr style={{ border: "0", borderTop: "1px solid #eee", marginBottom: "15px" }} />
+
+          <h3 style={{ fontSize: "1rem", marginBottom: "10px" }}>Comentarios ({comments.length})</h3>
+          
+          <div style={{ maxHeight: "250px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "10px", marginBottom: "15px" }}>
+            {comments.length === 0 ? (
+              <p style={{ fontSize: "0.9rem", color: "#999", fontStyle: "italic" }}>Sin comentarios aún. ¡Sé el primero!</p>
+            ) : (
+              comments.map((c) => (
+                <div key={c.id} style={{ backgroundColor: "#f9f9f9", padding: "10px", borderRadius: "8px" }}>
+                  <p style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#10b981", marginBottom: "3px" }}>
+                    {c.authorName}
+                  </p>
+                  <p style={{ fontSize: "0.9rem", color: "#333" }}>{c.text}</p>
+                </div>
+              ))
+            )}
+          </div>
+
+          {!isGuest ? (
+            <form onSubmit={handleAddComment} style={{ display: "flex", gap: "10px" }}>
+              <input
+                type="text"
+                placeholder="Escribe una respuesta pública..."
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                style={{
+                  flex: "1",
+                  padding: "10px",
+                  borderRadius: "6px",
+                  border: "1px solid #ddd",
+                  fontSize: "0.9rem"
+                }}
+                required
+              />
+              <button 
+                type="submit" 
+                className={styles.btnPrimary} 
+                disabled={submitting}
+                style={{ padding: "0 15px" }}
+              >
+                {submitting ? "..." : "Enviar"}
+              </button>
+            </form>
+          ) : (
+            <p style={{ color: "#ef4444", fontSize: "0.85rem", fontStyle: "italic" }}>
+              🔒 Registrate o inicia sesión para comentar en esta discusión.
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================
+   MODAL DETALLE DE HISTORIA
+============================================ */
+function StoryModal({ story, onClose }) {
+  if (!story) return null;
+
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{ maxWidth: "550px", padding: "0", overflow: "hidden" }}>
+        <div 
+          style={{ 
+            backgroundImage: `url(${story.image})`, 
+            height: "200px", 
+            backgroundSize: "cover", 
+            backgroundPosition: "center",
+            position: "relative" 
+          }}
+        >
+          <div style={{
+            position: "absolute",
+            bottom: "0",
+            left: "0",
+            right: "0",
+            background: "linear-gradient(transparent, rgba(0,0,0,0.8))",
+            padding: "15px",
+            color: "white"
+          }}>
+            <h2 style={{ margin: "0", fontSize: "1.3rem" }}>{story.title}</h2>
+            <p style={{ margin: "5px 0 0 0", fontSize: "0.85rem", opacity: "0.9" }}>Escrita por {story.author}</p>
+          </div>
+          <button 
+            onClick={onClose} 
+            style={{ 
+              position: "absolute", 
+              top: "15px", 
+              right: "15px", 
+              backgroundColor: "rgba(0,0,0,0.5)", 
+              border: "none", 
+              color: "white", 
+              borderRadius: "50%", 
+              width: "32px", 
+              height: "32px", 
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }}
+          >
+            ✕
+          </button>
+        </div>
+
+        <div style={{ padding: "20px" }}>
+          <p style={{ fontSize: "0.95rem", lineHeight: "1.6", color: "#4b5563", whiteSpace: "pre-wrap" }}>
+            {story.description}
+          </p>
+          <button 
+            className={styles.btnPrimary} 
+            onClick={onClose}
+            style={{ marginTop: "20px", width: "100%" }}
+          >
+            Cerrar Historia
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================
+   PÁGINA PRINCIPAL DE COMUNIDAD
+============================================ */
 export default function CommunityPage() {
   const [user, setUser] = useState(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
@@ -65,12 +249,14 @@ export default function CommunityPage() {
   const [showModal, setShowModal] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [posting, setPosting] = useState(false);
-
-  const [pendingId, setPendingId] = useState(null); // evita doble-click en likes/asistir
+  const [pendingId, setPendingId] = useState(null); 
   const [toast, setToast] = useState("");
 
-  // Auth — FIX: ya no redirige a /login. El invitado puede mirar la
-  // comunidad en modo lectura, igual que en /publish y /benefits.
+  // Estados de interacción adicionales
+  const [selectedDiscussion, setSelectedDiscussion] = useState(null);
+  const [selectedStory, setSelectedStory] = useState(null);
+
+  // Auth [cite: 16]
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -79,7 +265,7 @@ export default function CommunityPage() {
     return () => unsubscribe();
   }, []);
 
-  // Foro en tiempo real
+  // Foro en tiempo real [cite: 18]
   useEffect(() => {
     const q = query(collection(db, "forumPosts"), orderBy("createdAt", "desc"));
     const unsubscribe = onSnapshot(
@@ -96,7 +282,7 @@ export default function CommunityPage() {
     return () => unsubscribe();
   }, []);
 
-  // Eventos en tiempo real
+  // Eventos en tiempo real [cite: 20]
   useEffect(() => {
     const q = query(collection(db, "events"), orderBy("date", "asc"));
     const unsubscribe = onSnapshot(
@@ -113,7 +299,7 @@ export default function CommunityPage() {
     return () => unsubscribe();
   }, []);
 
-  // Historias en tiempo real
+  // Historias en tiempo real [cite: 22]
   useEffect(() => {
     const q = query(collection(db, "stories"), orderBy("createdAt", "desc"));
     const unsubscribe = onSnapshot(
@@ -130,7 +316,7 @@ export default function CommunityPage() {
     return () => unsubscribe();
   }, []);
 
-  // Top 3 contribuidores por puntos
+  // Top 3 contribuidores por puntos [cite: 24]
   useEffect(() => {
     const q = query(collection(db, "users"), orderBy("points", "desc"), limit(3));
     const unsubscribe = onSnapshot(
@@ -157,9 +343,11 @@ export default function CommunityPage() {
   }, [toast]);
 
   const toggleLike = async (collectionName, id, currentLikes) => {
-    if (isGuest) return;
+    if (isGuest) {
+      setToast("🔒 Registrate para dar me gusta");
+      return;
+    }
     if (pendingId === id) return;
-
     setPendingId(id);
     try {
       const ref = doc(db, collectionName, id);
@@ -176,7 +364,10 @@ export default function CommunityPage() {
   };
 
   const toggleAttend = async (eventId, currentAttendees) => {
-    if (isGuest) return;
+    if (isGuest) {
+      setToast("🔒 Registrate para asistir");
+      return;
+    }
     if (pendingId === eventId) return;
 
     setPendingId(eventId);
@@ -356,16 +547,21 @@ export default function CommunityPage() {
                 {forums.map((forum) => {
                   const liked = !isGuest && (forum.likes || []).includes(user?.uid);
                   return (
-                    <div className={styles.forumItem} key={forum.id}>
+                    <div 
+                      className={styles.forumItem} 
+                      key={forum.id} 
+                      onClick={() => setSelectedDiscussion(forum)} // Abre el detalle interactivo
+                      style={{ cursor: "pointer" }}
+                    >
                       <h3 className={styles.forumTitle}>{forum.title}</h3>
 
-                      <div className={styles.forumMeta}>
+                      <div className={styles.forumMeta} onClick={(e) => e.stopPropagation()}>
                         <div className={styles.metaLeft}>
                           <span>Por {forum.authorName}</span>
                         </div>
 
                         <div className={styles.metaRight}>
-                          <span className={styles.metaIcon}>
+                          <span className={styles.metaIcon} onClick={() => setSelectedDiscussion(forum)} style={{ cursor: "pointer" }}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                               <path
                                 d="M21 15C21 16.1 20.1 17 19 17H8L3 21V5C3 3.9 3.9 3 5 3H19C20.1 3 21 3.9 21 5V15Z"
@@ -380,9 +576,10 @@ export default function CommunityPage() {
                           <button
                             disabled={isGuest || pendingId === forum.id}
                             className={`${styles.likeBtn} ${liked ? styles.liked : ""}`}
-                            onClick={() =>
-                              toggleLike("forumPosts", forum.id, forum.likes)
-                            }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleLike("forumPosts", forum.id, forum.likes);
+                            }}
                           >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                               <path
@@ -429,7 +626,8 @@ export default function CommunityPage() {
                     <div className={styles.storyCard} key={story.id}>
                       <div
                         className={styles.storyImg}
-                        style={{ backgroundImage: `url(${story.image})` }}
+                        style={{ backgroundImage: `url(${story.image})`, cursor: "pointer" }}
+                        onClick={() => setSelectedStory(story)}
                       >
                         <div className={styles.storyOverlay}>
                           <h3>{story.title}</h3>
@@ -438,15 +636,13 @@ export default function CommunityPage() {
                       </div>
 
                       <div className={styles.storyBody}>
-                        <p>{story.description}</p>
+                        <p>{story.description.slice(0, 100)}...</p>
 
                         <div className={styles.storyFooter}>
                           <button
                             disabled={isGuest || pendingId === story.id}
                             className={`${styles.likeBtn} ${liked ? styles.liked : ""}`}
-                            onClick={() =>
-                              toggleLike("stories", story.id, story.likes)
-                            }
+                            onClick={() => toggleLike("stories", story.id, story.likes)}
                           >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                               <path
@@ -459,8 +655,11 @@ export default function CommunityPage() {
                             {(story.likes || []).length}
                           </button>
 
-                          <button disabled={isGuest} className={styles.readMore}>
-                            {isGuest ? "Registrarse →" : "Leer más →"}
+                          <button 
+                            className={styles.readMore}
+                            onClick={() => setSelectedStory(story)} // Abre el modal de la historia completa
+                          >
+                            Leer más →
                           </button>
                         </div>
                       </div>
@@ -590,7 +789,7 @@ export default function CommunityPage() {
         </section>
       </main>
 
-      {/* MODAL */}
+      {/* MODAL CREAR DISCUSIÓN */}
       {showModal && !isGuest && (
         <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -627,6 +826,22 @@ export default function CommunityPage() {
         </div>
       )}
 
+      {/* MODAL DETALLES DEL FORO / COMENTARIOS */}
+      <DiscussionModal
+        discussion={selectedDiscussion}
+        onClose={() => setSelectedDiscussion(null)}
+        user={user}
+        isGuest={isGuest}
+        setToast={setToast}
+      />
+
+      {/* MODAL DETALLES HISTORIA INSPIRADORA */}
+      <StoryModal
+        story={selectedStory}
+        onClose={() => setSelectedStory(null)}
+      />
+
+      {/* TOAST */}
       {toast && (
         <div className={styles.toast} role="status" aria-live="polite">
           {toast}
