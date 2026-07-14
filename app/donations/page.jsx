@@ -185,14 +185,14 @@ function CloseIcon() {
 /* ============================================
    DONATION CARD
 ============================================ */
-function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
+function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest, onImageClick }) {
   const { 
     id, 
     type, 
     title, 
     description, 
     location, 
-    coordinates, // Extraemos las coordenadas guardadas desde el mapa
+    coordinates, 
     likes, 
     liked, 
     solicitado, 
@@ -216,8 +216,8 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
 
   // Genera la URL dinámica para abrir la ubicación en Google Maps
   const mapsUrl = coordinates?.lat && coordinates?.lng
-    ? `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`
-    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location || "")}`;
+    ? `https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}`
+    : `https://www.google.com/maps?q=${encodeURIComponent(location || "")}`;
 
   return (
     <article className={styles.card}>
@@ -238,7 +238,7 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
         <h2 className={styles.cardTitle}>{title}</h2>
         <p className={styles.cardDesc}>{description}</p>
 
-        {/* CONTENEDOR DE UBICACIÓN ACTUALIZADO CON BOTÓN EN LÍNEA */}
+        {/* CONTENEDOR DE UBICACIÓN */}
         {location && (
           <div className={styles.locationContainer} style={{ marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
             <div style={{ display: "flex", alignItems: "center", flex: "1" }}>
@@ -248,7 +248,6 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
               </span>
             </div>
             
-            {/* Botón interactivo para ver en Google Maps */}
             <a
               href={mapsUrl}
               target="_blank"
@@ -272,7 +271,7 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
           </div>
         )}
 
-        {/* Renderizado de imágenes */}
+        {/* Renderizado de imágenes interactivo al hacer clic */}
         {images && images.length > 0 && (
           <div className={styles.cardImagesContainer}>
             {images.map((url, idx) => (
@@ -281,6 +280,8 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
                 src={url}
                 alt={`Imagen ${idx + 1} de ${title}`}
                 className={styles.cardImage}
+                style={{ cursor: "zoom-in" }} // El cursor cambia a lupa para indicar interactividad
+                onClick={() => onImageClick(url)} // Llama a la función del modal visor
                 loading="lazy"
               />
             ))}
@@ -361,6 +362,75 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
         </div>
       )}
     </article>
+  );
+}
+
+/* ============================================
+   NUEVO: MODAL VISOR DE IMÁGENES (LIGHTBOX)
+============================================ */
+function ImageLightbox({ imageUrl, onClose }) {
+  useEffect(() => {
+    if (imageUrl) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [imageUrl]);
+
+  if (!imageUrl) return null;
+
+  return (
+    <div
+      className={styles.overlay}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      style={{
+        zIndex: 1100, // Por encima del modal de solicitar
+        backgroundColor: "rgba(0, 0, 0, 0.95)", // Fondo mucho más oscuro
+      }}
+    >
+      <div 
+        style={{
+          position: "relative",
+          maxWidth: "90%",
+          maxHeight: "90%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center"
+        }}
+      >
+        <button 
+          onClick={onClose}
+          style={{
+            position: "absolute",
+            top: "-40px",
+            right: "0px",
+            background: "transparent",
+            border: "none",
+            color: "#ffffff",
+            cursor: "pointer",
+            fontSize: "1.5rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "5px"
+          }}
+        >
+           <CloseIcon />
+        </button>
+        <img
+          src={imageUrl}
+          alt="Vista ampliada"
+          style={{
+            maxWidth: "100%",
+            maxHeight: "80vh",
+            borderRadius: "8px",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
+            objectFit: "contain"
+          }}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -459,6 +529,7 @@ export default function DonacionesPage() {
   const [currentFilter, setCurrentFilter] = useState("todas");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeModal, setActiveModal] = useState(null);
+  const [activeImage, setActiveImage] = useState(null); // NUEVO: Guarda la URL de la imagen abierta
   const [toastMsg, setToastMsg] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -675,6 +746,7 @@ export default function DonacionesPage() {
                   onLike={handleLike}
                   onShare={handleShare}
                   isGuest={isGuest}
+                  onImageClick={setActiveImage} // Pasamos la función que abre el visor
                 />
               ))}
             </div>
@@ -682,7 +754,11 @@ export default function DonacionesPage() {
         </section>
       </div>
 
+      {/* Modal de Solicitud */}
       <SolicitarModal donation={activeModal} onClose={() => setActiveModal(null)} onConfirm={handleConfirmSolicitar} />
+
+      {/* NUEVO: Modal de Previsualización de Imagen Grande (Lightbox) */}
+      <ImageLightbox imageUrl={activeImage} onClose={() => setActiveImage(null)} />
 
       <Toast message={toastMsg} onHide={() => setToastMsg("")} />
     </main>
