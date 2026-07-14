@@ -797,3 +797,8 @@
   color: #4b5563;
   margin-top: 10px;
 }
+
+.btnVerMapa:hover {
+  background-color: #bae6fd !important; /* Un celeste un poco más marcado al pasar el cursor */
+  color: #025a87 !important;
+}
