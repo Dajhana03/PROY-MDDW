@@ -31,8 +31,54 @@ const TAG_LABELS = {
 };
 
 /* ============================================
+   FUNCIÓN AUXILIAR PARA FORMATEAR LA FECHA
+============================================ */
+const formatDate = (createdAt) => {
+  if (!createdAt) return "Publicando...";
+
+  let date;
+  if (typeof createdAt.toDate === "function") {
+    date = createdAt.toDate();
+  } else if (createdAt instanceof Date) {
+    date = createdAt;
+  } else {
+    date = new Date(createdAt);
+  }
+
+  if (isNaN(date.getTime())) return "Hace un momento";
+
+  return date.toLocaleString("es-PE", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
+/* ============================================
    ICONOS SVG INLINE
 ============================================ */
+function MapPinIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ marginRight: "4px", verticalAlign: "middle", color: "#666" }}
+    >
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+
 function HeartIcon({ filled }) {
   return (
     <svg
@@ -92,12 +138,7 @@ function SearchIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
       <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
-      <path
-        d="M20 20L17 17"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
+      <path d="M20 20L17 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -122,10 +163,24 @@ function CloseIcon() {
 }
 
 /* ============================================
-   DONATION CARD
+   DONATION CARD (CON VISUALIZACIÓN DE UBICACIÓN)
 ============================================ */
 function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
-  const { id, type, title, description, likes, liked, solicitado, comments = [] } = donation;
+  const { 
+    id, 
+    type, 
+    title, 
+    description, 
+    location, // Obtenemos el campo location de la donación
+    likes, 
+    liked, 
+    solicitado, 
+    comments = [], 
+    images = [],
+    ownerName,
+    createdAt 
+  } = donation;
+
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
 
@@ -136,16 +191,19 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
     setCommentText("");
   };
 
+  const displayName = ownerName || "Usuario ECO";
+
   return (
     <article className={styles.card}>
       <div className={styles.cardHeader}>
         <div className={styles.cardUser}>
-          <div className={styles.avatar}>{title?.charAt(0).toUpperCase()}</div>
+          <div className={styles.avatar}>{displayName.charAt(0).toUpperCase()}</div>
           <div className={styles.userInfo}>
-            <span className={styles.userName}>Usuario ECO</span>
-            <span className={styles.userTime}>Publicación reciente</span>
+            <span className={styles.userName}>{displayName}</span>
+            <span className={styles.userTime}>{formatDate(createdAt)}</span> 
           </div>
         </div>
+   
         <span className={styles.ptsBadge}>+50 pts</span>
       </div>
 
@@ -153,6 +211,29 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
         <span className={`${styles.cardTag} ${styles[`tag_${type}`]}`}>{TAG_LABELS[type]}</span>
         <h2 className={styles.cardTitle}>{title}</h2>
         <p className={styles.cardDesc}>{description}</p>
+
+        {/* NUEVO: Muestra la ubicación de entrega debajo de la descripción */}
+        {location && (
+          <div className={styles.locationContainer} style={{ marginTop: "8px", fontSize: "0.85rem", color: "#555", display: "flex", alignItems: "center" }}>
+            <MapPinIcon />
+            <span><strong>Entrega:</strong> {location}</span>
+          </div>
+        )}
+
+        {/* Renderizado de imágenes */}
+        {images && images.length > 0 && (
+          <div className={styles.cardImagesContainer}>
+            {images.map((url, idx) => (
+              <img
+                key={idx}
+                src={url}
+                alt={`Imagen ${idx + 1} de ${title}`}
+                className={styles.cardImage}
+                loading="lazy"
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <div className={styles.cardFooter}>
@@ -232,7 +313,7 @@ function DonationCard({ donation, onSolicitar, onLike, onShare, isGuest }) {
 }
 
 /* ============================================
-   MODAL
+   MODAL DE SOLICITUD
 ============================================ */
 function SolicitarModal({ donation, onClose, onConfirm }) {
   const textareaRef = useRef(null);
@@ -304,7 +385,7 @@ function SolicitarModal({ donation, onClose, onConfirm }) {
 }
 
 /* ============================================
-   TOAST
+   TOAST NOTIFICATION
 ============================================ */
 function Toast({ message, onHide }) {
   useEffect(() => {
@@ -317,7 +398,7 @@ function Toast({ message, onHide }) {
 }
 
 /* ============================================
-   PAGE PRINCIPAL
+   PÁGINA PRINCIPAL
 ============================================ */
 export default function DonacionesPage() {
   const [user, setUser] = useState(null);
@@ -487,7 +568,8 @@ export default function DonacionesPage() {
               ].map(({ id, label }) => (
                 <button
                   key={id}
-                  className={`${styles.filterBtn} ${currentFilter === id ? styles.active : ""}`}
+                  className={`${styles.filterBtn} ${currentFilter === id ?
+                    styles.active : ""}`}
                   onClick={() => setCurrentFilter(id)}
                 >
                   {label}
