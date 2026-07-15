@@ -262,7 +262,7 @@ function DonationCard({
 
   const handleSubmitComment = (e) => {
     e.preventDefault();
-    if (!commentText.trim() || finalizado === true) return;
+    if (!commentText.trim() || commentText.length > 250 || finalizado === true) return;
     donation.onCommentAdd?.(id, commentText);
     setCommentText("");
   };
@@ -519,6 +519,7 @@ function DonationCard({
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   className={styles.commentInput}
+                  maxLength={250}
                 />
                 <button type="submit" className={styles.commentSubmitBtn}>
                   Enviar
