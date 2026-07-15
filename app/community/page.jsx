@@ -64,7 +64,13 @@ function IconLock(props) {
 // Reemplaza el emoji ✨
 function IconSparkle(props) {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" {...props}>
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      {...props}
+    >
       <path d="M12 2L13.8 9.2L21 11L13.8 12.8L12 20L10.2 12.8L3 11L10.2 9.2L12 2Z" />
     </svg>
   );
@@ -76,8 +82,22 @@ function IconMedal({ color = "#10b981", ...props }) {
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" {...props}>
       <path d="M8 2L10 8H6L8 2Z" fill={color} />
       <path d="M16 2L18 8H14L16 2Z" fill={color} />
-      <circle cx="12" cy="15" r="6.5" fill={color} stroke="#fff" strokeWidth="1.2" />
-      <circle cx="12" cy="15" r="3.2" fill="none" stroke="#fff" strokeWidth="1.2" />
+      <circle
+        cx="12"
+        cy="15"
+        r="6.5"
+        fill={color}
+        stroke="#fff"
+        strokeWidth="1.2"
+      />
+      <circle
+        cx="12"
+        cy="15"
+        r="3.2"
+        fill="none"
+        stroke="#fff"
+        strokeWidth="1.2"
+      />
     </svg>
   );
 }
@@ -86,9 +106,52 @@ const MEDAL_COLORS = ["#facc15", "#c0c0c0", "#cd7f32", "#10b981", "#10b981"];
 const iconInline = { verticalAlign: "-2px", marginRight: "4px" };
 
 /* ============================================
+   AVATAR REUTILIZABLE (foto real o iniciales)
+============================================ */
+function Avatar({ userObj, name, size = 28 }) {
+  const initials =
+    `${userObj?.first_name?.[0] || name?.[0] || "U"}${userObj?.last_name?.[0] || ""}`.toUpperCase();
+  const base = {
+    width: size,
+    height: size,
+    borderRadius: "50%",
+    flexShrink: 0,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: Math.max(size * 0.38, 9),
+    fontWeight: 700,
+    overflow: "hidden",
+  };
+
+  if (userObj?.photoURL) {
+    return (
+      <img
+        src={userObj.photoURL}
+        alt={name || "avatar"}
+        style={{ ...base, objectFit: "cover" }}
+      />
+    );
+  }
+
+  return (
+    <span style={{ ...base, background: "#c8e6c9", color: "#2e7d32" }}>
+      {initials}
+    </span>
+  );
+}
+
+/* ============================================
    MODAL DETALLE DE DISCUSIÓN (FORO)
 ============================================ */
-function DiscussionModal({ discussion, onClose, user, isGuest, setToast }) {
+function DiscussionModal({
+  discussion,
+  onClose,
+  user,
+  isGuest,
+  setToast,
+  allUsers,
+}) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -141,6 +204,8 @@ function DiscussionModal({ discussion, onClose, user, isGuest, setToast }) {
 
   if (!discussion) return null;
 
+  const authorObj = allUsers.find((u) => u.id === discussion.authorId);
+
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div
@@ -151,14 +216,26 @@ function DiscussionModal({ discussion, onClose, user, isGuest, setToast }) {
         <div className={styles.modalHeader}>
           <h2>Discusión: {discussion.title}</h2>
           <button className={styles.closeBtn} onClick={onClose}>
-            ✕
+            <CloseIcon />
           </button>
         </div>
 
         <div style={{ padding: "15px 0" }}>
           <p
-            style={{ fontSize: "0.85rem", color: "#666", marginBottom: "15px" }}
+            style={{
+              fontSize: "0.85rem",
+              color: "#666",
+              marginBottom: "15px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
           >
+            <Avatar
+              userObj={authorObj}
+              name={discussion.authorName}
+              size={22}
+            />
             Iniciada por <strong>{discussion.authorName}</strong>
           </p>
 
@@ -195,28 +272,43 @@ function DiscussionModal({ discussion, onClose, user, isGuest, setToast }) {
                 Sin comentarios aún. ¡Sé el primero!
               </p>
             ) : (
-              comments.map((c) => (
-                <div
-                  key={c.id}
-                  style={{
-                    backgroundColor: "#f9f9f9",
-                    padding: "10px",
-                    borderRadius: "8px",
-                  }}
-                >
-                  <p
+              comments.map((c) => {
+                const commentAuthor = allUsers.find((u) => u.id === c.authorId);
+                return (
+                  <div
+                    key={c.id}
                     style={{
-                      fontSize: "0.85rem",
-                      fontWeight: "bold",
-                      color: "#10b981",
-                      marginBottom: "3px",
+                      backgroundColor: "#f9f9f9",
+                      padding: "10px",
+                      borderRadius: "8px",
+                      display: "flex",
+                      gap: "10px",
+                      alignItems: "flex-start",
                     }}
                   >
-                    {c.authorName}
-                  </p>
-                  <p style={{ fontSize: "0.9rem", color: "#333" }}>{c.text}</p>
-                </div>
-              ))
+                    <Avatar
+                      userObj={commentAuthor}
+                      name={c.authorName}
+                      size={26}
+                    />
+                    <div>
+                      <p
+                        style={{
+                          fontSize: "0.85rem",
+                          fontWeight: "bold",
+                          color: "#10b981",
+                          marginBottom: "3px",
+                        }}
+                      >
+                        {c.authorName}
+                      </p>
+                      <p style={{ fontSize: "0.9rem", color: "#333" }}>
+                        {c.text}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
             )}
           </div>
 
@@ -368,20 +460,26 @@ export default function CommunityPage() {
     return () => clearTimeout(timer);
   }, [toast]);
 
+  // Busca un usuario por id dentro de la lista ya cargada en tiempo real
+  const getUserById = (id) => allUsers.find((u) => u.id === id);
+
   // Calcula nivel real de cada usuario según sus donaciones
   const usersWithLevels = useMemo(() => {
     return allUsers.map((u) => {
-      // ⚠️ AJUSTA "donorId" AQUÍ si tu campo en /donations se llama distinto (ej. userId, donorUid)
-      const userDonations = allDonations.filter((d) => d.donorId === u.id);
+      const userDonations = allDonations.filter((d) => d.ownerId === u.id);
+
+      console.log("Usuario:", u.first_name, "Donaciones:", userDonations);
+
       const { totalPoints, userLevel } = getUserLevel(u, userDonations);
+
       return { ...u, totalPoints, userLevel };
     });
   }, [allUsers, allDonations]);
 
-  // Top 5 — solo usuarios con rol "donante", ordenados por puntos reales
+  // Top 5 — usuarios que donan (donante o ambos), ordenados por puntos reales, en tiempo real
   const contributors = useMemo(() => {
     return usersWithLevels
-      .filter((u) => u.user_type === "donante")
+      .filter((u) => u.user_type === "donante" || u.user_type === "ambos")
       .sort((a, b) => b.totalPoints - a.totalPoints)
       .slice(0, 5)
       .map((u, i) => ({
@@ -389,6 +487,9 @@ export default function CommunityPage() {
         id: u.id,
         name: `${u.first_name || ""} ${u.last_name || ""}`.trim() || "Usuario",
         points: u.totalPoints,
+        photoURL: u.photoURL,
+        first_name: u.first_name,
+        last_name: u.last_name,
         badgeColor: MEDAL_COLORS[i] || MEDAL_COLORS[MEDAL_COLORS.length - 1],
       }));
   }, [usersWithLevels]);
@@ -488,8 +589,8 @@ export default function CommunityPage() {
           {isGuest && (
             <div className={styles.guestWarning}>
               <IconSparkle style={iconInline} />
-              Regístrate para participar en la comunidad y acceder a
-              funciones exclusivas
+              Regístrate para participar en la comunidad y acceder a funciones
+              exclusivas
             </div>
           )}
         </section>
@@ -630,6 +731,7 @@ export default function CommunityPage() {
                 {forums.map((forum) => {
                   const liked =
                     !isGuest && (forum.likes || []).includes(user?.uid);
+                  const authorObj = getUserById(forum.authorId);
                   return (
                     <div
                       className={styles.forumItem}
@@ -643,7 +745,19 @@ export default function CommunityPage() {
                         className={styles.forumMeta}
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <div className={styles.metaLeft}>
+                        <div
+                          className={styles.metaLeft}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                          }}
+                        >
+                          <Avatar
+                            userObj={authorObj}
+                            name={forum.authorName}
+                            size={22}
+                          />
                           <span>Por {forum.authorName}</span>
                         </div>
 
@@ -700,7 +814,7 @@ export default function CommunityPage() {
               </div>
             </div>
 
-            {/* NIVELES DE LA COMUNIDAD (antes: Historias Inspiradoras) */}
+            {/* NIVELES DE LA COMUNIDAD */}
             <div className={styles.card}>
               <h2 className={styles.cardTitle}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -745,8 +859,23 @@ export default function CommunityPage() {
                   {usersWithLevels.map((u) => (
                     <div className={styles.levelCard} key={u.id}>
                       <div className={styles.levelAvatar}>
-                        {u.first_name?.[0]}
-                        {u.last_name?.[0]}
+                        {u.photoURL ? (
+                          <img
+                            src={u.photoURL}
+                            alt=""
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                              borderRadius: "50%",
+                            }}
+                          />
+                        ) : (
+                          <>
+                            {u.first_name?.[0]}
+                            {u.last_name?.[0]}
+                          </>
+                        )}
                       </div>
                       <div className={styles.levelInfo}>
                         <p className={styles.levelName}>
@@ -987,8 +1116,24 @@ export default function CommunityPage() {
                 )}
                 {contributors.map((c) => (
                   <div className={styles.contributorItem} key={c.id}>
-                    <div className={styles.contributorLeft}>
+                    <div
+                      className={styles.contributorLeft}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                      }}
+                    >
                       <div className={styles.rank}>{c.rank}</div>
+                      <Avatar
+                        userObj={{
+                          photoURL: c.photoURL,
+                          first_name: c.first_name,
+                          last_name: c.last_name,
+                        }}
+                        name={c.name}
+                        size={30}
+                      />
                       <div>
                         <p className={styles.contributorName}>{c.name}</p>
                         <p className={styles.contributorPoints}>
@@ -1020,7 +1165,7 @@ export default function CommunityPage() {
                 className={styles.closeBtn}
                 onClick={() => setShowModal(false)}
               >
-                ✕
+                <CloseIcon />
               </button>
             </div>
 
@@ -1057,6 +1202,7 @@ export default function CommunityPage() {
         user={user}
         isGuest={isGuest}
         setToast={setToast}
+        allUsers={allUsers}
       />
 
       {/* TOAST */}

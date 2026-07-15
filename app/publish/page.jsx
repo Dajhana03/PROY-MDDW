@@ -31,6 +31,7 @@ export default function PublishPage() {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
+  const [ownerPhoto, setOwnerPhoto] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [loadError, setLoadError] = useState(false);
@@ -92,14 +93,18 @@ export default function PublishPage() {
                 .toLowerCase()
                 .trim(),
             );
+            setOwnerPhoto(userData.photoURL || null);
           } else {
             setUserRole(null);
+            setOwnerPhoto(null);
           }
         } catch (error) {
           setUserRole(null);
+          setOwnerPhoto(null);
         }
       } else {
         setUserRole(null);
+        setOwnerPhoto(null);
       }
       setAuthChecked(true);
     });
@@ -374,6 +379,7 @@ export default function PublishPage() {
         puntos: puntosAsignados, // <-- AGREGAMOS ESTE CAMPO DINÁMICO
         ownerId: user.uid,
         ownerName: user.displayName || "Usuario Anónimo", //
+        ownerPhoto: ownerPhoto || null, // foto de perfil guardada en Firestore
         createdAt: serverTimestamp(), //
       });
 

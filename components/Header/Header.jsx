@@ -8,40 +8,35 @@ import { auth } from "../../firebase/auth"; // 👈 AJUSTA si tu ruta cambia
 import styles from "./Header.module.css";
 import { useScrollShadow } from "../../hooks/useScrollShadow";
 import { db } from "../../firebase/db";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 
 export default function Header() {
   const scrolled = useScrollShadow();
   const pathname = usePathname();
   const router = useRouter();
   const [profilePhoto, setProfilePhoto] = useState(null);
+  const [profileZoom, setProfileZoom] = useState(1);
   const [user, setUser] = useState(null);
   const [open, setOpen] = useState(false);
   const [userType, setUserType] = useState(null);
 
   // 👤 detectar usuario logueado
   useEffect(() => {
-    const loadProfilePhoto = async () => {
-      if (!user) return;
+    if (!user) return;
 
-      try {
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
+    const docRef = doc(db, "users", user.uid);
 
-        if (docSnap.exists()) {
-          const data = docSnap.data();
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
 
-          if (data.photoURL) {
-            setProfilePhoto(data.photoURL);
-          }
-          setUserType(data.user_type);
-        }
-      } catch (error) {
-        console.error(error);
+        setProfilePhoto(data.photoURL || null);
+        setProfileZoom(data.zoom || 1);
+        setUserType(data.user_type || null);
       }
-    };
+    });
 
-    loadProfilePhoto();
+    return () => unsubscribe();
   }, [user]);
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -156,6 +151,10 @@ export default function Header() {
                       src={profilePhoto}
                       alt="Perfil"
                       className={styles.avatarImage}
+                      style={{
+                        transform: `scale(${profileZoom})`,
+                        transformOrigin: "center",
+                      }}
                     />
                   ) : (
                     getInitials(user.displayName || user.email)
