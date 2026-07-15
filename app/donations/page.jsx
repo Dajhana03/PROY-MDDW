@@ -16,6 +16,7 @@ import {
   addDoc,
   deleteDoc,
   serverTimestamp,
+  deleteDoc, // <-- Para eliminar publicaciones
 } from "firebase/firestore";
 import { auth } from "../../firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
@@ -33,12 +34,14 @@ const TAG_LABELS = {
   alimentos: "Alimento",
 };
 
+// Correos electrónicos autorizados como administradores
+const ADMIN_EMAILS = ["robertaquispe@gmail.com", "davidperez@gmail.com","marco96392@gmail.com","azul@gmail.com"];
+
 /* ============================================
    FUNCIÓN AUXILIAR PARA FORMATEAR LA FECHA
 ============================================ */
 const formatDate = (createdAt) => {
   if (!createdAt) return "Publicando...";
-
   let date;
   if (typeof createdAt.toDate === "function") {
     date = createdAt.toDate();
@@ -49,7 +52,6 @@ const formatDate = (createdAt) => {
   }
 
   if (isNaN(date.getTime())) return "Hace un momento";
-
   return date.toLocaleString("es-PE", {
     day: "numeric",
     month: "short",
@@ -119,6 +121,7 @@ function HeartIcon({ filled }) {
   );
 }
 
+// Icono de Comentario
 function CommentIcon() {
   return (
     <svg
@@ -226,6 +229,8 @@ function DonationCard({
   onDelete,
   onFinish,
   onImageClick,
+  isAdmin,   // <-- Propiedades recibidas
+  onDelete,  // <-- Propiedades recibidas
 }) {
   const {
     id,
@@ -245,7 +250,6 @@ function DonationCard({
     ownerName,
     createdAt,
   } = donation;
-
   const router = useRouter();
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
@@ -259,13 +263,13 @@ function DonationCard({
     donation.onCommentAdd?.(id, commentText);
     setCommentText("");
   };
-
   const displayName = ownerName || "Usuario ECO";
 
+  // Enlace corregido a Google Maps
   const mapsUrl =
     coordinates?.lat && coordinates?.lng
-      ? `http://maps.google.com/?q=${coordinates.lat},${coordinates.lng}`
-      : `http://maps.google.com/?q=${encodeURIComponent(location || "")}`;
+      ? `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location || "")}`;
 
   return (
     <article
@@ -389,6 +393,42 @@ function DonationCard({
           </button>
         </div>
 
+        {/* REEMPLAZO DEL BOTÓN SOLICITAR POR EL DE ELIMINAR SI ES ADMIN */}
+        {isAdmin ? (
+          <button
+            className={styles.btnEliminar}
+            onClick={() => onDelete(id)}
+            style={{
+              backgroundColor: "#ef4444",
+              color: "#ffffff",
+              border: "none",
+              padding: "10px 20px",
+              borderRadius: "8px",
+              fontSize: "0.875rem",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "background-color 0.2s",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#b91c1c")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ef4444")}
+          >
+            Eliminar publicación
+          </button>
+        ) : (
+          <button
+            className={`${styles.btnSolicitar} ${solicitado || isGuest ? styles.solicitado : ""}`}
+            onClick={() => {
+              if (isGuest) {
+                router.push("/login");
+                return;
+              }
+              onSolicitar(donation);
+            }}
+            disabled={solicitado}
+          >
+            {isGuest ? "Inicia sesión" : solicitado ? "✓ Solicitado" : "Solicitar"}
+          </button>
+        )}
         {isOwner ? (
           <div style={{ display: "flex", gap: "8px" }}>
             {!finalizado && (
@@ -650,6 +690,10 @@ function Toast({ message, onHide }) {
 export default function DonacionesPage() {
   const [user, setUser] = useState(null);
   const isGuest = !user;
+
+  // Calculamos si el usuario activo es administrador
+  const isAdmin = useMemo(() => user && ADMIN_EMAILS.includes(user.email), [user]);
+
   const [donations, setDonations] = useState([]);
   const [currentFilter, setCurrentFilter] = useState("todas");
   const [searchQuery, setSearchQuery] = useState("");
@@ -736,8 +780,8 @@ export default function DonacionesPage() {
                   ? Math.max(0, d.likes - 1)
                   : d.likes + 1,
               }
-            : d,
-        ),
+            : d
+        )
       );
 
       try {
@@ -751,8 +795,23 @@ export default function DonacionesPage() {
         showToast("Error al procesar el like");
       }
     },
-    [donations, isGuest, showToast],
+    [donations, isGuest, showToast]
   );
+
+  // Función exclusiva para borrar publicaciones de Firestore
+  const handleDelete = useCallback(async (id) => {
+    if (!window.confirm("¿Estás seguro de que deseas eliminar esta publicación permanentemente?")) {
+      return;
+    }
+    try {
+      const donationRef = doc(db, "donations", id);
+      await deleteDoc(donationRef);
+      showToast("Publicación eliminada correctamente");
+    } catch (error) {
+      console.error("Error al eliminar la publicación:", error);
+      showToast("Error al intentar eliminar");
+    }
+  }, [showToast]);
 
   const handleAddComment = useCallback(
     async (id, text) => {
@@ -798,7 +857,7 @@ export default function DonacionesPage() {
           .then(() => showToast("Enlace copiado"));
       }
     },
-    [showToast],
+    [showToast]
   );
 
   const handleConfirmSolicitar = useCallback(
@@ -963,6 +1022,8 @@ export default function DonacionesPage() {
                   onDelete={handleDelete}
                   onFinish={handleFinish}
                   onImageClick={setActiveImage}
+                  isAdmin={isAdmin}       // Prop para el botón especial admin
+                  onDelete={handleDelete} // Prop de acción de borrar
                 />
               ))}
             </div>
