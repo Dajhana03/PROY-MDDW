@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { auth } from "../../firebase/auth";
 import styles from "./contacto.module.css";
 import { sendContactMessage } from "./contactService";
 
@@ -21,12 +22,17 @@ export default function ContactPage() {
 
     console.log("Intentando enviar mensaje de: ", email);
 
+    // Si el usuario está logueado, guardamos su userId para poder
+    // mostrarle la respuesta del admin en Perfil > Soporte
+    const userId = auth.currentUser?.uid || null;
+
     const result = await sendContactMessage(
       firstName,
       lastName,
       email,
       subject,
       message,
+      userId,
     );
 
     if (result.success) {
@@ -155,17 +161,6 @@ export default function ContactPage() {
               <p className={styles.txt}>Torre A</p>
               <p className={styles.text}>Lima - San Juan de Lurigancho</p>
             </div>
-          </div>
-
-          {/* CHAT */}
-          <div className={styles.chatBox}>
-            <h2>Chat en vivo</h2>
-            <p>
-              ¿Necesitas ayuda inmediata? Nuestro equipo está
-              <br />
-              disponible para ayudarte en tiempo real.
-            </p>
-            <button>Iniciar chat</button>
           </div>
         </div>
       </div>

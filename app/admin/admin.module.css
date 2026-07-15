@@ -200,13 +200,20 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1rem;
   opacity: 0.6;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s, color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #c62828;
+  padding: 4px;
+  border-radius: 6px;
+  vertical-align: middle;
 }
 
 .deleteBtn:hover {
   opacity: 1;
+  background: #ffebee;
 }
 
 .empty {
@@ -251,9 +258,19 @@
   right: 1rem;
   background: none;
   border: none;
-  font-size: 1.1rem;
   cursor: pointer;
   color: #888;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.closeBtn:hover {
+  background: #f0f0f0;
+  color: #333;
 }
 
 .modalAvatar {
@@ -323,4 +340,168 @@
 
 .deleteBtnModal:hover {
   background: #ffcdd2;
+}
+
+/* Tabs */
+.tabsRow {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+
+.tabBtn {
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tabBtn:hover {
+  border-color: #4caf50;
+}
+
+.tabActive {
+  border-color: #4caf50;
+  background: #f1f8e9;
+  color: #2e7d32;
+}
+
+/* Eventos - header */
+.eventsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.eventsTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.newEventBtn {
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.newEventBtn:hover {
+  background: #43a047;
+}
+
+.newEventBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Eventos - grid de tarjetas */
+.eventsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.eventAdminCard {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 14px;
+  padding: 1rem 1.2rem;
+}
+
+.eventAdminHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.eventAdminHeader h3 {
+  font-size: 1rem;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.eventAdminMeta {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0.2rem 0;
+}
+
+/* Formulario evento */
+.eventForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.eventForm label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #444;
+}
+
+.eventForm input {
+  padding: 0.6rem 0.8rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.eventForm input:focus {
+  border-color: #4caf50;
+}
+
+.eventAdminMeta svg {
+  flex-shrink: 0;
+  color: #4caf50;
+}
+
+/* Badge de pendientes en la pestaña */
+.tabBadge {
+  background: #ff5252;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+  margin-left: 6px;
+}
+
+/* Textarea de respuesta en modal de mensajes */
+.replyTextarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.7rem 0.9rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-top: 0.4rem;
+}
+
+.replyTextarea:focus {
+  border-color: #4caf50;
 }

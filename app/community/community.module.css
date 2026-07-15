@@ -635,3 +635,67 @@
   padding: 20px 0;
 }
  
+/* NIVELES DE LA COMUNIDAD */
+
+.levelsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.levelCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #dcfce7;
+  border-radius: 14px;
+  padding: 14px;
+  background: #f8fffb;
+  transition: 0.25s;
+}
+
+.levelCard:hover {
+  border-color: #10b981;
+  transform: translateY(-2px);
+}
+
+.levelAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #c8e6c9;
+  color: #2e7d32;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.levelInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.levelName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #065f46;
+  margin: 0;
+}
+
+.levelBadge {
+  align-self: flex-start;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+@media (max-width: 520px) {
+  .levelsGrid {
+    grid-template-columns: 1fr;
+  }
+}
