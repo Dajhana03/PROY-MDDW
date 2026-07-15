@@ -34,8 +34,6 @@ const TAG_LABELS = {
   alimentos: "Alimento",
 };
 
-// Correos electrónicos autorizados como administradores
-const ADMIN_EMAILS = ["robertaquispe@gmail.com", "davidperez@gmail.com", "marco96392@gmail.com", "azul@gmail.com"];
 
 /* ============================================
    FUNCIÓN AUXILIAR PARA FORMATEAR LA FECHA
@@ -277,7 +275,7 @@ function DonationCard({
   // Renderizador de botones según el Rol de Negocio
   const renderActionButton = () => {
     // 1. Administrador: Solo eliminar publicación (En todas)[cite: 7]
-    if (isAdmin || userRole === "admin") {
+    if (isAdmin) {
       return (
         <button
           className={styles.btnEliminar}
@@ -702,7 +700,7 @@ export default function DonacionesPage() {
   const [userRole, setUserRole] = useState(null);
   const isGuest = !user;
 
-  const isAdmin = useMemo(() => user && ADMIN_EMAILS.includes(user.email), [user]);
+  const isAdmin = userRole === "admin";
   const [donations, setDonations] = useState([]);
   const [currentFilter, setCurrentFilter] = useState("todas");
   const [searchQuery, setSearchQuery] = useState("");
