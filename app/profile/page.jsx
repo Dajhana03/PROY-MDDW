@@ -364,8 +364,7 @@ export default function ProfilePage() {
   const initials = `${userData.first_name?.[0] || "U"}${userData.last_name?.[0] || ""}`.toUpperCase();
 
   // Puntos y Nivel
-  const totalPoints = (userData.points || 0) + (donations.length * 50);
-  let userLevel = LEVELS[0].name;
+const totalPoints = (userData.points || 0) + donations.reduce((sum, d) => sum + (Number(d.puntos) || 50), 0);  let userLevel = LEVELS[0].name;
   if (totalPoints >= LEVELS[1].points) userLevel = LEVELS[1].name;
   if (totalPoints >= LEVELS[2].points) userLevel = LEVELS[2].name;
 
