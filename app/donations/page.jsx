@@ -244,7 +244,7 @@ function DonationCard({
     finalizado,
     userId,
     uid,
-    ownerId, // Mapeamos por seguridad si se guardó como ownerId en Firestore
+    ownerId,
     comments = [],
     images = [],
     ownerName,
@@ -255,7 +255,7 @@ function DonationCard({
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
 
-  // COMPARACIÓN ULTRA SEGURA DE PROPIETARIO
+  // COMPARACIÓN DE ID DEL DUEÑO DE LA PUBLICACIÓN
   const postOwnerId = String(userId || uid || ownerId || "").trim();
   const currentUserId = String(currentUser?.uid || "").trim();
   const isOwner = currentUserId !== "" && postOwnerId !== "" && currentUserId === postOwnerId;
@@ -269,16 +269,15 @@ function DonationCard({
 
   const displayName = ownerName || "Usuario ECO";
 
-  // Corregido String interpolation de Maps
   const mapsUrl =
     coordinates?.lat && coordinates?.lng
       ? `https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}`
       : `https://www.google.com/maps?q=${encodeURIComponent(location || "")}`;
 
-  // Renderizador unificado y exclusivo de botones
+  // Renderizador de botones según el Rol de Negocio
   const renderActionButton = () => {
-    // 1. Administrador: Solo eliminar publicación (en todas)
-    if (isAdmin) {
+    // 1. Administrador: Solo eliminar publicación (En todas)[cite: 7]
+    if (isAdmin || userRole === "admin") {
       return (
         <button
           className={styles.btnEliminar}
@@ -302,7 +301,7 @@ function DonationCard({
       );
     }
 
-    // 2. Si es mi propia publicación (Soy el dueño) -> Mostrar "Finalizar" y "Borrar/Eliminar"
+    // 2. Si es mi propia publicación (Donante o Ambos) -> Mostrar "Finalizar" y "Borrar"[cite: 7]
     if (isOwner) {
       return (
         <div style={{ display: "flex", gap: "8px" }}>
@@ -326,12 +325,12 @@ function DonationCard({
       );
     }
 
-    // 3. Si la publicación es ajena pero mi rol es estrictamente "donante" -> NO SE MUESTRA NINGÚN BOTÓN
+    // 3. Si la publicación es AJENA pero el rol de mi perfil es estrictamente "donante" -> OCULTAR COMPLETAMENTE[cite: 7]
     if (userRole === "donante") {
       return null;
     }
 
-    // 4. Si soy receptor o "Ambos" en post ajeno -> Mostrar botón "Solicitar"
+    // 4. Receptores o rol mixto "Ambos" en post ajeno -> Mostrar botón "Solicitar"[cite: 7]
     return (
       <button
         className={`${styles.btnSolicitar} ${
@@ -711,38 +710,47 @@ export default function DonacionesPage() {
   const [toastMsg, setToastMsg] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Efecto 1: Detecta cambios de autenticación y consulta el rol en Firestore
+  const showToast = useCallback((msg) => {
+    setToastMsg(msg);
+  }, []);
+
+  // Efecto 1: Detecta cambios de autenticación y consulta el rol "user_type" en Firestore[cite: 7]
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        console.log("ID del usuario logueado:", currentUser.uid);
         try {
-          const userDocRef = doc(db, "users", currentUser.uid);
-          const userDocSnap = await getDoc(userDocRef);
+          let userDocRef = doc(db, "users", currentUser.uid);
+          let userDocSnap = await getDoc(userDocRef);
           
+          if (!userDocSnap.exists()) {
+            userDocRef = doc(db, "usuarios", currentUser.uid);
+            userDocSnap = await getDoc(userDocRef);
+          }
+
           if (userDocSnap.exists()) {
             const userData = userDocSnap.data();
-            console.log("Datos de usuario recuperados de Firestore:", userData);
             
-            // Asigna el rol guardado en minúsculas por seguridad
-            const role = (userData.role || userData.tipoUsuario || "").toLowerCase().trim();
-            console.log("Rol asignado:", role);
+            // Apuntamos exactamente al campo real de tu base de datos: user_type[cite: 7]
+            const rawRole = userData.user_type || "";
+            const role = String(rawRole).toLowerCase().trim();
+            
             setUserRole(role);
+            showToast(`Perfil cargado con éxito.`);
           } else {
-            console.warn("No se encontró el documento en la colección 'users' para el uid:", currentUser.uid);
             setUserRole(null);
+            showToast("⚠️ Tu usuario no tiene un perfil configurado en Firestore.");
           }
         } catch (error) {
-          console.error("Error al obtener el rol del usuario:", error);
           setUserRole(null);
+          showToast("❌ Error al obtener tu tipo de rol de Firestore.");
         }
       } else {
         setUserRole(null);
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [showToast]);
 
   // Efecto 2: Escucha en tiempo real la lista de donaciones
   useEffect(() => {
@@ -776,10 +784,6 @@ export default function DonacionesPage() {
 
     return () => unsubscribe();
   }, [user]);
-
-  const showToast = useCallback((msg) => {
-    setToastMsg(msg);
-  }, []);
 
   const filtered = useMemo(() => {
     const q = searchQuery.toLowerCase();
@@ -873,7 +877,7 @@ export default function DonacionesPage() {
         showToast("No se pudo enviar el comentario");
       }
     },
-    [showToast, donations],
+    [showToast, donations]
   );
 
   const handleShare = useCallback(
@@ -924,7 +928,7 @@ export default function DonacionesPage() {
         showToast("Error al enviar solicitud");
       }
     },
-    [user, showToast, donations],
+    [user, showToast, donations]
   );
 
   const handleFinish = useCallback(
@@ -944,7 +948,7 @@ export default function DonacionesPage() {
         }
       }
     },
-    [showToast],
+    [showToast]
   );
 
   return (
