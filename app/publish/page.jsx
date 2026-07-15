@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import styles from "./publish.module.css";
+// FIX: db y storage vienen de archivos separados según tu estructura de /firebase
 import { db } from "../../firebase/db";
 import { storage } from "../../firebase/storage";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
@@ -31,6 +32,7 @@ export default function PublishPage() {
   const markerInstanceRef = useRef(null);
   const defaultCenter = { lat: -12.046374, lng: -77.042793 };
 
+  // Carga del script de Google Maps (con guardia para no duplicarlo)
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!apiKey) {
@@ -61,6 +63,8 @@ export default function PublishPage() {
     document.head.appendChild(script);
   }, []);
 
+  // Auth: ya NO redirige automáticamente. El invitado puede ver el formulario
+  // (en modo lectura) y decide si quiere registrarse.
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -120,6 +124,7 @@ export default function PublishPage() {
       console.error("Error al inicializar el mapa:", err);
       setLoadError(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded]);
 
   const updateAddressWithGeocoding = async (lat, lng) => {
@@ -231,10 +236,11 @@ export default function PublishPage() {
       return true;
     });
 
+    // Mapeo síncrono e inmediato usando URL local temporal
     const newImages = validFiles.map((file) => ({
       id: `${Date.now()}-${Math.random()}`,
-      src: URL.createObjectURL(file),
-      file,
+      src: URL.createObjectURL(file), // Genera un Object URL rápido
+      file,                           // Conserva el archivo binario intacto
     }));
 
     setUploadedFiles((prev) => [...prev, ...newImages]);
@@ -243,6 +249,7 @@ export default function PublishPage() {
   const removeImage = (id) => {
     setUploadedFiles((prev) => {
       const imageToDelete = prev.find((img) => img.id === id);
+      // Revocamos la URL para no dejar desperdicios en la memoria del navegador
       if (imageToDelete && imageToDelete.src.startsWith("blob:")) {
         URL.revokeObjectURL(imageToDelete.src);
       }
@@ -268,74 +275,76 @@ export default function PublishPage() {
   };
 
   const handlePublish = async () => {
-    if (isGuest) {
-      router.push("/register");
-      return;
+  if (isGuest) {
+    router.push("/register"); // [cite: 46]
+    return;
+  }
+
+  if (!validateForm()) {
+    setToast("⚠️ Revisa los campos marcados"); // [cite: 47]
+    return;
+  }
+
+  try {
+    setLoading(true); // [cite: 48]
+    const imageUrls = [];
+
+    // Convertimos cada archivo a Base64 de manera asíncrona y secuencial
+    for (const image of uploadedFiles) {
+      if (!image.file || !(image.file instanceof File)) continue; // [cite: 49]
+
+      const base64String = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+        reader.readAsDataURL(image.file);
+      });
+
+      imageUrls.push(base64String);
     }
 
-    if (!validateForm()) {
-      setToast("⚠️ Revisa los campos marcados");
-      return;
-    }
+    // Guardamos directamente en la colección de Firestore
+    await addDoc(collection(db, "donations"), { // [cite: 2, 52]
+      type, // 
+      title: title.trim(), // 
+      description: description.trim(), // 
+      location, // 
+      coordinates, // 
+      condition, // 
+      quantity: Number(quantity), // 
+      images: imageUrls, // Guardamos el array de strings Base64 
+      likes: 0, // 
+      comments: [], // 
+      ownerId: user.uid, 
+      ownerName:user.displayName || "Usuario Anónimo", //
+      createdAt: serverTimestamp(), // 
+    });
 
-    try {
-      setLoading(true);
-      const imageUrls = [];
-      s;
-      for (const image of uploadedFiles) {
-        if (!image.file || !(image.file instanceof File)) continue;
-
-        const base64String = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = (error) => reject(error);
-          reader.readAsDataURL(image.file);
-        });
-
-        imageUrls.push(base64String);
+    setToast("🎉 Donación publicada correctamente"); // [cite: 53]
+    setTitle(""); // [cite: 53]
+    setDescription(""); // [cite: 53]
+    setLocation(""); // [cite: 53]
+    setCoordinates(defaultCenter); // [cite: 53]
+    setCondition("Nuevo"); // [cite: 53]
+    setQuantity(1); // [cite: 53]
+    
+    // Limpieza de ObjectURLs para liberar memoria del navegador
+    uploadedFiles.forEach((img) => {
+      if (img.src.startsWith("blob:")) {
+        URL.revokeObjectURL(img.src);
       }
-
-      await addDoc(collection(db, "donations"), {
-        type,
-        title: title.trim(),
-        description: description.trim(),
-        location,
-        coordinates,
-        condition,
-        quantity: Number(quantity),
-        images: imageUrls,
-        likes: 0,
-        comments: [],
-        userId: user.uid,
-        ownerId: user.uid,
-        ownerName: user.displayName || "Usuario Anónimo",
-        createdAt: serverTimestamp(),
-      });
-
-      setToast("🎉 Donación publicada correctamente");
-      setTitle("");
-      setDescription("");
-      setLocation("");
-      setCoordinates(defaultCenter);
-      setCondition("Nuevo");
-      setQuantity(1);
-
-      uploadedFiles.forEach((img) => {
-        if (img.src.startsWith("blob:")) {
-          URL.revokeObjectURL(img.src);
-        }
-      });
-      setUploadedFiles([]);
-      setType("articulos");
-      setErrors({});
-      localStorage.removeItem("draftDonation");
-    } catch (error) {
-      console.error("ERROR AL PUBLICAR:", error);
-      setToast("Error al publicar. Intenta de nuevo");
-    } finally {
-      setLoading(false);
-    }
-  };
+    });
+    setUploadedFiles([]); // [cite: 53]
+    setType("articulos"); // [cite: 53]
+    setErrors({}); // [cite: 53]
+    localStorage.removeItem("draftDonation"); // [cite: 53]
+  } catch (error) {
+    console.error("ERROR AL PUBLICAR:", error);
+    setToast("Error al publicar. Intenta de nuevo"); // [cite: 54]
+  } finally {
+    setLoading(false); // [cite: 55]
+  }
+};
 
   const handleSaveDraft = () => {
     if (isGuest) {
@@ -393,7 +402,9 @@ export default function PublishPage() {
             className={styles.formInput}
             maxLength={80}
           />
-          {errors.title && <p className={styles.fieldError}>{errors.title}</p>}
+          {errors.title && (
+            <p className={styles.fieldError}>{errors.title}</p>
+          )}
         </div>
 
         {/* DESCRIPCION */}
@@ -525,8 +536,7 @@ export default function PublishPage() {
           )}
           {loadError && (
             <p className={styles.mapError}>
-              Error al cargar el mapa interactivo. Revisa tu conexión o
-              inténtalo más tarde.
+              Error al cargar el mapa interactivo. Revisa tu conexión o inténtalo más tarde.
             </p>
           )}
           {!isLoaded && !loadError ? (
@@ -565,8 +575,7 @@ export default function PublishPage() {
         </div>
 
         <div className={styles.bottomText}>
-          Al publicar, aceptas que la información sea visible para la comunidad
-          universitaria
+          Al publicar, aceptas que la información sea visible para la comunidad universitaria
         </div>
       </div>
       {toast && (

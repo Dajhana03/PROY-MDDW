@@ -14,9 +14,8 @@ import {
   arrayRemove,
   increment,
   addDoc,
-  deleteDoc,
   serverTimestamp,
-  deleteDoc, // <-- Para eliminar publicaciones
+  deleteDoc,
 } from "firebase/firestore";
 import { auth } from "../../firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
@@ -34,8 +33,7 @@ const TAG_LABELS = {
   alimentos: "Alimento",
 };
 
-// Correos electrónicos autorizados como administradores
-const ADMIN_EMAILS = ["robertaquispe@gmail.com", "davidperez@gmail.com","marco96392@gmail.com","azul@gmail.com"];
+const ADMIN_EMAILS = ["robertaquispe@gmail.com", "davidperez@gmail.com", "marco96392@gmail.com", "azul@gmail.com"];
 
 /* ============================================
    FUNCIÓN AUXILIAR PARA FORMATEAR LA FECHA
@@ -121,7 +119,6 @@ function HeartIcon({ filled }) {
   );
 }
 
-// Icono de Comentario
 function CommentIcon() {
   return (
     <svg
@@ -199,6 +196,7 @@ function FilterIcon() {
   );
 }
 
+// Icono de Cerrar para Modales
 function CloseIcon() {
   return (
     <svg
@@ -229,8 +227,7 @@ function DonationCard({
   onDelete,
   onFinish,
   onImageClick,
-  isAdmin,   // <-- Propiedades recibidas
-  onDelete,  // <-- Propiedades recibidas
+  isAdmin,
 }) {
   const {
     id,
@@ -250,6 +247,7 @@ function DonationCard({
     ownerName,
     createdAt,
   } = donation;
+
   const router = useRouter();
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
@@ -263,13 +261,13 @@ function DonationCard({
     donation.onCommentAdd?.(id, commentText);
     setCommentText("");
   };
+
   const displayName = ownerName || "Usuario ECO";
 
-  // Enlace corregido a Google Maps
   const mapsUrl =
     coordinates?.lat && coordinates?.lng
-      ? `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`
-      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location || "")}`;
+      ? `https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}`
+      : `https://www.google.com/maps?q=${encodeURIComponent(location || "")}`;
 
   return (
     <article
@@ -393,7 +391,6 @@ function DonationCard({
           </button>
         </div>
 
-        {/* REEMPLAZO DEL BOTÓN SOLICITAR POR EL DE ELIMINAR SI ES ADMIN */}
         {isAdmin ? (
           <button
             className={styles.btnEliminar}
@@ -429,6 +426,7 @@ function DonationCard({
             {isGuest ? "Inicia sesión" : solicitado ? "✓ Solicitado" : "Solicitar"}
           </button>
         )}
+
         {isOwner ? (
           <div style={{ display: "flex", gap: "8px" }}>
             {!finalizado && (
@@ -691,9 +689,7 @@ export default function DonacionesPage() {
   const [user, setUser] = useState(null);
   const isGuest = !user;
 
-  // Calculamos si el usuario activo es administrador
   const isAdmin = useMemo(() => user && ADMIN_EMAILS.includes(user.email), [user]);
-
   const [donations, setDonations] = useState([]);
   const [currentFilter, setCurrentFilter] = useState("todas");
   const [searchQuery, setSearchQuery] = useState("");
@@ -798,7 +794,6 @@ export default function DonacionesPage() {
     [donations, isGuest, showToast]
   );
 
-  // Función exclusiva para borrar publicaciones de Firestore
   const handleDelete = useCallback(async (id) => {
     if (!window.confirm("¿Estás seguro de que deseas eliminar esta publicación permanentemente?")) {
       return;
@@ -890,22 +885,6 @@ export default function DonacionesPage() {
       }
     },
     [user, showToast, donations],
-  );
-
-  const handleDelete = useCallback(
-    async (id) => {
-      if (
-        window.confirm("¿Estás seguro de que deseas borrar esta publicación?")
-      ) {
-        try {
-          await deleteDoc(doc(db, "donations", id));
-          showToast("Publicación borrada exitosamente");
-        } catch (error) {
-          showToast("Error al intentar borrar la publicación");
-        }
-      }
-    },
-    [showToast],
   );
 
   const handleFinish = useCallback(
@@ -1022,8 +1001,7 @@ export default function DonacionesPage() {
                   onDelete={handleDelete}
                   onFinish={handleFinish}
                   onImageClick={setActiveImage}
-                  isAdmin={isAdmin}       // Prop para el botón especial admin
-                  onDelete={handleDelete} // Prop de acción de borrar
+                  isAdmin={isAdmin}
                 />
               ))}
             </div>
