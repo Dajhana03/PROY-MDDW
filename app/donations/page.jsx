@@ -14,6 +14,7 @@ import {
   arrayRemove,
   increment,
   addDoc,
+  deleteDoc,
   serverTimestamp,
 } from "firebase/firestore";
 import { auth } from "../../firebase/auth";
@@ -221,6 +222,9 @@ function DonationCard({
   onLike,
   onShare,
   isGuest,
+  currentUser,
+  onDelete,
+  onFinish,
   onImageClick,
 }) {
   const {
@@ -233,6 +237,9 @@ function DonationCard({
     likes,
     liked,
     solicitado,
+    finalizado,
+    userId,
+    uid,
     comments = [],
     images = [],
     ownerName,
@@ -243,9 +250,12 @@ function DonationCard({
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
 
+  const isOwner =
+    currentUser && (currentUser.uid === userId || currentUser.uid === uid);
+
   const handleSubmitComment = (e) => {
     e.preventDefault();
-    if (!commentText.trim()) return;
+    if (!commentText.trim() || finalizado === true) return;
     donation.onCommentAdd?.(id, commentText);
     setCommentText("");
   };
@@ -258,7 +268,9 @@ function DonationCard({
       : `http://maps.google.com/?q=${encodeURIComponent(location || "")}`;
 
   return (
-    <article className={styles.card}>
+    <article
+      className={`${styles.card} ${finalizado ? styles.cardFinalizado : ""}`}
+    >
       <div className={styles.cardHeader}>
         <div className={styles.cardUser}>
           <div className={styles.avatar}>
@@ -270,7 +282,16 @@ function DonationCard({
           </div>
         </div>
 
-        <span className={styles.ptsBadge}>+50 pts</span>
+        {finalizado ? (
+          <span
+            className={styles.ptsBadge}
+            style={{ backgroundColor: "#9ca3af", color: "#fff" }}
+          >
+            Finalizado
+          </span>
+        ) : (
+          <span className={styles.ptsBadge}>+50 pts</span>
+        )}
       </div>
 
       <div className={styles.cardBody}>
@@ -368,23 +389,49 @@ function DonationCard({
           </button>
         </div>
 
-        <button
-          className={`${styles.btnSolicitar} ${solicitado || isGuest ? styles.solicitado : ""}`}
-          onClick={() => {
-            if (isGuest) {
-              router.push("/login");
-              return;
-            }
-            onSolicitar(donation);
-          }}
-          disabled={solicitado}
-        >
-          {isGuest
-            ? "Inicia sesión"
-            : solicitado
-              ? "✓ Solicitado"
-              : "Solicitar"}
-        </button>
+        {isOwner ? (
+          <div style={{ display: "flex", gap: "8px" }}>
+            {!finalizado && (
+              <button
+                className={styles.btnSolicitar}
+                style={{ backgroundColor: "#f59e0b", borderColor: "#f59e0b" }}
+                onClick={() => onFinish(id)}
+              >
+                Finalizar
+              </button>
+            )}
+            <button
+              className={styles.btnSolicitar}
+              style={{ backgroundColor: "#ef4444", borderColor: "#ef4444" }}
+              onClick={() => onDelete(id)}
+            >
+              Borrar
+            </button>
+          </div>
+        ) : (
+          <button
+            className={`${styles.btnSolicitar} ${
+              solicitado || isGuest || finalizado ? styles.solicitado : ""
+            }`}
+            onClick={() => {
+              if (finalizado) return;
+              if (isGuest) {
+                router.push("/login");
+                return;
+              }
+              onSolicitar(donation);
+            }}
+            disabled={solicitado || finalizado}
+          >
+            {finalizado
+              ? "Finalizado"
+              : isGuest
+                ? "Inicia sesión"
+                : solicitado
+                  ? "✓ Solicitado"
+                  : "Solicitar"}
+          </button>
+        )}
       </div>
 
       {showComments && (
@@ -394,7 +441,9 @@ function DonationCard({
           <div className={styles.commentsList}>
             {comments.length === 0 ? (
               <p className={styles.noComments}>
-                Aún no hay comentarios. ¡Sé el primero!
+                {finalizado
+                  ? "Esta donación ha finalizado. No se admiten más comentarios."
+                  : "Aún no hay comentarios. ¡Sé el primero!"}
               </p>
             ) : (
               comments.map((c, index) => (
@@ -405,24 +454,28 @@ function DonationCard({
             )}
           </div>
 
-          {!isGuest ? (
-            <form onSubmit={handleSubmitComment} className={styles.commentForm}>
-              <input
-                type="text"
-                placeholder="Escribe un comentario público..."
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                className={styles.commentInput}
-              />
-              <button type="submit" className={styles.commentSubmitBtn}>
-                Enviar
-              </button>
-            </form>
-          ) : (
-            <p className={styles.loginWarning}>
-              Inicia sesión para dejar un comentario.
-            </p>
-          )}
+          {!finalizado &&
+            (isGuest ? (
+              <p className={styles.loginWarning}>
+                Inicia sesión para dejar un comentario.
+              </p>
+            ) : (
+              <form
+                onSubmit={handleSubmitComment}
+                className={styles.commentForm}
+              >
+                <input
+                  type="text"
+                  placeholder="Escribe un comentario público..."
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  className={styles.commentInput}
+                />
+                <button type="submit" className={styles.commentSubmitBtn}>
+                  Enviar
+                </button>
+              </form>
+            ))}
         </div>
       )}
     </article>
@@ -506,7 +559,7 @@ function SolicitarModal({ donation, onClose, onConfirm }) {
 }
 
 /* ============================================
-   NUEVO: MODAL VISOR DE IMÁGENES (LIGHTBOX)
+   MODAL VISOR DE IMÁGENES (LIGHTBOX)
 ============================================ */
 function ImageLightbox({ imageUrl, onClose }) {
   useEffect(() => {
@@ -623,12 +676,18 @@ export default function DonacionesPage() {
           ? likedBy.includes(auth.currentUser.uid)
           : false;
 
+        const solicitantes = d.solicitantes || [];
+        const isSolicitado = auth.currentUser
+          ? solicitantes.includes(auth.currentUser.uid)
+          : false;
+
         return {
           id: doc.id,
           ...d,
           liked: isLiked,
           likes: d.likes || 0,
           comments: d.comments || [],
+          solicitado: isSolicitado,
         };
       });
       setDonations(data);
@@ -697,6 +756,12 @@ export default function DonacionesPage() {
 
   const handleAddComment = useCallback(
     async (id, text) => {
+      const targetDonation = donations.find((d) => d.id === id);
+      if (targetDonation?.finalizado) {
+        showToast("La donación ha finalizado, no se puede comentar.");
+        return;
+      }
+
       try {
         const donationRef = doc(db, "donations", id);
         const currentUserName = auth.currentUser?.displayName || "Usuario ECO";
@@ -714,7 +779,7 @@ export default function DonacionesPage() {
         showToast("No se pudo enviar el comentario");
       }
     },
-    [showToast],
+    [showToast, donations],
   );
 
   const handleShare = useCallback(
@@ -738,24 +803,70 @@ export default function DonacionesPage() {
 
   const handleConfirmSolicitar = useCallback(
     async (id, mensaje) => {
+      if (!user) return;
+
+      const targetDonation = donations.find((d) => d.id === id);
+      if (targetDonation?.finalizado) {
+        showToast("La donación ya fue finalizada por el dueño.");
+        return;
+      }
+
       try {
         await addDoc(collection(db, "requests"), {
           donationId: id,
-          userId: user?.uid || "guest",
-          userEmail: user?.email || "",
+          userId: user.uid,
+          userEmail: user.email || "",
           mensaje: mensaje || "",
           createdAt: serverTimestamp(),
         });
 
-        setDonations((prev) =>
-          prev.map((d) => (d.id === id ? { ...d, solicitado: true } : d)),
-        );
+        const donationRef = doc(db, "donations", id);
+        await updateDoc(donationRef, {
+          solicitantes: arrayUnion(user.uid),
+        });
+
         showToast("Solicitud enviada");
       } catch (e) {
         showToast("Error al enviar solicitud");
       }
     },
-    [user, showToast],
+    [user, showToast, donations],
+  );
+
+  const handleDelete = useCallback(
+    async (id) => {
+      if (
+        window.confirm("¿Estás seguro de que deseas borrar esta publicación?")
+      ) {
+        try {
+          await deleteDoc(doc(db, "donations", id));
+          showToast("Publicación borrada exitosamente");
+        } catch (error) {
+          showToast("Error al intentar borrar la publicación");
+        }
+      }
+    },
+    [showToast],
+  );
+
+  const handleFinish = useCallback(
+    async (id) => {
+      if (
+        window.confirm(
+          "¿Estás seguro de marcar esta donación como finalizada? Ya no se podrán enviar solicitudes ni comentarios.",
+        )
+      ) {
+        try {
+          await updateDoc(doc(db, "donations", id), {
+            finalizado: true,
+          });
+          showToast("Donación marcada como finalizada");
+        } catch (error) {
+          showToast("Error al finalizar la donación");
+        }
+      }
+    },
+    [showToast],
   );
 
   return (
@@ -848,6 +959,9 @@ export default function DonacionesPage() {
                   onLike={handleLike}
                   onShare={handleShare}
                   isGuest={isGuest}
+                  currentUser={user}
+                  onDelete={handleDelete}
+                  onFinish={handleFinish}
                   onImageClick={setActiveImage}
                 />
               ))}
