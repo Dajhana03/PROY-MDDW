@@ -8,32 +8,15 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase/auth";
 import { db } from "../../firebase/db";
 import {
-  doc,
-  onSnapshot,
   collection,
   query,
   where,
-  runTransaction,
+  onSnapshot,
+  addDoc,
 } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 
-/*
- * ESQUEMA ASUMIDO EN FIRESTORE (ajusta si el tuyo es distinto):
- *
- * users/{uid}
- *   - points: number   -> puntos disponibles del usuario
- *
- * redemptions/{autoId}
- *   - userId: string
- *   - benefitId: string
- *   - benefitTitle: string
- *   - pointsCost: number
- *   - valueSoles: number
- *   - createdAt: Timestamp
- */
-
-// pointsCost y valueSoles definen el costo real de cada canje.
-// valueSoles se usa solo para calcular "Ahorro Total" en la barra de stats.
+// Definición de Beneficios con Costo, Valor y Prefijo para el código de cupón
 const BENEFITS = [
   {
     id: "cafe",
@@ -43,6 +26,7 @@ const BENEFITS = [
     desc: "Obtén un café gratis en la cafetería del campus.",
     pointsCost: 50,
     valueSoles: 5,
+    prefix: "CAFE",
   },
   {
     id: "libro",
@@ -52,6 +36,7 @@ const BENEFITS = [
     desc: "20% de descuento en material académico.",
     pointsCost: 100,
     valueSoles: 15,
+    prefix: "BOOK",
   },
   {
     id: "comida",
@@ -61,6 +46,7 @@ const BENEFITS = [
     desc: "Vale de S/20 para el comedor universitario.",
     pointsCost: 150,
     valueSoles: 20,
+    prefix: "FOOD",
   },
   {
     id: "tienda",
@@ -70,6 +56,7 @@ const BENEFITS = [
     desc: "15% en comercios afiliados.",
     pointsCost: 75,
     valueSoles: 10,
+    prefix: "SHOP",
   },
   {
     id: "eventos",
@@ -79,6 +66,7 @@ const BENEFITS = [
     desc: "Acceso gratis a eventos culturales y deportivos.",
     pointsCost: 200,
     valueSoles: 30,
+    prefix: "EVNT",
   },
   {
     id: "premium",
@@ -88,6 +76,7 @@ const BENEFITS = [
     desc: "Beneficios premium y acceso exclusivo.",
     pointsCost: 500,
     valueSoles: 60,
+    prefix: "PREM",
     disabled: true,
   },
 ];
@@ -110,6 +99,18 @@ const HOW_STEPS = [
   },
 ];
 
+/* ============================================
+   FUNCIÓN AUXILIAR: GENERADOR DE CÓDIGOS DE DESCUENTO
+============================================ */
+const generateCouponCode = (prefix) => {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let randomPart = "";
+  for (let i = 0; i < 6; i++) {
+    randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `ECO-${prefix}-${randomPart}`;
+};
+
 export default function BenefitsPage() {
   const pageRef = useReveal();
   const statsRef = useCounter();
@@ -117,13 +118,20 @@ export default function BenefitsPage() {
 
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
+  
+  // Estados de cálculo dinámico
+  const [userDonations, setUserDonations] = useState([]);
+  const [userRedemptions, setUserRedemptions] = useState([]);
   const [userPoints, setUserPoints] = useState(0);
   const [redemptionCount, setRedemptionCount] = useState(0);
   const [totalSavings, setTotalSavings] = useState(0);
 
-  const [processingId, setProcessingId] = useState(null); // id del beneficio en canje
-  const [justRedeemed, setJustRedeemed] = useState({}); // feedback visual temporal
+  const [processingId, setProcessingId] = useState(null); 
+  const [justRedeemed, setJustRedeemed] = useState({}); 
   const [toast, setToast] = useState("");
+  
+  // Estado para controlar el modal del código de descuento generado
+  const [unlockedCoupon, setUnlockedCoupon] = useState(null);
 
   const isGuest = authChecked && !user;
 
@@ -136,53 +144,57 @@ export default function BenefitsPage() {
     return () => unsubscribe();
   }, []);
 
-  // Puntos del usuario en tiempo real
+  // 1. Escuchar las donaciones del usuario en tiempo real
   useEffect(() => {
     if (!user) {
-      setUserPoints(0);
+      setUserDonations([]);
       return;
     }
-    const userRef = doc(db, "users", user.uid);
-    const unsubscribe = onSnapshot(
-      userRef,
-      (snap) => {
-        setUserPoints(snap.exists() ? snap.data().points || 0 : 0);
-      },
-      (err) => {
-        console.error("Error leyendo puntos:", err);
-        setToast("No se pudieron cargar tus puntos");
-      },
+    const q = query(
+      collection(db, "donations"),
+      where("ownerId", "==", user.uid)
     );
+    const unsubscribe = onSnapshot(q, (snap) => {
+      setUserDonations(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    }, (err) => {
+      console.error("Error leyendo donaciones:", err);
+    });
     return () => unsubscribe();
   }, [user]);
 
-  // Historial de canjes en tiempo real -> conteo y ahorro total
+  // 2. Escuchar los canjes del usuario en tiempo real
   useEffect(() => {
     if (!user) {
+      setUserRedemptions([]);
       setRedemptionCount(0);
       setTotalSavings(0);
       return;
     }
     const q = query(
       collection(db, "redemptions"),
-      where("userId", "==", user.uid),
+      where("userId", "==", user.uid)
     );
-    const unsubscribe = onSnapshot(
-      q,
-      (snap) => {
-        setRedemptionCount(snap.size);
-        const total = snap.docs.reduce(
-          (sum, d) => sum + (d.data().valueSoles || 0),
-          0,
-        );
-        setTotalSavings(total);
-      },
-      (err) => {
-        console.error("Error leyendo canjes:", err);
-      },
-    );
+    const unsubscribe = onSnapshot(q, (snap) => {
+      setUserRedemptions(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      setRedemptionCount(snap.size);
+      const total = snap.docs.reduce(
+        (sum, d) => sum + (d.data().valueSoles || 0),
+        0
+      );
+      setTotalSavings(total);
+    }, (err) => {
+      console.error("Error leyendo canjes:", err);
+    });
     return () => unsubscribe();
   }, [user]);
+
+  // 3. Calcular los puntos disponibles en tiempo real (Ganados - Consumidos)
+  useEffect(() => {
+    const puntosGanados = userDonations.reduce((sum, d) => sum + (Number(d.puntos) || 50), 0);
+    const puntosConsumidos = userRedemptions.reduce((sum, r) => sum + (Number(r.pointsCost) || 0), 0);
+    const saldoDisponible = Math.max(0, puntosGanados - puntosConsumidos);
+    setUserPoints(saldoDisponible);
+  }, [userDonations, userRedemptions]);
 
   useEffect(() => {
     if (!toast) return;
@@ -190,6 +202,7 @@ export default function BenefitsPage() {
     return () => clearTimeout(timer);
   }, [toast]);
 
+  // Función de Canje
   const handleCanjear = async (benefit) => {
     if (isGuest) {
       router.push("/register");
@@ -199,54 +212,37 @@ export default function BenefitsPage() {
 
     if (userPoints < benefit.pointsCost) {
       setToast(
-        `⚠️ Te faltan ${benefit.pointsCost - userPoints} puntos para este beneficio`,
+        `⚠️ Te faltan ${benefit.pointsCost - userPoints} puntos para este beneficio`
       );
       return;
     }
 
     setProcessingId(benefit.id);
+    const couponCode = generateCouponCode(benefit.prefix);
 
     try {
-      const userRef = doc(db, "users", user.uid);
-      const redemptionRef = doc(collection(db, "redemptions"));
-
-      await runTransaction(db, async (transaction) => {
-        const userSnap = await transaction.get(userRef);
-        const currentPoints = userSnap.exists()
-          ? userSnap.data().points || 0
-          : 0;
-
-        if (currentPoints < benefit.pointsCost) {
-          throw new Error("INSUFFICIENT_POINTS");
-        }
-
-        transaction.update(userRef, {
-          points: currentPoints - benefit.pointsCost,
-        });
-
-        transaction.set(redemptionRef, {
-          userId: user.uid,
-          benefitId: benefit.id,
-          benefitTitle: benefit.title,
-          pointsCost: benefit.pointsCost,
-          valueSoles: benefit.valueSoles,
-          createdAt: new Date(),
-        });
+      await addDoc(collection(db, "redemptions"), {
+        userId: user.uid,
+        benefitId: benefit.id,
+        benefitTitle: benefit.title,
+        pointsCost: benefit.pointsCost,
+        valueSoles: benefit.valueSoles,
+        couponCode: couponCode,
+        createdAt: new Date(),
       });
 
       setJustRedeemed((s) => ({ ...s, [benefit.id]: true }));
-      setToast(`🎉 Canjeaste "${benefit.title}"`);
+      setUnlockedCoupon({
+        title: benefit.title,
+        code: couponCode,
+      });
 
       setTimeout(() => {
         setJustRedeemed((s) => ({ ...s, [benefit.id]: false }));
       }, 2200);
     } catch (err) {
-      if (err.message === "INSUFFICIENT_POINTS") {
-        setToast("⚠️ No tienes suficientes puntos");
-      } else {
-        console.error("Error al canjear:", err);
-        setToast("Error al canjear. Intenta de nuevo");
-      }
+      console.error("Error al canjear:", err);
+      setToast("Error al procesar el canje. Intenta de nuevo");
     } finally {
       setProcessingId(null);
     }
@@ -257,7 +253,7 @@ export default function BenefitsPage() {
     { icon: "fa-star", value: redemptionCount, label: "Beneficios Canjeados" },
     {
       icon: "fa-wallet",
-      value: `s/${totalSavings}`,
+      value: `S/ ${totalSavings}`,
       label: "Ahorro Total",
     },
   ];
@@ -269,10 +265,7 @@ export default function BenefitsPage() {
         <div className="container">
           <div className="section-title">
             <h1>Catálogo de Beneficios</h1>
-            <p>
-              Canjea tus puntos por increíbles beneficios y descuentos
-              exclusivos
-            </p>
+            <p>Canjea tus puntos por increíbles beneficios y descuentos exclusivos</p>
             {isGuest && (
               <div className={styles.guestWarning}>
                 Regístrate para desbloquear beneficios y recompensas exclusivas
@@ -283,10 +276,7 @@ export default function BenefitsPage() {
           {/* Stats bar */}
           <div className={styles.benefitStats} ref={statsRef}>
             {BENEFIT_STATS.map(({ icon, value, label }) => (
-              <div
-                key={label}
-                className={`benefit-stat-card ${styles.benefitStatCard}`}
-              >
+              <div key={label} className={`benefit-stat-card ${styles.benefitStatCard}`}>
                 <i className={`fa-solid ${icon}`} />
                 <h2>{value}</h2>
                 <p>{label}</p>
@@ -297,17 +287,13 @@ export default function BenefitsPage() {
           {/* Benefit cards */}
           <div className={styles.benefitsGrid}>
             {BENEFITS.map((benefit) => {
-              const { id, iconCls, icon, title, desc, pointsCost, disabled } =
-                benefit;
+              const { id, iconCls, icon, title, desc, pointsCost, disabled } = benefit;
               const isProcessing = processingId === id;
               const isRedeemed = justRedeemed[id];
               const notEnoughPoints = !isGuest && userPoints < pointsCost;
 
               return (
-                <div
-                  key={id}
-                  className={`benefit-card ${styles.benefitCard} ${disabled ? styles.disabled : ""}`}
-                >
+                <div key={id} className={`benefit-card ${styles.benefitCard} ${disabled ? styles.disabled : ""}`}>
                   <div className={`${styles.benefitCardIcon} ${iconCls}`}>
                     <img
                       src={icon}
@@ -325,10 +311,7 @@ export default function BenefitsPage() {
                     <span>{pointsCost} pts</span>
                     <button
                       className={`${styles.canjearBtn} ${isRedeemed ? styles.canjeado : ""}`}
-                      disabled={
-                        !isGuest &&
-                        (disabled || isProcessing || notEnoughPoints)
-                      }
+                      disabled={!isGuest && (disabled || isProcessing || notEnoughPoints)}
                       onClick={() => handleCanjear(benefit)}
                     >
                       {isGuest
@@ -351,6 +334,77 @@ export default function BenefitsPage() {
         </div>
       </section>
 
+      {/* ── MODAL DE CUPÓN DESBLOQUEADO ── */}
+      {unlockedCoupon && (
+        <div 
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            padding: "20px"
+          }}
+        >
+          <div 
+            style={{
+              backgroundColor: "#ffffff",
+              padding: "30px",
+              borderRadius: "20px",
+              maxWidth: "450px",
+              width: "100%",
+              textAlign: "center",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.3)"
+            }}
+          >
+            <div style={{ fontSize: "50px", marginBottom: "15px" }}>🎁</div>
+            <h2 style={{ color: "#10b981", marginBottom: "10px", fontSize: "1.5rem" }}>¡Beneficio Desbloqueado!</h2>
+            <p style={{ color: "#4b5563", fontSize: "0.95rem", marginBottom: "20px" }}>
+              Has canjeado con éxito tu <strong>{unlockedCoupon.title}</strong>. Usa el siguiente código para reclamarlo en el campus:
+            </p>
+            
+            <div 
+              style={{
+                backgroundColor: "#f3f4f6",
+                border: "2px dashed #10b981",
+                padding: "15px",
+                borderRadius: "10px",
+                fontSize: "1.25rem",
+                fontWeight: "bold",
+                color: "#111827",
+                letterSpacing: "2px",
+                marginBottom: "25px",
+                cursor: "pointer"
+              }}
+              onClick={() => {
+                navigator.clipboard.writeText(unlockedCoupon.code);
+                setToast("📋 ¡Código copiado al portapapeles!");
+              }}
+              title="Haz clic para copiar"
+            >
+              {unlockedCoupon.code}
+            </div>
+
+            <button 
+              onClick={() => setUnlockedCoupon(null)}
+              style={{
+                backgroundColor: "#10b981",
+                color: "#ffffff",
+                border: "none",
+                padding: "10px 25px",
+                borderRadius: "10px",
+                fontWeight: "bold",
+                cursor: "pointer"
+              }}
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── PARTNERS ── */}
       <section className={styles.partnersSection}>
         <div className="container">
@@ -360,48 +414,24 @@ export default function BenefitsPage() {
           <div className={styles.partnersGrid}>
             <div className={styles.partnerCard}>
               <svg viewBox="0 0 24 24" fill="none" width="70" height="70">
-                <path
-                  d="M12 2L15 8L22 9L17 14L18 22L12 19L6 22L7 14L2 9L9 8L12 2Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinejoin="round"
-                />
+                <path d="M12 2L15 8L22 9L17 14L18 22L12 19L6 22L7 14L2 9L9 8L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
               </svg>
             </div>
-
             <div className={styles.partnerCard}>
               <svg viewBox="0 0 24 24" fill="none" width="70" height="70">
-                <path
-                  d="M12 3L20 7V17L12 21L4 17V7L12 3Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinejoin="round"
-                />
+                <path d="M12 3L20 7V17L12 21L4 17V7L12 3Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
               </svg>
             </div>
-
             <div className={styles.partnerCard}>
               <svg viewBox="0 0 24 24" fill="none" width="70" height="70">
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="8"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
+                <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2" />
                 <path d="M8 12H16" stroke="currentColor" strokeWidth="2" />
                 <path d="M12 8V16" stroke="currentColor" strokeWidth="2" />
               </svg>
             </div>
-
             <div className={styles.partnerCard}>
               <svg viewBox="0 0 24 24" fill="none" width="70" height="70">
-                <path
-                  d="M4 12L12 4L20 12L12 20L4 12Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinejoin="round"
-                />
+                <path d="M4 12L12 4L20 12L12 20L4 12Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
               </svg>
             </div>
           </div>
