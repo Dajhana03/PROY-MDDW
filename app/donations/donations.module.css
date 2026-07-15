@@ -803,3 +803,14 @@
   background-color: #bae6fd !important; /* Un celeste un poco más marcado al pasar el cursor */
   color: #025a87 !important;
 }
+
+.avatar {
+  overflow: hidden; /* asegura que la foto no se salga del círculo */
+}
+
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}

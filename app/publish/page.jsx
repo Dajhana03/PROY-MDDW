@@ -5,7 +5,13 @@ import styles from "./publish.module.css";
 // FIX: db y storage vienen de archivos separados según tu estructura de /firebase
 import { db } from "../../firebase/db";
 import { storage } from "../../firebase/storage";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  doc,
+  getDoc,
+} from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase/auth";
@@ -24,6 +30,8 @@ const MAPS_SCRIPT_ID = "google-maps-script";
 export default function PublishPage() {
   const router = useRouter();
   const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
+  const [ownerPhoto, setOwnerPhoto] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [loadError, setLoadError] = useState(false);
@@ -66,8 +74,38 @@ export default function PublishPage() {
   // Auth: ya NO redirige automáticamente. El invitado puede ver el formulario
   // (en modo lectura) y decide si quiere registrarse.
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        try {
+          let userDocRef = doc(db, "users", currentUser.uid);
+          let userDocSnap = await getDoc(userDocRef);
+
+          if (!userDocSnap.exists()) {
+            userDocRef = doc(db, "usuarios", currentUser.uid);
+            userDocSnap = await getDoc(userDocRef);
+          }
+
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            setUserRole(
+              String(userData.user_type || "")
+                .toLowerCase()
+                .trim(),
+            );
+            setOwnerPhoto(userData.photoURL || null);
+          } else {
+            setUserRole(null);
+            setOwnerPhoto(null);
+          }
+        } catch (error) {
+          setUserRole(null);
+          setOwnerPhoto(null);
+        }
+      } else {
+        setUserRole(null);
+        setOwnerPhoto(null);
+      }
       setAuthChecked(true);
     });
     return () => unsubscribe();
@@ -153,7 +191,12 @@ export default function PublishPage() {
       setCondition("Regular");
     } else {
       // Para artículos, cualquier opción es válida, pero si estaba vacío, iniciamos en "Nuevo"
-      if (condition === "" || (condition !== "Nuevo" && condition !== "Usado" && condition !== "Regular")) {
+      if (
+        condition === "" ||
+        (condition !== "Nuevo" &&
+          condition !== "Usado" &&
+          condition !== "Regular")
+      ) {
         setCondition("Nuevo");
       }
     }
@@ -163,6 +206,7 @@ export default function PublishPage() {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState("");
   const isGuest = authChecked && !user;
+  const isReceptor = userRole === "receptor";
 
   useEffect(() => {
     try {
@@ -335,6 +379,7 @@ export default function PublishPage() {
         puntos: puntosAsignados, // <-- AGREGAMOS ESTE CAMPO DINÁMICO
         ownerId: user.uid,
         ownerName: user.displayName || "Usuario Anónimo", //
+        ownerPhoto: ownerPhoto || null, // foto de perfil guardada en Firestore
         createdAt: serverTimestamp(), //
       });
 
@@ -356,6 +401,10 @@ export default function PublishPage() {
       setType("articulos"); // [cite: 53]
       setErrors({}); // [cite: 53]
       localStorage.removeItem("draftDonation"); // [cite: 53]
+
+      setTimeout(() => {
+        router.push("/donations");
+      }, 1200);
     } catch (error) {
       console.error("ERROR AL PUBLICAR:", error);
       setToast("Error al publicar. Intenta de nuevo"); // [cite: 54]
@@ -376,6 +425,41 @@ export default function PublishPage() {
     );
     setToast("Borrador guardado");
   };
+
+  if (authChecked && isReceptor) {
+    return (
+      <main className={styles.mainBg}>
+        <div className={styles.pageHeader}>
+          <h1>Publicar Donación</h1>
+          <p>Esta sección está disponible solo para donantes</p>
+        </div>
+
+        <div
+          className={styles.formCard}
+          style={{ textAlign: "center", padding: "60px 30px" }}
+        >
+          <p
+            style={{
+              color: "#5f6b66",
+              fontSize: "16px",
+              marginBottom: "24px",
+            }}
+          >
+            Como receptor, puedes explorar y solicitar donaciones de la
+            comunidad.
+          </p>
+
+          <Link
+            href="/donations"
+            className={styles.btnPublish}
+            style={{ display: "inline-block", textDecoration: "none" }}
+          >
+            Ver donaciones disponibles
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className={styles.mainBg}>
@@ -520,11 +604,14 @@ export default function PublishPage() {
               onChange={(e) => setCondition(e.target.value)}
               className={styles.formInput}
             >
-                  {type !== "reciclables" && <option value="Nuevo">Nuevo (50 pts)</option>}
-                  <option value="Regular">Regular (25 pts)</option>
+              {type !== "reciclables" && (
+                <option value="Nuevo">Nuevo (50 pts)</option>
+              )}
+              <option value="Regular">Regular (25 pts)</option>
 
-                  {type !== "alimentos" && <option value="Usado">Usado (15 pts)</option>}                
-
+              {type !== "alimentos" && (
+                <option value="Usado">Usado (15 pts)</option>
+              )}
             </select>
           </div>
         </div>

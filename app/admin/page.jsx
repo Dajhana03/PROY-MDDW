@@ -19,12 +19,14 @@ const ROLE_LABELS = {
   donante: "Donante",
   receptor: "Receptor",
   admin: "Admin",
+  ambos: "Ambos",
 };
 
 const ROLE_COLORS = {
   donante: "#4caf50",
   receptor: "#2196f3",
   admin: "#ff9800",
+  ambos: "#8b5cf6",
 };
 
 const SUBJECT_LABELS = {
@@ -38,16 +40,43 @@ const SUBJECT_LABELS = {
 /* ─────────── Íconos SVG inline (reemplazan los emojis) ─────────── */
 const IconTrash = (props) => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" {...props}>
-    <path d="M4 7h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    <path d="M9 7V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M18.5 7l-.8 12.4a2 2 0 0 1-2 1.6H8.3a2 2 0 0 1-2-1.6L5.5 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    <path
+      d="M4 7h16"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+    <path
+      d="M9 7V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V7"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M18.5 7l-.8 12.4a2 2 0 0 1-2 1.6H8.3a2 2 0 0 1-2-1.6L5.5 7"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M10 11v6M14 11v6"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
 const IconClose = (props) => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" {...props}>
-    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+    <path
+      d="M18 6L6 18M6 6l12 12"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
@@ -95,13 +124,26 @@ export default function AdminPage() {
     setFiltered(result);
   }, [users, search, roleFilter]);
 
-  const handleRoleChange = async (userId, newRole) => {
-    await updateDoc(doc(db, "users", userId), { user_type: newRole });
+  const handleRoleChange = async (user, newRole) => {
+    if (user.user_type === "admin") {
+      alert("No puedes modificar el rol de otro administrador.");
+      return;
+    }
+
+    await updateDoc(doc(db, "users", user.id), {
+      user_type: newRole,
+    });
   };
 
-  const handleDelete = async (userId) => {
+  const handleDelete = async (user) => {
+    if (user.user_type === "admin") {
+      alert("No puedes eliminar otro administrador.");
+      return;
+    }
+
     if (!confirm("¿Seguro que quieres eliminar este usuario?")) return;
-    await deleteDoc(doc(db, "users", userId));
+
+    await deleteDoc(doc(db, "users", user.id));
     setSelectedUser(null);
   };
 
@@ -189,7 +231,10 @@ export default function AdminPage() {
   const [sendingReply, setSendingReply] = useState(false);
 
   useEffect(() => {
-    const q = query(collection(db, "contactMessages"), orderBy("createdAt", "desc"));
+    const q = query(
+      collection(db, "contactMessages"),
+      orderBy("createdAt", "desc"),
+    );
     const unsub = onSnapshot(q, (snapshot) => {
       setMessages(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
       setMessagesLoading(false);
@@ -204,7 +249,8 @@ export default function AdminPage() {
 
   const messageCounts = {
     todos: messages.length,
-    pendiente: messages.filter((m) => (m.status || "pendiente") === "pendiente").length,
+    pendiente: messages.filter((m) => (m.status || "pendiente") === "pendiente")
+      .length,
     respondido: messages.filter((m) => m.status === "respondido").length,
   };
 
@@ -363,17 +409,19 @@ export default function AdminPage() {
                           <select
                             className={styles.roleSelect}
                             value={user.user_type}
+                            disabled={user.user_type === "admin"}
                             onChange={(e) =>
-                              handleRoleChange(user.id, e.target.value)
+                              handleRoleChange(user, e.target.value)
                             }
                           >
                             <option value="donante">Donante</option>
                             <option value="receptor">Receptor</option>
                             <option value="admin">Admin</option>
+                            <option value="ambos">Ambos</option>
                           </select>
                           <button
                             className={styles.deleteBtn}
-                            onClick={() => handleDelete(user.id)}
+                            onClick={() => handleDelete(user)}
                             title="Eliminar usuario"
                           >
                             <IconTrash />
@@ -443,9 +491,11 @@ export default function AdminPage() {
                     <strong>ID:</strong> <code>{selectedUser.userId}</code>
                   </p>
                 </div>
+
                 <button
                   className={styles.deleteBtnModal}
-                  onClick={() => handleDelete(selectedUser.id)}
+                  disabled={selectedUser.user_type === "admin"}
+                  onClick={() => handleDelete(selectedUser)}
                 >
                   Eliminar usuario
                 </button>
@@ -492,29 +542,90 @@ export default function AdminPage() {
                   </div>
                   <p className={styles.eventAdminMeta}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                      <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="2" />
-                      <path d="M8 3V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                      <path d="M16 3V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                      <path d="M3 10H21" stroke="currentColor" strokeWidth="2" />
+                      <rect
+                        x="3"
+                        y="5"
+                        width="18"
+                        height="16"
+                        rx="2"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M8 3V7"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M16 3V7"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M3 10H21"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      />
                     </svg>
                     {event.date}
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ marginLeft: "8px" }}>
-                      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-                      <path d="M12 7V12L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      style={{ marginLeft: "8px" }}
+                    >
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="9"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M12 7V12L15 15"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                     {event.hour}
                   </p>
                   <p className={styles.eventAdminMeta}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                      <path d="M12 21C12 21 19 14.5 19 9.5C19 5.9 15.9 3 12 3C8.1 3 5 5.9 5 9.5C5 14.5 12 21 12 21Z" stroke="currentColor" strokeWidth="2" />
-                      <circle cx="12" cy="10" r="2.5" stroke="currentColor" strokeWidth="2" />
+                      <path
+                        d="M12 21C12 21 19 14.5 19 9.5C19 5.9 15.9 3 12 3C8.1 3 5 5.9 5 9.5C5 14.5 12 21 12 21Z"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      />
+                      <circle
+                        cx="12"
+                        cy="10"
+                        r="2.5"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      />
                     </svg>
                     {event.place}
                   </p>
                   <p className={styles.eventAdminMeta}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2" />
-                      <path d="M4 21C4 17.5 7 15 12 15C17 15 20 17.5 20 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                      <circle
+                        cx="12"
+                        cy="8"
+                        r="4"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M4 21C4 17.5 7 15 12 15C17 15 20 17.5 20 21"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
                     </svg>
                     {(event.attendees || []).length} asistirán
                   </p>
@@ -620,7 +731,11 @@ export default function AdminPage() {
               >
                 <span className={styles.statNumber}>{messageCounts[f]}</span>
                 <span className={styles.statLabel}>
-                  {f === "todos" ? "Total" : f === "pendiente" ? "Pendientes" : "Respondidos"}
+                  {f === "todos"
+                    ? "Total"
+                    : f === "pendiente"
+                      ? "Pendientes"
+                      : "Respondidos"}
                 </span>
               </button>
             ))}
@@ -648,19 +763,29 @@ export default function AdminPage() {
                       className={styles.row}
                       onClick={() => openMessage(msg)}
                     >
-                      <td>{msg.firstName} {msg.lastName}</td>
+                      <td>
+                        {msg.firstName} {msg.lastName}
+                      </td>
                       <td>{msg.email}</td>
                       <td>{SUBJECT_LABELS[msg.subject] || msg.subject}</td>
                       <td>
                         <span
                           className={styles.roleBadge}
                           style={{
-                            background: (msg.status === "respondido" ? "#4caf50" : "#ff9800") + "22",
-                            color: msg.status === "respondido" ? "#4caf50" : "#ff9800",
+                            background:
+                              (msg.status === "respondido"
+                                ? "#4caf50"
+                                : "#ff9800") + "22",
+                            color:
+                              msg.status === "respondido"
+                                ? "#4caf50"
+                                : "#ff9800",
                             border: `1px solid ${msg.status === "respondido" ? "#4caf50" : "#ff9800"}55`,
                           }}
                         >
-                          {msg.status === "respondido" ? "Respondido" : "Pendiente"}
+                          {msg.status === "respondido"
+                            ? "Respondido"
+                            : "Pendiente"}
                         </span>
                       </td>
                     </tr>
@@ -690,15 +815,25 @@ export default function AdminPage() {
                 <div className={styles.modalDetails}>
                   <p>
                     <strong>Asunto:</strong>{" "}
-                    {SUBJECT_LABELS[selectedMessage.subject] || selectedMessage.subject}
+                    {SUBJECT_LABELS[selectedMessage.subject] ||
+                      selectedMessage.subject}
                   </p>
                   <p>
                     <strong>Mensaje:</strong>
                   </p>
-                  <p style={{ whiteSpace: "pre-wrap" }}>{selectedMessage.message}</p>
+                  <p style={{ whiteSpace: "pre-wrap" }}>
+                    {selectedMessage.message}
+                  </p>
                 </div>
 
-                <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#444", marginTop: "0.8rem" }}>
+                <label
+                  style={{
+                    fontSize: "0.85rem",
+                    fontWeight: 600,
+                    color: "#444",
+                    marginTop: "0.8rem",
+                  }}
+                >
                   Tu respuesta
                 </label>
                 <textarea
@@ -709,12 +844,24 @@ export default function AdminPage() {
                   rows={4}
                 />
 
-                <div style={{ display: "flex", gap: "0.6rem", marginTop: "0.8rem" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "0.6rem",
+                    marginTop: "0.8rem",
+                  }}
+                >
                   <a
                     className={styles.tabBtn}
-                    style={{ flex: 1, textAlign: "center", textDecoration: "none" }}
+                    style={{
+                      flex: 1,
+                      textAlign: "center",
+                      textDecoration: "none",
+                    }}
                     href={`mailto:${selectedMessage.email}?subject=${encodeURIComponent(
-                      "Re: " + (SUBJECT_LABELS[selectedMessage.subject] || selectedMessage.subject)
+                      "Re: " +
+                      (SUBJECT_LABELS[selectedMessage.subject] ||
+                        selectedMessage.subject),
                     )}&body=${encodeURIComponent(replyText)}`}
                   >
                     Abrir en correo

@@ -808,3 +808,98 @@
   .tabs { padding: 0 0.5rem; overflow-x: auto; }
   .content { padding: 0 1rem; }
 }
+
+/* Solicitudes recibidas en Mis donaciones */
+.donationBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.requestsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-left: 1rem;
+  border-left: 2px solid #dcfce7;
+  margin-left: 0.6rem;
+}
+
+.requestCard {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+}
+
+.requestHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.requestUser {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #111;
+}
+
+.requestStatus {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.statusRejected {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.requestMsg {
+  font-size: 0.85rem;
+  color: #475569;
+  margin: 0.4rem 0 0;
+  line-height: 1.5;
+}
+
+.requestActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.btnAccept, .btnReject {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btnAccept {
+  background: #16a34a;
+  color: #fff;
+}
+
+.btnReject {
+  background: #ef4444;
+  color: #fff;
+}
+
+.btnAccept:hover, .btnReject:hover {
+  opacity: 0.85;
+}

@@ -34,9 +34,6 @@ const TAG_LABELS = {
   alimentos: "Alimento",
 };
 
-// Correos electrónicos autorizados como administradores
-const ADMIN_EMAILS = ["robertaquispe@gmail.com", "davidperez@gmail.com", "marco96392@gmail.com", "azul@gmail.com"];
-
 /* ============================================
    FUNCIÓN AUXILIAR PARA FORMATEAR LA FECHA
 ============================================ */
@@ -248,6 +245,7 @@ function DonationCard({
     comments = [],
     images = [],
     ownerName,
+    ownerPhoto,
     createdAt,
   } = donation;
 
@@ -258,11 +256,13 @@ function DonationCard({
   // COMPARACIÓN DE ID DEL DUEÑO DE LA PUBLICACIÓN
   const postOwnerId = String(userId || uid || ownerId || "").trim();
   const currentUserId = String(currentUser?.uid || "").trim();
-  const isOwner = currentUserId !== "" && postOwnerId !== "" && currentUserId === postOwnerId;
+  const isOwner =
+    currentUserId !== "" && postOwnerId !== "" && currentUserId === postOwnerId;
 
   const handleSubmitComment = (e) => {
     e.preventDefault();
-    if (!commentText.trim() || commentText.length > 250 || finalizado === true) return;
+    if (!commentText.trim() || commentText.length > 250 || finalizado === true)
+      return;
     donation.onCommentAdd?.(id, commentText);
     setCommentText("");
   };
@@ -277,7 +277,7 @@ function DonationCard({
   // Renderizador de botones según el Rol de Negocio
   const renderActionButton = () => {
     // 1. Administrador: Solo eliminar publicación (En todas)[cite: 7]
-    if (isAdmin || userRole === "admin") {
+    if (isAdmin) {
       return (
         <button
           className={styles.btnEliminar}
@@ -293,8 +293,12 @@ function DonationCard({
             cursor: "pointer",
             transition: "background-color 0.2s",
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#b91c1c")}
-          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ef4444")}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor = "#b91c1c")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.backgroundColor = "#ef4444")
+          }
         >
           Eliminar publicación
         </button>
@@ -364,7 +368,15 @@ function DonationCard({
       <div className={styles.cardHeader}>
         <div className={styles.cardUser}>
           <div className={styles.avatar}>
-            {displayName.charAt(0).toUpperCase()}
+            {ownerPhoto ? (
+              <img
+                src={ownerPhoto}
+                alt={displayName}
+                className={styles.avatarImg}
+              />
+            ) : (
+              displayName.charAt(0).toUpperCase()
+            )}
           </div>
           <div className={styles.userInfo}>
             <span className={styles.userName}>{displayName}</span>
@@ -702,7 +714,7 @@ export default function DonacionesPage() {
   const [userRole, setUserRole] = useState(null);
   const isGuest = !user;
 
-  const isAdmin = useMemo(() => user && ADMIN_EMAILS.includes(user.email), [user]);
+  const isAdmin = userRole === "admin";
   const [donations, setDonations] = useState([]);
   const [currentFilter, setCurrentFilter] = useState("todas");
   const [searchQuery, setSearchQuery] = useState("");
@@ -723,7 +735,7 @@ export default function DonacionesPage() {
         try {
           let userDocRef = doc(db, "users", currentUser.uid);
           let userDocSnap = await getDoc(userDocRef);
-          
+
           if (!userDocSnap.exists()) {
             userDocRef = doc(db, "usuarios", currentUser.uid);
             userDocSnap = await getDoc(userDocRef);
@@ -731,16 +743,18 @@ export default function DonacionesPage() {
 
           if (userDocSnap.exists()) {
             const userData = userDocSnap.data();
-            
+
             // Apuntamos exactamente al campo real de tu base de datos: user_type[cite: 7]
             const rawRole = userData.user_type || "";
             const role = String(rawRole).toLowerCase().trim();
-            
+
             setUserRole(role);
             showToast(`Perfil cargado con éxito.`);
           } else {
             setUserRole(null);
-            showToast("⚠️ Tu usuario no tiene un perfil configurado en Firestore.");
+            showToast(
+              "⚠️ Tu usuario no tiene un perfil configurado en Firestore.",
+            );
           }
         } catch (error) {
           setUserRole(null);
@@ -821,8 +835,8 @@ export default function DonacionesPage() {
                   ? Math.max(0, d.likes - 1)
                   : d.likes + 1,
               }
-            : d
-        )
+            : d,
+        ),
       );
 
       try {
@@ -836,22 +850,29 @@ export default function DonacionesPage() {
         showToast("Error al procesar el like");
       }
     },
-    [donations, isGuest, showToast]
+    [donations, isGuest, showToast],
   );
 
-  const handleDelete = useCallback(async (id) => {
-    if (!window.confirm("¿Estás seguro de que deseas eliminar esta publicación permanentemente?")) {
-      return;
-    }
-    try {
-      const donationRef = doc(db, "donations", id);
-      await deleteDoc(donationRef);
-      showToast("Publicación eliminada correctamente");
-    } catch (error) {
-      console.error("Error al eliminar la publicación:", error);
-      showToast("Error al intentar eliminar");
-    }
-  }, [showToast]);
+  const handleDelete = useCallback(
+    async (id) => {
+      if (
+        !window.confirm(
+          "¿Estás seguro de que deseas eliminar esta publicación permanentemente?",
+        )
+      ) {
+        return;
+      }
+      try {
+        const donationRef = doc(db, "donations", id);
+        await deleteDoc(donationRef);
+        showToast("Publicación eliminada correctamente");
+      } catch (error) {
+        console.error("Error al eliminar la publicación:", error);
+        showToast("Error al intentar eliminar");
+      }
+    },
+    [showToast],
+  );
 
   const handleAddComment = useCallback(
     async (id, text) => {
@@ -878,7 +899,7 @@ export default function DonacionesPage() {
         showToast("No se pudo enviar el comentario");
       }
     },
-    [showToast, donations]
+    [showToast, donations],
   );
 
   const handleShare = useCallback(
@@ -897,7 +918,7 @@ export default function DonacionesPage() {
           .then(() => showToast("Enlace copiado"));
       }
     },
-    [showToast]
+    [showToast],
   );
 
   const handleConfirmSolicitar = useCallback(
@@ -913,9 +934,17 @@ export default function DonacionesPage() {
       try {
         await addDoc(collection(db, "requests"), {
           donationId: id,
+          donationTitle: targetDonation.title || "",
+          ownerId:
+            targetDonation.ownerId ||
+            targetDonation.userId ||
+            targetDonation.uid ||
+            "",
           userId: user.uid,
           userEmail: user.email || "",
+          userName: user.displayName || "Usuario ECO",
           mensaje: mensaje || "",
+          status: "pendiente",
           createdAt: serverTimestamp(),
         });
 
@@ -929,7 +958,7 @@ export default function DonacionesPage() {
         showToast("Error al enviar solicitud");
       }
     },
-    [user, showToast, donations]
+    [user, showToast, donations],
   );
 
   const handleFinish = useCallback(
@@ -949,7 +978,7 @@ export default function DonacionesPage() {
         }
       }
     },
-    [showToast]
+    [showToast],
   );
 
   return (
