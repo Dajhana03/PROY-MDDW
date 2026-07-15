@@ -38,17 +38,20 @@
   font-weight: 600;
   animation: slideIn 0.3s ease;
   box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
 .error   { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
 @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ── Hero Card Corregido ── */
+/* ── Hero Card ── */
 .heroCard {
   position: relative;
   background: #fff;
   border-radius: 0 0 28px 28px;
-  overflow: visible; /* Permitir que el avatar sobresalga */
+  overflow: hidden;
   box-shadow: 0 4px 24px rgba(0,0,0,0.08);
   margin-bottom: 0;
 }
@@ -57,29 +60,26 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 230px; 
+  height: 210px;
   background: linear-gradient(135deg, #166534 0%, #16a34a 60%, #4ade80 100%);
   z-index: 1;
 }
 
-.heroContent {
+.heroTopRow {
   position: relative;
-  padding-top: 100px; /* Empuja el contenido hacia abajo del fondo verde */
-  padding-left: 2rem;
-  padding-right: 2rem;
-  padding-bottom: 2rem;
+  padding: 2.75rem 2rem 1.5rem;
   display: flex;
-  align-items: center; /* Centrar verticalmente avatar, texto y stats */
+  align-items: flex-end;
   gap: 1.5rem;
   flex-wrap: wrap;
   z-index: 2;
 }
 
-/* Avatar Flotante */
+/* Foto de perfil tipo carnet (cuadrado redondeado) */
 .avatarWrapper {
-  width: 110px;
-  height: 110px;
-  border-radius: 50%;
+  width: 108px;
+  height: 108px;
+  border-radius: 24px;
   border: 4px solid #fff;
   overflow: hidden;
   background: #dcfce7;
@@ -89,7 +89,6 @@
   cursor: pointer;
   position: relative;
   flex-shrink: 0;
-  margin-top: -10px; /* Efecto de solapamiento con la franja verde */
   box-shadow: 0 4px 16px rgba(0,0,0,0.15);
 }
 .avatarImg {
@@ -116,14 +115,31 @@
 }
 .avatarWrapper:hover .avatarOverlay { opacity: 1; }
 
-/* Info del Usuario sin solapamientos */
+/* Badge de editar, siempre visible (útil en móvil, donde no hay hover) */
+.avatarBadge {
+  position: absolute;
+  bottom: -6px;
+  right: -6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: #16a34a;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  pointer-events: none;
+}
+
 .heroInfo {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   gap: 6px;
   flex: 1;
   min-width: 220px;
+  padding-bottom: 4px;
 }
 .heroInfo h1 {
   font-size: 1.8rem;
@@ -134,12 +150,11 @@
 }
 .heroEmail {
   font-size: 0.95rem;
-  color: #d3e1f6; /* Gris más oscuro para asegurar legibilidad */
+  color: #d3e1f6;
   margin: 0;
   font-weight: 500;
 }
 
-/* Pastillas de Medallas */
 .badgeContainer {
   display: flex;
   flex-wrap: wrap;
@@ -151,6 +166,7 @@
 .rolePill, .levelPill {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   white-space: nowrap;
   padding: 5px 12px;
   border-radius: 20px;
@@ -163,11 +179,11 @@
   border: 1px solid #fde047;
 }
 
-/* Stats */
 .heroStats {
   display: flex;
   align-items: center;
   gap: 1.5rem;
+  padding-bottom: 4px;
   margin-left: auto;
 }
 .stat {
@@ -176,10 +192,14 @@
   align-items: center;
   gap: 2px;
 }
+.statIcon {
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 1px;
+}
 .stat strong {
   font-size: 1.3rem;
   font-weight: 800;
-  color: #094d15;
+  color: #ffffff;
 }
 .stat span {
   font-size: 0.72rem;
@@ -190,7 +210,72 @@
 .statDivider {
   width: 1px;
   height: 32px;
-  background: #e2e8f0;
+  background: rgba(255,255,255,0.3);
+}
+
+/* ── Tallo de crecimiento (nivel Novato → Eco-Guardián → Héroe Verde) ── */
+.heroMetaRow {
+  position: relative;
+  z-index: 2;
+  background: #fff;
+  padding: 0.4rem 2rem 1.6rem;
+}
+.growthStem {
+  padding-top: 0.6rem;
+}
+.stemTrack {
+  position: relative;
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  margin: 0 10px;
+}
+.stemFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #4ade80, #16a34a);
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+.stemNode {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #e5e7eb;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.3s, color 0.3s;
+}
+.stemNodeActive {
+  border-color: #16a34a;
+  color: #16a34a;
+  background: #dcfce7;
+}
+.stemLabels {
+  position: relative;
+  height: 16px;
+  margin: 10px 10px 0;
+}
+.stemLabel {
+  position: absolute;
+  top: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+.stemCaption {
+  margin: 8px 4px 0;
+  font-size: 0.8rem;
+  color: #64748b;
 }
 
 /* ── Tabs ── */
@@ -206,6 +291,10 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 .tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 1rem 1.4rem;
   background: none;
   border: none;
@@ -217,11 +306,25 @@
   transition: all 0.2s;
   white-space: nowrap;
 }
+.tabIcon { flex-shrink: 0; }
 .tab:hover { color: #16a34a; }
 .tabActive {
   color: #16a34a;
   border-bottom-color: #16a34a;
   font-weight: 700;
+}
+.tabBadge {
+  display: inline-block;
+  background: #16a34a;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 2px 7px;
+  border-radius: 20px;
+  margin-left: 6px;
+  vertical-align: middle;
 }
 
 /* ── Content ── */
@@ -245,6 +348,9 @@
   padding-bottom: 0.6rem;
 }
 .editFloatBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: transparent;
   border: 1px solid #16a34a;
   color: #16a34a;
@@ -321,10 +427,12 @@
   filter: grayscale(0%);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
-.badgeIcon {
-  font-size: 2rem;
-  display: block;
+.badgeIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 8px;
+  color: #16a34a;
 }
 .badgeCard p {
   font-weight: bold;
@@ -433,6 +541,9 @@
 .saveBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .errorMsg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   color: #b91c1c;
   font-size: 0.87rem;
   background: #fee2e2;
@@ -457,7 +568,10 @@
   gap: 1rem;
 }
 .activityIcon {
-  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #16a34a;
   flex-shrink: 0;
 }
 .activityTitle {
@@ -488,6 +602,95 @@
   font-size: 0.9rem;
   text-align: center;
   padding: 2rem;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px dashed #e5e7eb;
+}
+
+/* ── Soporte ── */
+.supportList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+.supportCard {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+}
+.supportHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.supportSubject {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #111;
+  font-size: 0.9rem;
+}
+.supportStatus {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.statusPending {
+  background: #fff3e0;
+  color: #e65100;
+  border: 1px solid #ffcc80;
+}
+.statusDone {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+.supportMessage {
+  font-size: 0.9rem;
+  color: #475569;
+  margin: 0;
+  line-height: 1.5;
+}
+.supportReply {
+  margin-top: 0.8rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+}
+.supportReplyLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #15803d;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.supportReply p {
+  margin: 0.4rem 0 0;
+  font-size: 0.9rem;
+  color: #1e293b;
+  line-height: 1.5;
+}
+.emptySupport {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  color: #94a3b8;
+  text-align: center;
+  padding: 3rem 1rem;
   background: #fff;
   border-radius: 12px;
   border: 1px dashed #e5e7eb;
@@ -530,11 +733,13 @@
   font-size: 1.1rem;
   cursor: pointer;
   color: #94a3b8;
+  display: flex;
+  align-items: center;
 }
 .photoPreviewBox {
   width: 120px;
   height: 120px;
-  border-radius: 50%;
+  border-radius: 26px;
   overflow: hidden;
   background: #dcfce7;
   margin: 0 auto;
@@ -566,7 +771,10 @@
   accent-color: #16a34a;
 }
 .uploadBtn {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   text-align: center;
   padding: 0.7rem;
   border: 1.5px dashed #d1fae5;
@@ -582,34 +790,21 @@
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
-  .heroContent {
+  .heroTopRow {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding-top: 80px;
+    padding-top: 3.5rem;
   }
-  .avatarWrapper {
-    margin-top: -50px;
-  }
-  .heroInfo {
-    align-items: center;
-  }
+  .heroInfo { align-items: center; }
   .heroStats {
     margin-left: 0;
     width: 100%;
     justify-content: center;
   }
-  .infoGrid {
-    grid-template-columns: 1fr;
-  }
-  .formRow {
-    grid-template-columns: 1fr;
-  }
-  .tabs {
-    padding: 0 0.5rem;
-    overflow-x: auto;
-  }
-  .content {
-    padding: 0 1rem;
-  }
+  .heroMetaRow { padding: 0.4rem 1.25rem 1.4rem; }
+  .infoGrid { grid-template-columns: 1fr; }
+  .formRow { grid-template-columns: 1fr; }
+  .tabs { padding: 0 0.5rem; overflow-x: auto; }
+  .content { padding: 0 1rem; }
 }
