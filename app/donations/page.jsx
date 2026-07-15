@@ -380,7 +380,7 @@ function DonationCard({
             Finalizado
           </span>
         ) : (
-          <span className={styles.ptsBadge}>+50 pts</span>
+          <span className={styles.ptsBadge}>+{donation.puntos || 50} pts</span>
         )}
       </div>
 
