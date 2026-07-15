@@ -16,6 +16,7 @@ import {
   addDoc,
   serverTimestamp,
   deleteDoc,
+  getDoc,
 } from "firebase/firestore";
 import { auth } from "../../firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
@@ -33,6 +34,7 @@ const TAG_LABELS = {
   alimentos: "Alimento",
 };
 
+// Correos electrónicos autorizados como administradores
 const ADMIN_EMAILS = ["robertaquispe@gmail.com", "davidperez@gmail.com", "marco96392@gmail.com", "azul@gmail.com"];
 
 /* ============================================
@@ -196,7 +198,6 @@ function FilterIcon() {
   );
 }
 
-// Icono de Cerrar para Modales
 function CloseIcon() {
   return (
     <svg
@@ -228,6 +229,7 @@ function DonationCard({
   onFinish,
   onImageClick,
   isAdmin,
+  userRole,
 }) {
   const {
     id,
@@ -242,6 +244,7 @@ function DonationCard({
     finalizado,
     userId,
     uid,
+    ownerId, // Mapeamos por seguridad si se guardó como ownerId en Firestore
     comments = [],
     images = [],
     ownerName,
@@ -252,8 +255,10 @@ function DonationCard({
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
 
-  const isOwner =
-    currentUser && (currentUser.uid === userId || currentUser.uid === uid);
+  // COMPARACIÓN ULTRA SEGURA DE PROPIETARIO
+  const postOwnerId = String(userId || uid || ownerId || "").trim();
+  const currentUserId = String(currentUser?.uid || "").trim();
+  const isOwner = currentUserId !== "" && postOwnerId !== "" && currentUserId === postOwnerId;
 
   const handleSubmitComment = (e) => {
     e.preventDefault();
@@ -264,10 +269,94 @@ function DonationCard({
 
   const displayName = ownerName || "Usuario ECO";
 
+  // Corregido String interpolation de Maps
   const mapsUrl =
     coordinates?.lat && coordinates?.lng
       ? `https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}`
       : `https://www.google.com/maps?q=${encodeURIComponent(location || "")}`;
+
+  // Renderizador unificado y exclusivo de botones
+  const renderActionButton = () => {
+    // 1. Administrador: Solo eliminar publicación (en todas)
+    if (isAdmin) {
+      return (
+        <button
+          className={styles.btnEliminar}
+          onClick={() => onDelete(id)}
+          style={{
+            backgroundColor: "#ef4444",
+            color: "#ffffff",
+            border: "none",
+            padding: "10px 20px",
+            borderRadius: "8px",
+            fontSize: "0.875rem",
+            fontWeight: "600",
+            cursor: "pointer",
+            transition: "background-color 0.2s",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#b91c1c")}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ef4444")}
+        >
+          Eliminar publicación
+        </button>
+      );
+    }
+
+    // 2. Si es mi propia publicación (Soy el dueño) -> Mostrar "Finalizar" y "Borrar/Eliminar"
+    if (isOwner) {
+      return (
+        <div style={{ display: "flex", gap: "8px" }}>
+          {!finalizado && (
+            <button
+              className={styles.btnSolicitar}
+              style={{ backgroundColor: "#f59e0b", borderColor: "#f59e0b" }}
+              onClick={() => onFinish(id)}
+            >
+              Finalizar
+            </button>
+          )}
+          <button
+            className={styles.btnSolicitar}
+            style={{ backgroundColor: "#ef4444", borderColor: "#ef4444" }}
+            onClick={() => onDelete(id)}
+          >
+            Borrar
+          </button>
+        </div>
+      );
+    }
+
+    // 3. Si la publicación es ajena pero mi rol es estrictamente "donante" -> NO SE MUESTRA NINGÚN BOTÓN
+    if (userRole === "donante") {
+      return null;
+    }
+
+    // 4. Si soy receptor o "Ambos" en post ajeno -> Mostrar botón "Solicitar"
+    return (
+      <button
+        className={`${styles.btnSolicitar} ${
+          solicitado || isGuest || finalizado ? styles.solicitado : ""
+        }`}
+        onClick={() => {
+          if (finalizado) return;
+          if (isGuest) {
+            router.push("/login");
+            return;
+          }
+          onSolicitar(donation);
+        }}
+        disabled={solicitado || finalizado}
+      >
+        {finalizado
+          ? "Finalizado"
+          : isGuest
+            ? "Inicia sesión"
+            : solicitado
+              ? "✓ Solicitado"
+              : "Solicitar"}
+      </button>
+    );
+  };
 
   return (
     <article
@@ -391,85 +480,8 @@ function DonationCard({
           </button>
         </div>
 
-        {isAdmin ? (
-          <button
-            className={styles.btnEliminar}
-            onClick={() => onDelete(id)}
-            style={{
-              backgroundColor: "#ef4444",
-              color: "#ffffff",
-              border: "none",
-              padding: "10px 20px",
-              borderRadius: "8px",
-              fontSize: "0.875rem",
-              fontWeight: "600",
-              cursor: "pointer",
-              transition: "background-color 0.2s",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#b91c1c")}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ef4444")}
-          >
-            Eliminar publicación
-          </button>
-        ) : (
-          <button
-            className={`${styles.btnSolicitar} ${solicitado || isGuest ? styles.solicitado : ""}`}
-            onClick={() => {
-              if (isGuest) {
-                router.push("/login");
-                return;
-              }
-              onSolicitar(donation);
-            }}
-            disabled={solicitado}
-          >
-            {isGuest ? "Inicia sesión" : solicitado ? "✓ Solicitado" : "Solicitar"}
-          </button>
-        )}
-
-        {isOwner ? (
-          <div style={{ display: "flex", gap: "8px" }}>
-            {!finalizado && (
-              <button
-                className={styles.btnSolicitar}
-                style={{ backgroundColor: "#f59e0b", borderColor: "#f59e0b" }}
-                onClick={() => onFinish(id)}
-              >
-                Finalizar
-              </button>
-            )}
-            <button
-              className={styles.btnSolicitar}
-              style={{ backgroundColor: "#ef4444", borderColor: "#ef4444" }}
-              onClick={() => onDelete(id)}
-            >
-              Borrar
-            </button>
-          </div>
-        ) : (
-          <button
-            className={`${styles.btnSolicitar} ${
-              solicitado || isGuest || finalizado ? styles.solicitado : ""
-            }`}
-            onClick={() => {
-              if (finalizado) return;
-              if (isGuest) {
-                router.push("/login");
-                return;
-              }
-              onSolicitar(donation);
-            }}
-            disabled={solicitado || finalizado}
-          >
-            {finalizado
-              ? "Finalizado"
-              : isGuest
-                ? "Inicia sesión"
-                : solicitado
-                  ? "✓ Solicitado"
-                  : "Solicitar"}
-          </button>
-        )}
+        {/* Renderizado de botón exclusivo */}
+        {renderActionButton()}
       </div>
 
       {showComments && (
@@ -687,6 +699,7 @@ function Toast({ message, onHide }) {
 ============================================ */
 export default function DonacionesPage() {
   const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const isGuest = !user;
 
   const isAdmin = useMemo(() => user && ADMIN_EMAILS.includes(user.email), [user]);
@@ -698,13 +711,40 @@ export default function DonacionesPage() {
   const [toastMsg, setToastMsg] = useState("");
   const [loading, setLoading] = useState(true);
 
+  // Efecto 1: Detecta cambios de autenticación y consulta el rol en Firestore
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        console.log("ID del usuario logueado:", currentUser.uid);
+        try {
+          const userDocRef = doc(db, "users", currentUser.uid);
+          const userDocSnap = await getDoc(userDocRef);
+          
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            console.log("Datos de usuario recuperados de Firestore:", userData);
+            
+            // Asigna el rol guardado en minúsculas por seguridad
+            const role = (userData.role || userData.tipoUsuario || "").toLowerCase().trim();
+            console.log("Rol asignado:", role);
+            setUserRole(role);
+          } else {
+            console.warn("No se encontró el documento en la colección 'users' para el uid:", currentUser.uid);
+            setUserRole(null);
+          }
+        } catch (error) {
+          console.error("Error al obtener el rol del usuario:", error);
+          setUserRole(null);
+        }
+      } else {
+        setUserRole(null);
+      }
     });
     return () => unsubscribe();
   }, []);
 
+  // Efecto 2: Escucha en tiempo real la lista de donaciones
   useEffect(() => {
     const q = query(collection(db, "donations"), orderBy("createdAt", "desc"));
 
@@ -1002,6 +1042,7 @@ export default function DonacionesPage() {
                   onFinish={handleFinish}
                   onImageClick={setActiveImage}
                   isAdmin={isAdmin}
+                  userRole={userRole}
                 />
               ))}
             </div>
